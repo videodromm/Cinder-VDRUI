@@ -53,7 +53,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 	if (mIsResizing) {
 		mIsResizing = false;
-
+		// set ui window and io events callbacks 
+		ImGui::connectWindow(getWindow());
+		ImGui::initialize();
 #pragma region style
 		// our theme variables
 		style.WindowRounding = 8;
