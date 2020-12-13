@@ -2,9 +2,10 @@
 
 using namespace videodromm;
 
-VDUIFbos::VDUIFbos(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession) {
+VDUIFbos::VDUIFbos(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;
 	mVDSession = aVDSession;
+	mVDUniforms = aVDUniforms;
 	// Params
 	mVDParams = VDParams::create();
 	//globalUniforms = true;
@@ -237,8 +238,8 @@ void VDUIFbos::Run(const char* title) {
 	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 	yPos = mVDParams->getUIYPosRow2();// - mVDSettings->uiLargePreviewH
 
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 	/*
 	sprintf(buf, "%s##sh%d", "mix", 0);
 	ImGui::Begin(buf, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings);
@@ -302,8 +303,8 @@ void VDUIFbos::Run(const char* title) {
 	for (unsigned int f = 0; f < mVDSession->getFboListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));//+1
 		yPos = mVDParams->getUIYPosRow3();
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 2), ImGuiCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 2), ImGuiSetCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.7f));
 		sprintf(buf, "%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings);

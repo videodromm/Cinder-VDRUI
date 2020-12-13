@@ -1,4 +1,4 @@
-Cinder-VDRUI
+Cinder-VDUI
 ===============
 
 Cinder block imgui UI wrapper for Cinder-VDR projects.

@@ -16,6 +16,7 @@
 	<sourcePattern>src/*.cpp</sourcePattern>
 	<sourcePattern>src/*.c</sourcePattern>
 	<requires>com.wk.websocketpp</requires>
+	<requires>ocornut.imgui</requires>
 	<requires>nl.cowlumbus.warping</requires>
 	<requires>com.videodromm.vd</requires>
 	<requires>com.videodromm.vdui</requires>

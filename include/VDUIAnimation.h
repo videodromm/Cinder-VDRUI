@@ -3,11 +3,13 @@
 #include "cinder/app/App.h"
 
 // UserInterface
-#include "cinder/CinderImGui.h"
+#include "CinderImGui.h"
 // Settings
 #include "VDSettings.h"
 // Session
 #include "VDSessionFacade.h"
+// Uniforms
+#include "VDUniforms.h"
 // Params
 #include "VDParams.h"
 
@@ -24,10 +26,10 @@ namespace videodromm
 	class VDUIAnimation
 	{
 	public:
-		VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession);
-		static VDUIAnimationRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession)
+		VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms);
+		static VDUIAnimationRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms)
 		{
-			return shared_ptr<VDUIAnimation>(new VDUIAnimation(aVDSettings, aVDSession));
+			return shared_ptr<VDUIAnimation>(new VDUIAnimation(aVDSettings, aVDSession, aVDUniforms));
 		}
 		~VDUIAnimation();
 		void    Run(const char* title);
@@ -38,6 +40,8 @@ namespace videodromm
 		VDSettingsRef					mVDSettings;
 		// Session
 		VDSessionFacadeRef				mVDSession;
+		// Uniforms
+		VDUniformsRef					mVDUniforms;
 
 		// imgui
 		float							getFloatValue(unsigned int aCtrl) {

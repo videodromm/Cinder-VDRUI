@@ -2,9 +2,10 @@
 
 using namespace videodromm;
 
-VDUIWarps::VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession) {
+VDUIWarps::VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;
 	mVDSession = aVDSession;
+	mVDUniforms = aVDUniforms;
 	// Params
 	mVDParams = VDParams::create();
 }
@@ -19,8 +20,8 @@ void VDUIWarps::Run(const char* title) {
 
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
 		yPos = mVDParams->getUIYPosRow2();
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 
 
 		sprintf(buf, "%s##sh%d", mVDSession->getWarpName(w).c_str(), w);

@@ -30,7 +30,8 @@
 #include "CiSpoutOut.h"
 // Video
 //#include "ciWMFVideoPlayer.h"
-#include "VDUniform.h"
+#include "VDUniforms.h"
+#include "VDParams.h"
 
 // UI
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
@@ -61,8 +62,10 @@ private:
 	VDAnimationRef					mVDAnimation;
 	// Session
 	VDSessionFacadeRef				mVDSessionFacade;
-	// Uniform
-	VDUniformRef					mVDUniform;
+	// Uniforms
+	VDUniformsRef					mVDUniforms;
+	// Params
+	VDParamsRef						mVDParams;
 	// UI
 	VDUIRef							mVDUI;
 	// video
@@ -83,26 +86,28 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	// Settings
 	mVDSettings = VDSettings::create("VDRUI");
 	// Uniform
-	mVDUniform = VDUniform::create();
+	mVDUniforms = VDUniform::create();
+	// Params
+	mVDParams = VDParams::create();
 	// Animation
-	mVDAnimation = VDAnimation::create(mVDSettings);
+	mVDAnimation = VDAnimation::create(mVDSettings, mVDUniforms);
 	// Session
-	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation)
-		->setUniformValue(mVDUniform->IBPM, 160.0f)
-		->setUniformValue(mVDUniform->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniform->IMOUSEY, 0.5648f)
+	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms)
+		->setUniformValue(mVDUniforms->IBPM, 160.0f)
+		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
+		->setUniformValue(mVDUniform-s>IMOUSEY, 0.5648f)
 		->setMode(8)
 		->loadFromJsonFile("fbo0.json")
 		->loadFromJsonFile("fbo1.json")
 		//->setupOSCReceiver()
 		//->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort)
 		->addUIObserver(mVDSettings, mVDAnimation)
-		->toggleValue(mVDUniform->IFLIPV);
+		->toggleValue(mVDUniforms->IFLIPV);
 
 	// sos only mVDSession->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
 	mFadeInDelay = true;
 	// UI
-	ImGui::Initialize();
+	
 	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade);
 	/*fs::path texFileOrPath = getAssetPath("") / mVDSettings->mAssetsPath / "accueil.mp4";
 	if (fs::exists(texFileOrPath)) {
@@ -138,12 +143,12 @@ void _TBOX_PREFIX_App::toggleCursorVisibility(bool visible)
 
 void _TBOX_PREFIX_App::fileDrop(FileDropEvent event)
 {
-	mVDSession->fileDrop(event);
+	mVDSessionFacade->fileDrop(event);
 }
 
 void _TBOX_PREFIX_App::mouseMove(MouseEvent event)
 {
-	if (!mVDSession->handleMouseMove(event)) {
+	if (!mVDSessionFacade->handleMouseMove(event)) {
 
 	}
 }
@@ -151,7 +156,7 @@ void _TBOX_PREFIX_App::mouseMove(MouseEvent event)
 void _TBOX_PREFIX_App::mouseDown(MouseEvent event)
 {
 
-	if (!mVDSession->handleMouseDown(event)) {
+	if (!mVDSessionFacade->handleMouseDown(event)) {
 
 	}
 }
@@ -159,7 +164,7 @@ void _TBOX_PREFIX_App::mouseDown(MouseEvent event)
 void _TBOX_PREFIX_App::mouseDrag(MouseEvent event)
 {
 
-	if (!mVDSession->handleMouseDrag(event)) {
+	if (!mVDSessionFacade->handleMouseDrag(event)) {
 
 	}
 }
@@ -167,7 +172,7 @@ void _TBOX_PREFIX_App::mouseDrag(MouseEvent event)
 void _TBOX_PREFIX_App::mouseUp(MouseEvent event)
 {
 
-	if (!mVDSession->handleMouseUp(event)) {
+	if (!mVDSessionFacade->handleMouseUp(event)) {
 
 	}
 }
@@ -176,7 +181,7 @@ void _TBOX_PREFIX_App::keyDown(KeyEvent event)
 {
 
 	// warp editor did not handle the key, so handle it here
-	if (!mVDSession->handleKeyDown(event)) {
+	if (!mVDSessionFacade->handleKeyDown(event)) {
 		switch (event.getCode()) {
 		case KeyEvent::KEY_F12:
 			// quit the application
@@ -188,7 +193,7 @@ void _TBOX_PREFIX_App::keyDown(KeyEvent event)
 			break;
 
 		case KeyEvent::KEY_l:
-			mVDSession->createWarp();
+			mVDSessionFacade->createWarp();
 			break;
 		}
 	}
@@ -198,7 +203,7 @@ void _TBOX_PREFIX_App::keyUp(KeyEvent event)
 {
 
 	// let your application perform its keyUp handling here
-	if (!mVDSession->handleKeyUp(event)) {
+	if (!mVDSessionFacade->handleKeyUp(event)) {
 		/*switch (event.getCode()) {
 		default:
 			CI_LOG_V("main keyup: " + toString(event.getCode()));
@@ -217,15 +222,15 @@ void _TBOX_PREFIX_App::cleanup()
 
 void _TBOX_PREFIX_App::update()
 {
-	switch (mVDSession->getCmd()) {
+	/*switch (mVDSession->getCmd()) {
 	case 0:
 		//createControlWindow();
 		break;
 	case 1:
 		//deleteControlWindows();
 		break;
-	}
-	mVDSessionFacade->setUniformValue(mVDUniform->IFPS, getAverageFps());
+	}*/
+	mVDSessionFacade->setUniformValue(mVDUniforms->IFPS, getAverageFps());
 	mVDSessionFacade->update();
 	/*mVideo.update();
 	mVideoPos = mVideo.getPosition();
@@ -253,7 +258,7 @@ void _TBOX_PREFIX_App::draw()
 		}
 	}
 	else {
-		gl::setMatricesWindow(mVDSettings->mFboWidth, mVDSettings->mFboHeight, false);
+		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight(), false);
 		//gl::setMatricesWindow(mVDSession->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSession->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
 		/*int m = mVDSession->getMode();
 		if (m < mVDSession->getModesCount() && m < mVDSession->getFboListSize()) {
@@ -268,7 +273,7 @@ void _TBOX_PREFIX_App::draw()
 		}
 		gl::draw(mVDSessionFacade->buildFboTexture(0), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
 		*/
-		gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
+		gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth(), mVDParams->getFboHeight()));
 
 		/*vec2 videoSize = vec2(mVideo.getWidth(), mVideo.getHeight());
 		mGlslVideoTexture->uniform("uVideoSize", videoSize);
@@ -283,10 +288,10 @@ void _TBOX_PREFIX_App::draw()
 	// Spout Send
 	// KO mSpoutOut.sendViewport();
 	// OK
-	 mSpoutOut.sendTexture(mVDSession->getFboRenderedTexture(1));
+	 mSpoutOut.sendTexture(mVDSessionFacade->buildRenderedMixetteTexture(0));
 
 	// imgui
-	if (mVDSession->showUI()) {
+	if (mVDSessionFacade->showUI()) {
 		mVDUI->Run("UI", (int)getAverageFps());
 		if (mVDUI->isReady()) {
 		}

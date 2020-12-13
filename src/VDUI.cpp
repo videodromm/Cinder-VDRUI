@@ -2,17 +2,18 @@
 
 using namespace videodromm;
 
-VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession) {
+VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;
 	mVDSession = aVDSession;
+	mVDUniforms = aVDUniforms;
 	// Params
 	mVDParams = VDParams::create();
 	// UITextures
 	//mUITextures = VDUITextures::create(mVDSettings, mVDSession);
 	// UIFbos
-	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession);
+	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIAnimation
-	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession);
+	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIMidi
 	/*mUIMidi = VDUIMidi::create(mVDSettings, mVDSession);
 	// UIAudio
@@ -34,7 +35,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession) {
 	// UIRender
 	mUIRender = VDUIRender::create(mVDSettings, mVDSession);*/
 	// UIWarps
-	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession);
+	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// imgui
 	mouseGlobal = false;
 	mouseZ = false;
@@ -114,8 +115,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 
 #pragma endregion menu
-	ImGui::SetNextWindowSize(ImVec2(400, mVDParams->getUILargeH()), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow2()), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(400, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow2()), ImGuiSetCond_Once);
 	
 
 	ImGui::Begin("Messages");
@@ -141,8 +142,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->mErrorMsg.c_str());
 	}
 	ImGui::End();
-	ImGui::SetNextWindowSize(ImVec2(800, mVDParams->getUILargeH()), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(800, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
 	sprintf(buf, "Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
 	ImGui::Begin(buf);

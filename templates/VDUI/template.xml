@@ -5,6 +5,7 @@
 	<requires>com.videodromm.vdrui</requires>
 	<requires>nl.cowlumbus.warping</requires>
 	<requires>com.wk.websocketpp</requires>
+	<requires>ocornut.imgui</requires>
 	<requires>org.libcinder.OSC</requires>
 	<platform os="msw">
 		<requires>fr.batchass.spout</requires>

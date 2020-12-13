@@ -2,9 +2,10 @@
 
 using namespace videodromm;
 
-VDUIAnimation::VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession) {
+VDUIAnimation::VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;
 	mVDSession = aVDSession;
+	mVDUniforms = aVDUniforms;
 	// Params
 	mVDParams = VDParams::create();
 	// zoom
@@ -28,8 +29,8 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.4), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.4), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 	int hue = 0;
 	ImGui::Begin("Animation", NULL, ImGuiWindowFlags_NoSavedSettings);
 	{

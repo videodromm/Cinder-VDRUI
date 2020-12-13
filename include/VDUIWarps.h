@@ -3,11 +3,13 @@
 #include "cinder/app/App.h"
 
 // UserInterface
-#include "cinder/CinderImGui.h"
+#include "CinderImGui.h"
 // Settings
 #include "VDSettings.h"
 // Session
 #include "VDSessionFacade.h"
+// Uniforms
+#include "VDUniforms.h"
 // Params
 #include "VDParams.h"
 
@@ -23,10 +25,10 @@ namespace videodromm
 	class VDUIWarps
 	{
 	public:
-		VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession);
-		static VDUIWarpsRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession)
+		VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms);
+		static VDUIWarpsRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms)
 		{
-			return shared_ptr<VDUIWarps>(new VDUIWarps(aVDSettings, aVDSession));
+			return shared_ptr<VDUIWarps>(new VDUIWarps(aVDSettings, aVDSession, aVDUniforms));
 		}
 		void    Run(const char* title);
 	private:
@@ -36,6 +38,8 @@ namespace videodromm
 		VDSettingsRef				mVDSettings;
 		// Session
 		VDSessionFacadeRef			mVDSession;
+		// Uniforms
+		VDUniformsRef				mVDUniforms;
 		// imgui
 		char						buf[64];
 		int							xPos, yPos;

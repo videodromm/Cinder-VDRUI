@@ -3,9 +3,11 @@
 #include "cinder/app/App.h"
 
 // UserInterface
-#include "Cinder/CinderImGui.h"
+#include "CinderImGui.h"
 // Settings
 #include "VDSettings.h"
+// Uniforms
+#include "VDUniforms.h"
 // Params
 #include "VDParams.h"
 // Session
@@ -23,10 +25,10 @@ namespace videodromm
 	class VDUIFbos
 	{
 	public:
-		VDUIFbos(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession);
-		static VDUIFbosRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession)
+		VDUIFbos(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms);
+		static VDUIFbosRef	create(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms)
 		{
-			return shared_ptr<VDUIFbos>(new VDUIFbos(aVDSettings, aVDSession));
+			return shared_ptr<VDUIFbos>(new VDUIFbos(aVDSettings, aVDSession, aVDUniforms));
 		}
 		void    Run(const char* title);
 	private:
@@ -36,6 +38,8 @@ namespace videodromm
 		VDSettingsRef					mVDSettings;
 		// Session
 		VDSessionFacadeRef				mVDSession;
+		// Uniforms
+		VDUniformsRef					mVDUniforms;
 		// imgui
 		char							buf[64];
 		int								xPos, yPos;
