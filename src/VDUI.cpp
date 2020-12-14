@@ -54,8 +54,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mIsResizing) {
 		mIsResizing = false;
 		// set ui window and io events callbacks 
+		// version 903 doesn't need init here
+#if CINDER_VERSION == 902
 		ImGui::connectWindow(getWindow());
 		ImGui::initialize();
+#endif
+		
 #pragma region style
 		// our theme variables
 		style.WindowRounding = 8;
@@ -138,7 +142,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::TextWrapped("Fbo: %s", mVDSettings->mFboMsg.c_str());
 		ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
 		ImGui::TextWrapped("Midi: %s", mVDSettings->mMidiMsg.c_str());
-		ImGui::TextWrapped("WS Msg: %s", mVDSettings->mSocketIOMsg.c_str());
+		ImGui::TextWrapped("WS Msg: %s", mVDSession->getWSMsg().c_str());
 		ImGui::TextWrapped("OSC Msg: %s", mVDSession->getOSCMsg().c_str());
 		ImGui::TextWrapped("Last error: %s", mVDSettings->mErrorMsg.c_str());
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->mErrorMsg.c_str());

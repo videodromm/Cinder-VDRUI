@@ -307,6 +307,27 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::SameLine();
 			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
 		}
+		// Websocket
+		if (ImGui::CollapsingHeader("Websocket", true))
+		{
+			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
+
+			static int clientPort = mVDSession->getWSClientPort();
+			if (ImGui::InputInt("client port", &clientPort)) mVDSession->setWSClientPort(clientPort);
+			if (mVDSession->isWSClientConnected()) {
+				ImGui::Text("client connected %d", mVDSession->getWSClientPort());
+				ImGui::Text(">%s", mVDSession->getWSMsg().c_str());
+			}
+
+			if (ImGui::Button("Connect"))
+			{
+				mVDSession->setupWSClient();
+				
+			}
+
+		}
+
+
 		if (ImGui::CollapsingHeader("Render", false))
 		{
 
