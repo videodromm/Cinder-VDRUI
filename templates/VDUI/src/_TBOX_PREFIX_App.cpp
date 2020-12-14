@@ -86,7 +86,7 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	// Settings
 	mVDSettings = VDSettings::create("VDRUI");
 	// Uniform
-	mVDUniforms = VDUniform::create();
+	mVDUniforms = VDUniforms::create();
 	// Params
 	mVDParams = VDParams::create();
 	// Animation
@@ -95,10 +95,11 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms)
 		->setUniformValue(mVDUniforms->IBPM, 160.0f)
 		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniform-s>IMOUSEY, 0.5648f)
+		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
 		->setMode(8)
 		->loadFromJsonFile("fbo0.json")
 		->loadFromJsonFile("fbo1.json")
+		->setupWSClient()
 		//->setupOSCReceiver()
 		//->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort)
 		->addUIObserver(mVDSettings, mVDAnimation)
@@ -108,7 +109,7 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mFadeInDelay = true;
 	// UI
 	
-	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade);
+	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade, mVDUniforms);
 	/*fs::path texFileOrPath = getAssetPath("") / mVDSettings->mAssetsPath / "accueil.mp4";
 	if (fs::exists(texFileOrPath)) {
 		string ext = "";
