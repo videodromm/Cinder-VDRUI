@@ -14,6 +14,8 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIAnimation
 	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession, mVDUniforms);
+	// UIShaders
+	mUIShaders = VDUIShaders::create(mVDSettings, mVDSession);
 	// UIMidi
 	/*mUIMidi = VDUIMidi::create(mVDSettings, mVDSession);
 	// UIAudio
@@ -30,8 +32,6 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUISocketIO = VDUISocketIO::create(mVDSettings, mVDSession);
 	// UIMouse
 	mUIMouse = VDUIMouse::create(mVDSettings, mVDSession);
-	// UIShaders
-	mUIShaders = VDUIShaders::create(mVDSettings, mVDSession);
 	// UIRender
 	mUIRender = VDUIRender::create(mVDSettings, mVDSession);*/
 	// UIWarps
@@ -660,7 +660,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		mUIFbos->Run("Fbos");
 	}
 	// Shaders
-	//mUIShaders->Run("Shaders");
+	mUIShaders->Run("Shaders");
 
 
 }
