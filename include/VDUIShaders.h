@@ -49,7 +49,7 @@ namespace videodromm
 		int										xPos, yPos;
 		// uniforms
 		unsigned int							ctrl;
-		//map<int, float>							localValues;
+		map<unsigned int, float>							localValues;
 		float							getValue(unsigned int aCtrl, unsigned int aFboIndex) {
 			float rtn;
 			if (aCtrl == 0) {
@@ -61,7 +61,9 @@ namespace videodromm
 			return rtn;
 		};
 		void							setValue(unsigned int aCtrl, unsigned int aFboIndex, float aValue) {
+			//localValues[ctrl] = aValue;
 			mVDSession->setUniformValueByLocation(aCtrl, aValue);
 		};
+		float val = 0.333f;
 	};
 }
