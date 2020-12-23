@@ -18,9 +18,9 @@ VDUIShaders::~VDUIShaders() {
 
 void VDUIShaders::Run(const char* title) {
 
-	xPos = mVDParams->getUIMargin();
-	yPos = mVDParams->getUIYPosRow3();
-	for (int s = 0; s < mVDSession->getFboShadersCount(); s++) {
+	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
+	yPos = mVDParams->getUIYPosRow2();
+	for (unsigned int s = 0; s < mVDSession->getFboShadersCount(); s++) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		//int hue = 0;
@@ -34,7 +34,7 @@ void VDUIShaders::Run(const char* title) {
 			
 			int hue = 0;
 			
-			for (auto u : mVDSession->getFboShaderUniforms()) {
+			for (auto u : mVDSession->getFboShaderUniforms(s)) {
 				string uName = u.getName(); // TODO use getIndex?
 				ctrl = u.getLocation();// mVDSession->getUniformIndexForName(uName);
 				
@@ -78,10 +78,9 @@ void VDUIShaders::Run(const char* title) {
 						ImGui::TextColored(ImColor(200, 200, 200), buf);
 					}
 					else {
-						//sprintf(buf, "%s##floatuniform%d", uName.c_str(), s);
-						sprintf(buf, "%s##floatuniform", uName.c_str());// TODO REMOVE
+						sprintf(buf, "%s##floatuniform%d", uName.c_str(), s);
 						//if (ImGui::DragFloat(buf, &val, 0.001f, 0.0f, 1.0f));//localValues[ctrl] getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-						if (ImGui::SliderFloat(buf, &localValues[ctrl], 0.0f, 1.0f, "%.4f", 3.0f))
+						if (ImGui::SliderFloat(buf, &localValues[ctrl], 0.0f, 1.0f, "%.3f", 3.0f))
 						{
 							//if (localValues[ctrl] > 0.0f) {
 								setValue(ctrl, s, localValues[ctrl]);//localValues[ctrl]
@@ -95,7 +94,7 @@ void VDUIShaders::Run(const char* title) {
 					}*/
 					break;
 				case GL_FLOAT_VEC2:
-					// vec2 35664		
+					// vec2 35664 GL_FLOAT_VEC2 0x8B50
 					if (uName == "RENDERSIZE" || uName == "resolution") {
 						float fw = mVDSession->buildFboRenderedTexture(s)->getWidth();
 						//ctrl = mVDSession->getUniformIndexForName("iResolutionX");
@@ -119,13 +118,13 @@ void VDUIShaders::Run(const char* title) {
 					}
 					break;
 				case GL_FLOAT_VEC3:
-					// vec3 35665
+					// vec3 35665 GL_FLOAT_VEC3 0x8B51
 					sprintf(buf, "vec3 %s %d##v3uniform%d", uName.c_str(), u.getType(), s);
 					ImGui::TextColored(ImColor(100, 100, 0), buf);
 
 					break;
 				case GL_FLOAT_VEC4:
-					// vec4 35666 GL_FLOAT_VEC4
+					// vec4 35666 GL_FLOAT_VEC4 0x8B52
 					sprintf(buf, "vec4 %s %d", uName.c_str(), u.getType());
 					ImGui::TextColored(ImColor(100, 100, 100), buf);
 					/*if (ctrl == mVDUniforms->IMOUSE) {
@@ -143,11 +142,6 @@ void VDUIShaders::Run(const char* title) {
 					break;
 				default:
 					//ciModelViewProjection 35676 GL_FLOAT_MAT4 0x8B5C
-					/* gl2.h
-						GL_FLOAT_VEC2                     0x8B50
-						GL_FLOAT_VEC3                     0x8B51
-						GL_FLOAT_VEC4                     0x8B52
-					*/
 					if (uName != "ciModelViewProjection") {
 						sprintf(buf, "! %s %d", uName.c_str(), u.getType());
 						ImGui::TextColored(ImColor(255, 0, 0), buf);
@@ -164,6 +158,7 @@ void VDUIShaders::Run(const char* title) {
 			ImGui::PopItemWidth();
 		}
 		ImGui::End();
+
 		xPos += mVDParams->getUILargePreviewW() + mVDParams->getUIMargin();
 		if (xPos > mVDSettings->mRenderWidth + mVDParams->getUILargePreviewW())
 		{

@@ -56,13 +56,13 @@ namespace videodromm
 				rtn = mVDSession->getUniformValue(aCtrl);
 			}
 			else {
-				rtn = mVDSession->getUniformValueByLocation(aCtrl);
+				rtn = mVDSession->getUniformValueByLocation(aFboIndex, aCtrl);
 			}
 			return rtn;
 		};
 		void							setValue(unsigned int aCtrl, unsigned int aFboIndex, float aValue) {
 			//localValues[ctrl] = aValue;
-			mVDSession->setUniformValueByLocation(aCtrl, aValue);
+			mVDSession->setUniformValueByLocation(aFboIndex, aCtrl, aValue);
 		};
 		float val = 0.333f;
 	};
