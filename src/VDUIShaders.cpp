@@ -20,7 +20,7 @@ void VDUIShaders::Run(const char* title) {
 
 	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 	yPos = mVDParams->getUIYPosRow2();
-	for (unsigned int s = 0; s < mVDSession->getFboShadersCount(); s++) {
+	for (unsigned int s = 0; s < mVDSession->getFboShaderListSize(); s++) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		//int hue = 0;

@@ -63,7 +63,7 @@ void VDUIWarps::Run(const char* title) {
 					ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
 					ImGui::PushID("fbomixes");
-					for (int m = 0; m < mVDSession->getFboListSize(); m++)
+					for (int m = 0; m < mVDSession->getFboShaderListSize(); m++)
 					{
 						if (m > 0) ImGui::SameLine();
 						
@@ -101,7 +101,7 @@ void VDUIWarps::Run(const char* title) {
 				/*ImGui::Image((void*)mVDSession->getMixTexture(w)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->getWarpName(w).c_str());*/
 				// loop on the fbos A
-				for (unsigned int a = 0; a < mVDSession->getFboListSize(); a++) {
+				for (unsigned int a = 0; a < mVDSession->getFboShaderListSize(); a++) {
 					if (a > 0 && (a % 6 != 0)) ImGui::SameLine();
 					if (fboa == a) {
 						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(a / 16.0f, 1.0f, 1.0f));

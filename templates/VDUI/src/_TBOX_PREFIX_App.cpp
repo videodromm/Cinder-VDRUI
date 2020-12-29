@@ -30,8 +30,12 @@
 #include "CiSpoutOut.h"
 // Video
 //#include "ciWMFVideoPlayer.h"
+// Uniforms
 #include "VDUniforms.h"
+// Params
 #include "VDParams.h"
+// Mix
+#include "VDMix.h"
 
 // UI
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
@@ -62,6 +66,8 @@ private:
 	VDAnimationRef					mVDAnimation;
 	// Session
 	VDSessionFacadeRef				mVDSessionFacade;
+	// Mix
+	VDMixRef						mVDMix;
 	// Uniforms
 	VDUniformsRef					mVDUniforms;
 	// Params
@@ -91,21 +97,23 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mVDParams = VDParams::create();
 	// Animation
 	mVDAnimation = VDAnimation::create(mVDSettings, mVDUniforms);
+	// Mix
+	mVDMix = VDMix::create(mVDSettings, mVDAnimation, mVDUniforms);
 	// Session
-	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms)
-		->setUniformValue(mVDUniforms->IBPM, 160.0f)
-		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
-		->setMode(8)
-		->loadFromJsonFile("fbo0.json")
-		->loadFromJsonFile("fbo1.json")
+	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms, mVDMix)
+		->setUniformValue(mVDUniform->IBPM, 160.0f)
+		->setUniformValue(mVDUniform->IMOUSEX, 0.27710f)
+		->setUniformValue(mVDUniform->IMOUSEY, 0.5648f)
+		->setMode(1)
 		->setupWSClient()
+		->wsConnect()
 		//->setupOSCReceiver()
 		//->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort)
-		->addUIObserver(mVDSettings, mVDAnimation)
-		->toggleValue(mVDUniforms->IFLIPV);
+		->addUIObserver(mVDSettings, mVDUniforms)
+		->toggleUI()
+		->toggleValue(mVDUniform->IFLIPV);
 
-	// sos only mVDSession->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
+	// sos only mVDSessionFacade->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
 	mFadeInDelay = true;
 	// UI
 	
@@ -223,7 +231,7 @@ void _TBOX_PREFIX_App::cleanup()
 
 void _TBOX_PREFIX_App::update()
 {
-	/*switch (mVDSession->getCmd()) {
+	/*switch (mVDSessionFacade->getCmd()) {
 	case 0:
 		//createControlWindow();
 		break;
@@ -253,27 +261,26 @@ void _TBOX_PREFIX_App::draw()
 	gl::color(Color::white());
 	if (mFadeInDelay) {
 		mVDSettings->iAlpha = 0.0f;
-		if (getElapsedFrames() > 10.0) {// mVDSession->getFadeInDelay()) {
+		if (getElapsedFrames() > 10.0) {// mVDSessionFacade->getFadeInDelay()) {
 			mFadeInDelay = false;
 			timeline().apply(&mVDSettings->iAlpha, 0.0f, 1.0f, 1.5f, EaseInCubic());
 		}
 	}
 	else {
 		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight(), false);
-		//gl::setMatricesWindow(mVDSession->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSession->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
-		/*int m = mVDSession->getMode();
-		if (m < mVDSession->getModesCount() && m < mVDSession->getFboListSize()) {
-			gl::draw(mVDSession->getFboTexture(m), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
-			//mSpoutOut.sendTexture(mVDSession->getFboRenderedTexture(m));
+		//gl::setMatricesWindow(mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
+		int m = mVDSessionFacade->getMode();
+		if (m < mVDSessionFacade->getFboShaderListSize()) {
+			gl::draw(mVDSessionFacade->getFboShaderTexture(m));
+			mSpoutOut.sendTexture(mVDSessionFacade->getFboShaderTexture(m));
 		}
 		else {
-			gl::draw(mVDSession->getPostFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
+			gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth(), mVDParams->getFboHeight()));
+			//gl::draw(mVDSessionFacade->getPostFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
 			//gl::draw(mVDSession->getRenderedMixetteTexture(0), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()
 			//mSpoutOut.sendTexture(mVDSession->getRenderedMixetteTexture(0));
 		}
-		gl::draw(mVDSessionFacade->buildFboTexture(0), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
-		*/
 		gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth(), mVDParams->getFboHeight()));
 
 		/*vec2 videoSize = vec2(mVideo.getWidth(), mVideo.getHeight());
@@ -284,7 +291,7 @@ void _TBOX_PREFIX_App::draw()
 		gl::scale(vec3(videoSize, 1.0f));*/
 
 		//gl::draw(mPostFbo->getColorTexture());
-		//gl::draw(mVDSession->getFboRenderedTexture(0));
+		//gl::draw(mVDSessionFacade->getFboRenderedTexture(0));
 	}
 	// Spout Send
 	// KO mSpoutOut.sendViewport();

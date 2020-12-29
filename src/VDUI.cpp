@@ -554,7 +554,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
 		ImGui::PushID("fbomixes");
-		for (int m = 0; m < mVDSession->getFboListSize(); m++)//mVDSession->getModesCount()
+		for (int m = 0; m < mVDSession->getFboShaderListSize(); m++)//mVDSession->getModesCount()
 		{
 			if (m > 0) ImGui::SameLine();
 			/*if (mVDSession->getMode() == m) {

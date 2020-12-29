@@ -300,7 +300,7 @@ void VDUIFbos::Run(const char* title) {
 	** fbos
 	*/
 	
-	for (unsigned int f = 0; f < mVDSession->getFboListSize(); f++) {
+	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));//+1
 		yPos = mVDParams->getUIYPosRow3();
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 2), ImGuiSetCond_Once);
