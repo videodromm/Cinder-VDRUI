@@ -306,7 +306,7 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.7f));
-		sprintf(buf, "FBO:%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
+		sprintf(buf, "%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings);
 		{
 			ImGui::PushID(f);
@@ -383,19 +383,8 @@ void VDUIFbos::Run(const char* title) {
 					break;
 				case GL_FLOAT:
 					// float 5126 GL_FLOAT 0x1406
-					//if (mVDSession->getGlobal(f) || ctrl == 0) {
 					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-					/*}
-					else {
-						localValues[ctrl] = mVDSession->getFboFloatUniformValueByIndex(ctrl, f);
-					*/
-
-					if (ctrl == 0) {
-						sprintf(buf, "time %.0f", localValues[ctrl]);
-						ImGui::Text(buf);
-						ImGui::TextColored(ImColor(200, 200, 200), buf);
-					}
-					else {
+					if (ctrl > 0) {						
 						sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
 						if (ImGui::DragFloat(buf, &localValues[ctrl], 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 						{
@@ -423,13 +412,13 @@ void VDUIFbos::Run(const char* title) {
 						//ImGui::Button(buf);
 					}
 					else {
-						sprintf(buf, "vec2 %s %d##v2uniform%d", uName.c_str(), u.getType(), f);
+						sprintf(buf, "vec2 %s", uName.c_str(), f);
 						ImGui::TextColored(ImColor(150, 220, 0), buf);
 					}
 					break;
 				case GL_FLOAT_VEC3:
 					// vec3 35665
-					sprintf(buf, "vec3 %s %d##v3uniform%d", uName.c_str(), u.getType(), f);
+					sprintf(buf, "vec3 %s", uName.c_str(), f);
 					ImGui::TextColored(ImColor(100, 100, 0), buf);
 
 					break;

@@ -70,7 +70,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 		if (ImGui::CollapsingHeader("Animation", true))
 		{
-			for (size_t iUniform = 5; iUniform < 29; iUniform++)
+			for (size_t iUniform = 5; iUniform < 19; iUniform++)
 			{
 				sprintf(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
@@ -98,7 +98,7 @@ void VDUIAnimation::Run(const char* title) {
 				sprintf(buf, "%d %s", iUniform, mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f))//PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 				{
-					mVDSession->setUniformValue(iUniform, localValues[iUniform]);
+					setFloatValue(iUniform, localValues[iUniform]);
 				}
 			}
 
@@ -114,7 +114,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::DragFloat("badTv", &localValues[ctrl], 0.01f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
+			}
 			// iPixelX
 			ctrl = mVDUniforms->IPIXELX;
 			if (ImGui::Button("x##iPixelX")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
@@ -132,7 +132,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::SliderFloat("iPixelY/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
-			}
+			}*/
 			// iBarBeat
 			ctrl = mVDUniforms->IBARBEAT;
 			if (ImGui::Button("x##iBarBeat")) { iBarBeat = 1; setFloatValue(ctrl, 1); }

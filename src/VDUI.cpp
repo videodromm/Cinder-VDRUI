@@ -59,7 +59,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::connectWindow(getWindow());
 		ImGui::initialize();
 #endif
-		
+
 #pragma region style
 		// our theme variables
 		style.WindowRounding = 8;
@@ -123,7 +123,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #pragma endregion menu
 	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
-	
+
 
 	ImGui::Begin("Messages");
 	{
@@ -156,7 +156,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Mixette");
 		ImGui::SameLine();*/
 		ImGui::Image((void*)mVDSession->buildRenderedMixetteTexture(0)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("RenderedMixette");
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Mixette");
 		ImGui::SameLine();
 		ImGui::Image((void*)mVDSession->buildPostFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Post");
@@ -172,7 +172,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::GetTime() > refresh_time)
 		{
 			refresh_time = ImGui::GetTime();
-			values[values_offset] = fps;// mVDSession->getUniformValue(mVDUniforms->IFPS);
+			values[values_offset] = fps;
 			values_offset = (values_offset + 1) % values.size();
 		}
 		if (fps < 12.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
@@ -200,19 +200,48 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		ImGui::SameLine();
-		/*		ImGui::Image((void*)mVDSession->getFboRenderedTexture(mVDSession->getFboFragmentShaderIndex(0))->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::SameLine();
-				ImGui::Image((void*)mVDSession->getMixTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::SameLine();
-				ImGui::Image((void*)mVDSession->getFboRenderedTexture(mVDSession->getFboFragmentShaderIndex(1))->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				*/
-
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 13
-		if (ImGui::SliderFloat("mult x", &multx, 0.01f, 12.0f)) {
+		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 12.0f)) {
 			mVDSession->setUniformValue(13, multx);
 		}
+
+
+		// mouse
+		mouseX = getFloatValue(mVDUniforms->IMOUSEX);
+		if (ImGui::SliderFloat("MouseX", &mouseX, 0.0f, mVDParams->getFboWidth(), "%.4f", 3.0f))
+		{
+			setFloatValue(mVDUniforms->IMOUSEX, mouseX);
+		}
 		ImGui::SameLine();
+		mouseY = getFloatValue(mVDUniforms->IMOUSEY);
+		if (ImGui::SliderFloat("MouseY", &mouseY, 0.0f, mVDParams->getFboHeight(), "%.4f", 0.3f))
+		{
+			setFloatValue(mVDUniforms->IMOUSEY, mouseY);
+		}
+		ImGui::SameLine();
+		mouseZ = getFloatValue(mVDUniforms->IMOUSEZ);
+		if (ImGui::Button("MouseZ"))
+		{
+			setFloatValue(mVDUniforms->IMOUSEZ, !mouseZ);
+		}
+		ImGui::SameLine();
+
+		/*mouseZ ^= ImGui::Button("mouse click");
+		if (mouseZ)
+		{
+			setFloatValue(mVDUniforms->IMOUSEZ, 1.0f);
+		}
+		else
+		{
+			setFloatValue(mVDUniforms->IMOUSEZ, 0.0f);
+		}
+		ImGui::SameLine();*/
+		ImGui::Text("Clic %d", ImGui::GetIO().MouseDown[0]);
+		ImGui::SameLine();
+		ImGui::Text("Pos: %.1f,%.1f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+
+
 		int hue = 0;
 		/*(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
@@ -310,7 +339,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("glitch")) {
+		if (ImGui::Button("Glitch")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -321,7 +350,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("toggle")) {
+		if (ImGui::Button("Toggle")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -332,7 +361,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("invert")) {
+		if (ImGui::Button("Invert")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -343,7 +372,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("greyscale")) {
+		if (ImGui::Button("Greyscale")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -355,7 +384,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("clear")) {
+		if (ImGui::Button("Clear")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -391,7 +420,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("flipPostV")) {
+		if (ImGui::Button("FlipPostV")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -402,7 +431,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("flipPostH")) {
+		if (ImGui::Button("FlipPostH")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
@@ -417,60 +446,32 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 		ImGui::TextColored(ImColor(255, 150, 0), "Mode: %d - %s", mVDSession->getMode(), mVDSession->getModeName(mVDSession->getMode()).c_str());
 		ImGui::SameLine();
-		ImGui::Text("fp %dx%d f %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
+		ImGui::Text(" Fp %dx%d F %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
 		ImGui::SameLine();
-		ImGui::Text("main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
+		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows
-		ImGui::Text("render window %dx%d", mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
+		ImGui::Text(" Render window %dx%d", mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
 
-		ImGui::SameLine();
-		ImGui::Text("Position: %.1f,%.1f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
-		ImGui::Text("Clic %d", ImGui::GetIO().MouseDown[0]);
 
-		// mouse
-		mouseX = getFloatValue(mVDUniforms->IMOUSEX);
-		if (ImGui::SliderFloat("MouseX", &mouseX, 0.0f, mVDParams->getFboWidth(), "%.4f", 3.0f))
-		{
-			setFloatValue(mVDUniforms->IMOUSEX, mouseX);
-		}
-		mouseY = getFloatValue(mVDUniforms->IMOUSEY);
-		if (ImGui::SliderFloat("MouseY", &mouseY, 0.0f, mVDParams->getFboHeight(), "%.4f", 0.3f))
-		{
-			setFloatValue(mVDUniforms->IMOUSEY, mouseY);
-		}
-		mouseZ = getFloatValue(mVDUniforms->IMOUSEZ);
-		if (ImGui::Button("MouseZ"))
-		{
-			setFloatValue(mVDUniforms->IMOUSEZ, !mouseZ);
-		}
-		/*
-		mouseZ ^= ImGui::Button("mouse click");
-		if (mouseZ)
-		{
-			setFloatValue(mVDUniforms->IMOUSEZ, 1.0f);
-		}
-		else
-		{
-			setFloatValue(mVDUniforms->IMOUSEZ, 0.0f);
-		}*/
-		ImGui::SameLine();
-		ImGui::Text("beat %d ", mVDSession->getUniformValue(mVDUniforms->IBEAT));
-		ImGui::SameLine();
-		ImGui::Text("bar %d ", mVDSession->getUniformValue(mVDUniforms->IBAR));
-		ImGui::SameLine();
-		ImGui::Text("bb %d ", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
-		ImGui::SameLine();
+
+
+
 		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
-		ImGui::Text("Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
+		ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
 		ImGui::SameLine();
-		ImGui::Text("Delta Time %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
+		ImGui::Text(" Delta Time %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
 		// LiveOSC Obsolete ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
 		ImGui::SameLine();
 		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);
-		ImGui::Text("Tempo %.2f ", mVDSession->getUniformValue(mVDUniforms->IBPM));
-
+		ImGui::Text(" Tempo %.2f ", mVDSession->getUniformValue(mVDUniforms->IBPM));
+		ImGui::SameLine();
+		ImGui::Text(" Beat %d ", mVDSession->getUniformValue(mVDUniforms->IBEAT));
+		ImGui::SameLine();
+		ImGui::Text(" Bar %d ", mVDSession->getUniformValue(mVDUniforms->IBAR));
+		ImGui::SameLine();
+		ImGui::Text(" Bb %d ", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
 
 		// line 3
 		/*ImGui::RadioButton("Warp", &currentWindowRow1, 0); ImGui::SameLine();
