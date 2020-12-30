@@ -121,8 +121,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 
 #pragma endregion menu
-	ImGui::SetNextWindowSize(ImVec2(400, mVDParams->getUILargeH()), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow2()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 	
 
 	ImGui::Begin("Messages");
@@ -133,18 +133,14 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDSettings->mSocketIOMsg = "";
 			mVDSession->setOSCMsg("");
 			mVDSettings->mErrorMsg = "";
-			mVDSettings->mShaderMsg = "";
-			mVDSettings->mFboMsg = "";
+			//mVDSettings->mShaderMsg = "";
 		}
 
 		ImGui::TextColored(ImColor(200, 200, 0), "Msg: %s", mVDSettings->mMsg.c_str());
-		//ImGui::TextWrapped("Msg: %s", mVDSettings->mMsg.c_str());
-		ImGui::TextWrapped("Fbo: %s", mVDSettings->mFboMsg.c_str());
-		ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
+		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
 		ImGui::TextWrapped("Midi: %s", mVDSettings->mMidiMsg.c_str());
 		ImGui::TextWrapped("WS Msg: %s", mVDSession->getWSMsg().c_str());
 		ImGui::TextWrapped("OSC Msg: %s", mVDSession->getOSCMsg().c_str());
-		ImGui::TextWrapped("Last error: %s", mVDSettings->mErrorMsg.c_str());
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->mErrorMsg.c_str());
 	}
 	ImGui::End();
@@ -176,13 +172,13 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::GetTime() > refresh_time)
 		{
 			refresh_time = ImGui::GetTime();
-			values[values_offset] = mVDSession->getUniformValue(mVDUniforms->IFPS);
+			values[values_offset] = fps;// mVDSession->getUniformValue(mVDUniforms->IFPS);
 			values_offset = (values_offset + 1) % values.size();
 		}
-		if (mVDSession->getUniformValue(mVDUniforms->IFPS) < 12.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+		if (fps < 12.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
 		// TODO ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, mVDSession->getTargetFps(), ImVec2(0, 30));
 		ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, 100.0f, ImVec2(0, 30));
-		if (mVDSession->getUniformValue(mVDUniforms->IFPS) < 12.0) ImGui::PopStyleColor();
+		if (fps < 12.0) ImGui::PopStyleColor();
 		// audio
 		ImGui::SameLine();
 		static ImVector<float> timeValues; if (timeValues.empty()) { timeValues.resize(40); memset(&timeValues.front(), 0, timeValues.size() * sizeof(float)); }

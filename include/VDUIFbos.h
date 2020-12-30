@@ -53,22 +53,11 @@ namespace videodromm
 		map<int, float>					localValues;
 		float							getValue(unsigned int aCtrl, unsigned int aFboIndex) {
 			float rtn;
-			//if (mVDSession->getGlobal(aFboIndex) || aCtrl == 0) {
-				rtn = mVDSession->getUniformValue(aCtrl);
-			/*}
-			else {
-				rtn = mVDSession->getFboFloatUniformValueByIndex(aCtrl, aFboIndex);
-			}*/
+			rtn = mVDSession->getUniformValue(aCtrl);
 			return rtn;
 		};
 		void							setValue(unsigned int aCtrl, unsigned int aFboIndex, float aValue) {
-			//if (mVDSession->getGlobal(aFboIndex)) {
-				mVDSession->setUniformValue(aCtrl, aValue);
-			/*}
-			else {
-				mVDSession->setFboFloatUniformValueByIndex(aCtrl, aFboIndex, aValue);
-			}*/
-			
+			mVDSession->setUniformValue(aCtrl, aValue);
 		};
 		float							getMinUniformValue(unsigned int aIndex) {
 			return mVDSession->getMinUniformValue(aIndex);

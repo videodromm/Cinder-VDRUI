@@ -299,11 +299,11 @@ void VDUIFbos::Run(const char* title) {
 	/*
 	** fbos
 	*/
-	
+
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));//+1
 
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 2), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.7f));
 		sprintf(buf, "FBO:%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
@@ -311,18 +311,18 @@ void VDUIFbos::Run(const char* title) {
 		{
 			ImGui::PushID(f);
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-
-			sprintf(buf, "show##rdrtexuniform%d", f);
-			mShowRenderedTexture ^= ImGui::Button(buf);
-			ImGui::SameLine();
 			if (!mVDSession->isFboValid(f)) {
 				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getError(f).c_str());
-				
 			}
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getMsg(f).c_str());
-				
 			}
+			sprintf(buf, "fbo##rdrtexuniform%d", f);
+			mShowRenderedTexture ^= ImGui::Button(buf);
+			ImGui::SameLine();
+			sprintf(buf, "tex##rdrtexuniform%d", f);
+			mShowInputTexture ^= ImGui::Button(buf);
+
 			/*ImGui::SameLine();
 			sprintf(buf, "global %d##gu%d", mVDSession->getGlobal(f), f);
 			if (ImGui::Button(buf)) {
@@ -330,7 +330,7 @@ void VDUIFbos::Run(const char* title) {
 			}
 			ImGui::SameLine();
 			if (!mVDSession->isFboValid(f)) {
-				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s - %s", mVDSettings->mFboMsg.c_str(), mVDSettings->mShaderMsg.c_str());  
+				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s - %s", mVDSettings->mFboMsg.c_str(), mVDSettings->mShaderMsg.c_str());
 			}
 			else {
 				sprintf(buf, "T##fboupd%d", f);
@@ -338,9 +338,14 @@ void VDUIFbos::Run(const char* title) {
 			}*/
 			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+
+			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+
 			// uniforms
 			//std::vector<ci::gl::GlslProg::Uniform> u = mVDSession->getUniforms(f);
-
 			int hue = 0;
 			for (auto u : mVDSession->getUniforms(f)) {
 				string uName = u.getName(); // TODO use getIndex?
@@ -359,7 +364,7 @@ void VDUIFbos::Run(const char* title) {
 					ImGui::PopStyleColor(3);
 					hue++;
 					break;
-				case GL_INT: 
+				case GL_INT:
 					// int 5124 GL_INT 0x1404
 					(getValue(ctrl, f)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -379,12 +384,12 @@ void VDUIFbos::Run(const char* title) {
 				case GL_FLOAT:
 					// float 5126 GL_FLOAT 0x1406
 					//if (mVDSession->getGlobal(f) || ctrl == 0) {
-						localValues[ctrl] = mVDSession->getUniformValue(ctrl);
+					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 					/*}
 					else {
 						localValues[ctrl] = mVDSession->getFboFloatUniformValueByIndex(ctrl, f);
 					*/
-					
+
 					if (ctrl == 0) {
 						sprintf(buf, "time %.0f", localValues[ctrl]);
 						ImGui::Text(buf);
@@ -426,7 +431,7 @@ void VDUIFbos::Run(const char* title) {
 					// vec3 35665
 					sprintf(buf, "vec3 %s %d##v3uniform%d", uName.c_str(), u.getType(), f);
 					ImGui::TextColored(ImColor(100, 100, 0), buf);
-					
+
 					break;
 				case GL_FLOAT_VEC4:
 					// vec4 35666 GL_FLOAT_VEC4
@@ -461,10 +466,7 @@ void VDUIFbos::Run(const char* title) {
 
 			} //for uniforms
 
-			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			if (mVDSession->buildFboInputTexture(f)  && mShowInputTexture) ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+
 
 			float fw = mVDSession->getFboTextureWidth(f);
 			sprintf(buf, "tw %.0f", fw);

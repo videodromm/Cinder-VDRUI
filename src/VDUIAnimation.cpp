@@ -96,7 +96,7 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf(buf, "%d %s", iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::SliderFloat(buf, &localValues[iUniform], getMinUniformValue(iUniform), getMaxUniformValue(iUniform)))
+				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f))//PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 				{
 					mVDSession->setUniformValue(iUniform, localValues[iUniform]);
 				}
@@ -171,7 +171,7 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
-		}
+		} // Uniforms
 		/*
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
@@ -229,7 +229,7 @@ void VDUIAnimation::Run(const char* title) {
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 			if (ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 			{
-				mVDSession->setUniformValue(ctrl, localValues[ctrl]);
+				setFloatValue(ctrl, localValues[ctrl]);
 			}
 
 			//ImGui::Text("Elapsed %.2f", mVDSession->getUniformValue(mVDUniforms->IELAPSED));
@@ -245,10 +245,10 @@ void VDUIAnimation::Run(const char* title) {
 				//ImGui::Text("Tempo %.2f ", tempo);
 				if (ImGui::DragFloat("Tempo", &tempo, 0.01f, 0.01f, 200.0f, "%.2f"))
 				{
-					mVDSession->setUniformValue(mVDUniforms->IBPM, tempo);
+					setFloatValue(mVDUniforms->IBPM, tempo);
 				}
 				if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
-					mVDSession->setUniformValue(mVDUniforms->IBPM, tempo);
+					setFloatValue(mVDUniforms->IBPM, tempo);
 				}
 			}
 			else {

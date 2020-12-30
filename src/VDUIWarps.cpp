@@ -13,12 +13,12 @@ VDUIWarps::VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, V
 void VDUIWarps::Run(const char* title) {
 	//static int currentNode = 0;
 
-	yPos = mVDParams->getUIYPosRow1();
+	yPos = mVDParams->getUIYPosRow3();
 	for (int w = 0; w < mVDSession->getWarpCount(); w++) {
 
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
 		
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), 150.0f), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 
 

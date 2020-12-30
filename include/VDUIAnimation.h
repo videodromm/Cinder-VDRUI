@@ -55,10 +55,10 @@ namespace videodromm
 		};
 
 		float							getMinUniformValue(unsigned int aIndex) {
-			return mVDSession->getMinUniformValue(aIndex);
+			return mVDSession->getMinUniformValue(aIndex); // TODO ERROR UI 0 for value
 		};
 		float							getMaxUniformValue(unsigned int aIndex) {
-			return mVDSession->getMaxUniformValue(aIndex);
+			return mVDSession->getMaxUniformValue(aIndex); // TODO ERROR UI 0 for value
 		};
 
 		unsigned int					ctrl;
