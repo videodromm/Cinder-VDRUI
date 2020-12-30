@@ -2,6 +2,7 @@
 // ISF
 uniform vec2      	RENDERSIZE;
 uniform float     	TIME; 			    // shader playback time (in seconds)
+uniform float     	iTime; 			    // shader playback time (in seconds)
 // shadertoy
 uniform vec3      	iResolution; 		// viewport resolution (in pixels)
 uniform vec4      	iMouse; 			// mouse pixel coords. xy: current (if MLB down), zw: click
@@ -65,3 +66,4 @@ uniform bool		iDebug;
 uniform sampler2D 	inputImage;
 out vec4 fragColor;
 #define IMG_NORM_PIXEL texture2D
+#define fragCoord gl_FragCoord

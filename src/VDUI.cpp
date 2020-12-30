@@ -15,7 +15,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	// UIAnimation
 	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIShaders
-	mUIShaders = VDUIShaders::create(mVDSettings, mVDSession);
+	//mUIShaders = VDUIShaders::create(mVDSettings, mVDSession);
 	// UIMidi
 	/*mUIMidi = VDUIMidi::create(mVDSettings, mVDSession);
 	// UIAudio
@@ -660,7 +660,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		mUIFbos->Run("Fbos");
 	}
 	// Shaders
-	mUIShaders->Run("Shaders");
+	//mUIShaders->Run("Shaders");
 
 
 }

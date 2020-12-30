@@ -302,11 +302,11 @@ void VDUIFbos::Run(const char* title) {
 	
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));//+1
-		yPos = mVDParams->getUIYPosRow3();
+
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 2), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.7f));
-		sprintf(buf, "%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
+		sprintf(buf, "FBO:%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings);
 		{
 			ImGui::PushID(f);
@@ -314,6 +314,15 @@ void VDUIFbos::Run(const char* title) {
 
 			sprintf(buf, "show##rdrtexuniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
+			ImGui::SameLine();
+			if (!mVDSession->isFboValid(f)) {
+				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getError(f).c_str());
+				
+			}
+			else {
+				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getMsg(f).c_str());
+				
+			}
 			/*ImGui::SameLine();
 			sprintf(buf, "global %d##gu%d", mVDSession->getGlobal(f), f);
 			if (ImGui::Button(buf)) {

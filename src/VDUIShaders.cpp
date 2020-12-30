@@ -24,7 +24,7 @@ void VDUIShaders::Run(const char* title) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		//int hue = 0;
-		sprintf(buf, "%s##sh%d", mVDSession->getFboShaderName(s).c_str(), s);
+		sprintf(buf, "SH:%s##sh%d", mVDSession->getFboShaderName(s).c_str(), s);
 		ImGui::Begin(buf, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings);
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());

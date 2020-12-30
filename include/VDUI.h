@@ -60,7 +60,7 @@ namespace videodromm
 		bool						showUIFbos;
 		bool						mShowFbos;
 		// UIShaders
-		VDUIShadersRef				mUIShaders;
+		//VDUIShadersRef				mUIShaders;
 		// UIAnimation
 		VDUIAnimationRef			mUIAnimation;
 		bool						showUIAnimation;
