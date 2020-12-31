@@ -172,14 +172,14 @@ void VDUIAnimation::Run(const char* title) {
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
 		} // Uniforms
-		/*
+		
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
-			//ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
 
-			static int iFreq0 = mVDSession->getFreqIndex(0);
+			/*static int iFreq0 = mVDSession->getFreqIndex(0);
 			sprintf(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
 			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
 			{
@@ -204,9 +204,9 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::SliderInt(buf, &iFreq3, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(3, iFreq3);
-			}
+			}*/
 			ImGui::PopItemWidth();
-		}*/
+		}
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
