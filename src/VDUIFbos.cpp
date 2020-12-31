@@ -391,10 +391,27 @@ void VDUIFbos::Run(const char* title) {
 							setValue(ctrl, f, localValues[ctrl]);
 						}
 					}
+					else {
+						// 0 = time or unknown uniform
+						if (uName == "iTime" || uName == "uTime" || uName == "time" || uName == "TIME") {
+							// don't display
+						}
+						else {
+							location = u.getLocation();							
+							mUniformValueByLocation[location] = mVDSession->getUniformValueByLocation(f, location);
+							sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
+							if (ImGui::DragFloat(buf, &mUniformValueByLocation[location], 0.001f, 0.0001f, 50.0f))
+							{
+								mVDSession->setUniformValueByLocation(f, location, mUniformValueByLocation[location]);
+								
+							}
+							
+						}
+					}
 					break;
 				case GL_FLOAT_VEC2:
 					// vec2 35664		
-					if (uName == "RENDERSIZE") {
+					if (uName == "RENDERSIZE" || uName == "resolution") {
 						float fw = mVDSession->buildFboRenderedTexture(f)->getWidth();
 						//ctrl = mVDSession->getUniformIndexForName("iResolutionX");
 						//localValues[ctrl] = mVDSession->getUniformValue(ctrl);

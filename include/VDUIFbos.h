@@ -50,7 +50,9 @@ namespace videodromm
 		float							speeds[12];
 		// uniforms
 		unsigned int					ctrl;
-		map<int, float>					localValues;
+		unsigned int					location;
+		std::map<int, float>					localValues;
+		std::map<unsigned int, float>			mUniformValueByLocation;
 		float							getValue(unsigned int aCtrl, unsigned int aFboIndex) {
 			float rtn;
 			rtn = mVDSession->getUniformValue(aCtrl);
