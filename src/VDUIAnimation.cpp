@@ -177,6 +177,15 @@ void VDUIAnimation::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			ImGui::SameLine();
+			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
+			if (ImGui::Button("LineIn")) {
+				mVDSession->toggleUseLineIn();
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
 
 			/*static int iFreq0 = mVDSession->getFreqIndex(0);

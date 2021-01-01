@@ -259,7 +259,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDSession->toggleUseLineIn();
 		}
 		ImGui::PopStyleColor(3);
-		hue++;/**/
+		hue++; */
 
 		// debug
 		ctrl = mVDUniforms->IDEBUG;
