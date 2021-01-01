@@ -200,7 +200,7 @@ void VDUIAnimation::Run(const char* title) {
 			hue++;
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
 
-			/*static int iFreq0 = mVDSession->getFreqIndex(0);
+			static int iFreq0 = mVDSession->getFreqIndex(0);
 			sprintf(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
 			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
 			{
@@ -225,9 +225,10 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::SliderInt(buf, &iFreq3, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(3, iFreq3);
-			}*/
+			}
 			ImGui::PopItemWidth();
 		} // Audio
+
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
@@ -328,6 +329,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::SameLine();
 			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
 		}
+		
 		// Websocket
 		if (ImGui::CollapsingHeader("Websocket", "8088", true, true))
 		{
@@ -345,7 +347,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::Text(">%s", mVDSession->getWSMsg().c_str());
 		}
 
-
+		// Render
 		if (ImGui::CollapsingHeader("Render", false))
 		{
 
