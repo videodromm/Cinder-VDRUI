@@ -448,13 +448,13 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		// LiveOSC Obsolete ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
 		ImGui::SameLine();
 		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);
-		ImGui::Text(" Tempo %.2f ", mVDSession->getUniformValue(mVDUniforms->IBPM));
+		ImGui::Text(" Tempo %.2f", mVDSession->getUniformValue(mVDUniforms->IBPM));
 		ImGui::SameLine();
-		ImGui::Text(" Beat %d ", mVDSession->getUniformValue(mVDUniforms->IBEAT));
+		ImGui::Text(" Beat %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT));
 		ImGui::SameLine();
-		ImGui::Text(" Bar %d ", mVDSession->getUniformValue(mVDUniforms->IBAR));
+		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
 		ImGui::SameLine();
-		ImGui::Text(" Bb %d ", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
+		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
 
 		// line 3
 		/*ImGui::RadioButton("Warp", &currentWindowRow1, 0); ImGui::SameLine();
