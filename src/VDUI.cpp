@@ -65,7 +65,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		style.WindowRounding = 8;
 		style.WindowPadding = ImVec2(3, 3);
 		style.FramePadding = ImVec2(2, 2);
-		style.FrameRounding = 16;
+		style.FrameRounding = 6;
 		style.ItemSpacing = ImVec2(3, 3);
 		style.ItemInnerSpacing = ImVec2(3, 3);
 		style.WindowMinSize = ImVec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight());
@@ -243,24 +243,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 
 		int hue = 0;
-		/*(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Wave")) {
-			mVDSession->toggleAudioBuffered();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-		(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
-		if (ImGui::Button("LineIn")) {
-			mVDSession->toggleUseLineIn();
-		}
-		ImGui::PopStyleColor(3);
-		hue++; */
-
+	
 		// debug
 		ctrl = mVDUniforms->IDEBUG;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));

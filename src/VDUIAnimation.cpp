@@ -177,7 +177,19 @@ void VDUIAnimation::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+
 			ImGui::SameLine();
+			// wave
+			(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+			if (ImGui::Button("Wave")) {
+				mVDSession->toggleAudioBuffered();
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
+			ImGui::SameLine();
+			// mic
 			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
@@ -215,7 +227,7 @@ void VDUIAnimation::Run(const char* title) {
 				mVDSession->setFreqIndex(3, iFreq3);
 			}*/
 			ImGui::PopItemWidth();
-		}
+		} // Audio
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }

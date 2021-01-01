@@ -322,6 +322,11 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::SameLine();
 			sprintf(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
+			ImGui::SameLine();
+			sprintf(buf, "audio##fboinputaudiotex%d", f);
+			if (ImGui::Button(buf)) mVDSession->setFboAudioInputTexture(f);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to Audio");
+		
 
 			/*ImGui::SameLine();
 			sprintf(buf, "global %d##gu%d", mVDSession->getGlobal(f), f);
