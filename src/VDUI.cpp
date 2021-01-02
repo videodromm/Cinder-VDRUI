@@ -14,26 +14,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIAnimation
 	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession, mVDUniforms);
-	// UIShaders
-	//mUIShaders = VDUIShaders::create(mVDSettings, mVDSession);
-	// UIMidi
-	/*mUIMidi = VDUIMidi::create(mVDSettings, mVDSession);
-	// UIAudio
-	mUIAudio = VDUIAudio::create(mVDSettings, mVDSession);
-	// UIColor
-	mUIColor = VDUIColor::create(mVDSettings, mVDSession);
-	// UITempo
-	//mUITempo = VDUITempo::create(mVDSettings, mVDSession);
-	// UIBlend
-	mUIBlend = VDUIBlend::create(mVDSettings, mVDSession);
-	// UIOsc
-	mUIOsc = VDUIOsc::create(mVDSettings, mVDSession);
-	// UISocketIO
-	mUISocketIO = VDUISocketIO::create(mVDSettings, mVDSession);
-	// UIMouse
-	mUIMouse = VDUIMouse::create(mVDSettings, mVDSession);
-	// UIRender
-	mUIRender = VDUIRender::create(mVDSettings, mVDSession);*/
+	
 	// UIWarps
 	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// imgui

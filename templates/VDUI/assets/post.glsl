@@ -1,6 +1,6 @@
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;
 uniform float iExposure;uniform float iSobel;uniform float iChromatic;
-uniform bool iFlipV;uniform bool iFlipH;uniform bool iInvert;uniform float iTrixels;
+uniform float iFlipV;uniform float iFlipH;uniform float iInvert;uniform float iTrixels;
 vec2  fragCoord = gl_FragCoord.xy;
 float intensity(in vec4 c){return sqrt((c.x*c.x)+(c.y*c.y)+(c.z*c.z));}
 vec4 sobel(float stepx, float stepy, vec2 center) {
@@ -34,12 +34,12 @@ vec4 trixels( vec2 inUV, sampler2D tex )
     float oddRow = mod(floor(screenY/height),2.0);
     screenX -= halfBase*oddRow;
     
-    float oddCollumn = mod(floor(screenX/halfBase), 2.0);
+    float oddColumn = mod(floor(screenX/halfBase), 2.0);
 
     float localX = mod(screenX, halfBase);
     float localY = mod(screenY, height);
 
-    if(oddCollumn == 0.0 )
+    if(oddColumn == 0.0 )
     {
         if(localY >= localX*upSlope)
         {
@@ -72,12 +72,12 @@ vec4 trixels( vec2 inUV, sampler2D tex )
 // trixels end
 void main() {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
-	if (iFlipH)
+	if (iFlipH > 0.0)
 	{
 		uv.x = 1.0 - uv.x;
 	}
 	// flip vertically
-	if (iFlipV)
+	if (iFlipV > 0.0)
 	{
 		uv.y = 1.0 - uv.y;
 	}
@@ -87,6 +87,6 @@ void main() {
 	if (iChromatic > 0.0) { t0 = chromatic(uv) * t0; }
 	if (iTrixels > 0.0) { t0 = trixels( uv, iChannel0 ); }
 	c = t0;c *= iExposure;
-	if (iInvert) c = 1. - c;
+	if (iInvert > 0.0) { c = 1.0 - c; }
    	gl_FragColor = c;
 }
