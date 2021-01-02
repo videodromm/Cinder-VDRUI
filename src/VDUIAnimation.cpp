@@ -92,6 +92,7 @@ void VDUIAnimation::Run(const char* title) {
 				sprintf(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
+					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
 				}
 				ImGui::SameLine();
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
