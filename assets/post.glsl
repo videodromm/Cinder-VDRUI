@@ -1,6 +1,11 @@
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;
+uniform float iTime;uniform float iTempoTime;uniform float iRatio;
 uniform float iExposure;uniform float iSobel;uniform float iChromatic;
 uniform float iFlipV;uniform float iFlipH;uniform float iInvert;uniform float iTrixels;
+uniform float iPixelate;uniform float iGlitch;
+uniform float       iRedMultiplier;			// red multiplier 
+uniform float       iGreenMultiplier;		// green multiplier 
+uniform float       iBlueMultiplier;		// blue multiplier 
 vec2  fragCoord = gl_FragCoord.xy;
 float intensity(in vec4 c){return sqrt((c.x*c.x)+(c.y*c.y)+(c.z*c.z));}
 vec4 sobel(float stepx, float stepy, vec2 center) {
@@ -56,7 +61,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
     
     float startX = floor(screenX/halfBase)*halfBase;
     float startY = floor(screenY/height)*height;
-    vec4 blend = vec4(0.0,0.0,0.0,0.0);
+    vec4 blend = vec4(0.0);
     for(float x = 0.0; x < 3.0; x += 1.0)
     {
         for(float y = 0.0; y < 3.0; y += 1.0)
@@ -70,8 +75,28 @@ vec4 trixels( vec2 inUV, sampler2D tex )
    	return rtn;
 }
 // trixels end
+// glitch begin
+float glitchHash(float x)
+{
+	return fract(sin(x * 11.1753) * 192652.37862);
+}
+float glitchNse(float x)
+{
+	float fl = floor(x);
+	return mix(glitchHash(fl), glitchHash(fl + 1.0), smoothstep(0.0, 1.0, fract(x)));
+}
+// glitch end
 void main() {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
+	// zoom centered
+	if ( iZoom < 1.0 )
+	{
+	  float xZ = (uv.x - 0.5)*(1.0-iZoom)*2.0;
+	  float yZ = (uv.y - 0.5)*(1.0-iZoom)*2.0;
+	  vec2 cZ = vec2(xZ, yZ);
+	  uv = uv+cZ;
+	}
+	// flip horizontally
 	if (iFlipH > 0.0)
 	{
 		uv.x = 1.0 - uv.x;
@@ -81,12 +106,29 @@ void main() {
 	{
 		uv.y = 1.0 - uv.y;
 	}
-
-	vec4 t0 = texture(iChannel0, uv );vec4 c = vec4(0.0);
+	if ( iPixelate < 1.0 )
+	{
+		vec2 divs = vec2(iResolution.x * iPixelate / iResolution.y*60.0, iPixelate*60.0);
+		uv = floor(uv * divs)/ divs;
+	}
+	// glitch
+	if (iGlitch > 0.0) 
+	{
+		float s = iTempoTime * iRatio;
+		float te = iTempoTime * 9.0 / 16.0;
+		vec2 shk = (vec2(glitchNse(s), glitchNse(s + 11.0)) * 2.0 - 1.0) * exp(-5.0 * fract(te * 4.0)) * 0.1;
+		uv += shk;		
+	}
+	vec4 t0 = texture(iChannel0, uv);
+	vec4 c = vec4(0.0);
 	if (iSobel > 0.03) { t0 = sobel(iSobel * 3.0 /iResolution.x, iSobel * 3.0 /iResolution.y, uv); }
 	if (iChromatic > 0.0) { t0 = chromatic(uv) * t0; }
 	if (iTrixels > 0.0) { t0 = trixels( uv, iChannel0 ); }
+
 	c = t0;c *= iExposure;
 	if (iInvert > 0.0) { c = 1.0 - c; }
+	c.r *= iRedMultiplier;
+	c.g *= iGreenMultiplier;
+	c.b *= iBlueMultiplier;
    	gl_FragColor = c;
 }
