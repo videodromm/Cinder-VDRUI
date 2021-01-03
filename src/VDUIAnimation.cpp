@@ -29,7 +29,7 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.4), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.2), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 	int hue = 0;
 	ImGui::Begin("Animation", NULL, ImGuiWindowFlags_NoSavedSettings);
@@ -173,7 +173,7 @@ void VDUIAnimation::Run(const char* title) {
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
 		} // Uniforms
-		
+
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
@@ -234,78 +234,82 @@ void VDUIAnimation::Run(const char* title) {
 		{
 			sprintf(buf, "Enable");
 			if (ImGui::Button(buf)) mVDSession->setupMidiReceiver();
-			if (ImGui::CollapsingHeader("MidiIn", "20", true, true))
-			{
-				ImGui::Columns(2, "datain", true);
-				ImGui::Text("Name"); ImGui::NextColumn();
-				ImGui::Text("Connect"); ImGui::NextColumn();
-				ImGui::Separator();
-				for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
+			if (mVDSession->isMidiSetup()) {
+				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
+				ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
+				if (ImGui::CollapsingHeader("MidiIn", "20", true, true))
 				{
-					if (mVDSession->getMidiInPortName(i) != "Ableton Push 2 1") {
-						ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+					ImGui::Columns(2, "datain", true);
+					ImGui::Text("Name"); ImGui::NextColumn();
+					ImGui::Text("Connect"); ImGui::NextColumn();
+					ImGui::Separator();
+					for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
+					{
+						if (mVDSession->getMidiInPortName(i) != "Ableton Push 2 1") {
+							ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
 
-						if (mVDSession->isMidiInConnected(i))
+							if (mVDSession->isMidiInConnected(i))
+							{
+								sprintf(buf, "Disconnect %d", i);
+							}
+							else
+							{
+								sprintf(buf, "Connect %d", i);
+							}
+
+							if (ImGui::Button(buf))
+							{
+								if (mVDSession->isMidiInConnected(i))
+								{
+									mVDSession->closeMidiInPort(i);
+								}
+								else
+								{
+									mVDSession->openMidiInPort(i);
+								}
+							}
+							ImGui::NextColumn();
+							ImGui::Separator();
+						}
+					}
+					ImGui::Columns(1);
+				}
+				// Midi out
+				if (ImGui::CollapsingHeader("MidiOut", "20", true, true))
+				{
+					ImGui::Columns(2, "dataout", true);
+					ImGui::Text("Name"); ImGui::NextColumn();
+					ImGui::Text("Connect"); ImGui::NextColumn();
+					ImGui::Separator();
+					for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
+					{
+						ImGui::Text(mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
+
+						if (mVDSession->isMidiOutConnected(i))
 						{
-							sprintf(buf, "Disconnect %d", i);
+							sprintf(buf, "Disconnect  %d", i);
 						}
 						else
 						{
-							sprintf(buf, "Connect %d", i);
+							sprintf(buf, "Connect  %d", i);
 						}
 
 						if (ImGui::Button(buf))
 						{
-							if (mVDSession->isMidiInConnected(i))
+							if (mVDSession->isMidiOutConnected(i))
 							{
-								mVDSession->closeMidiInPort(i);
+								mVDSession->closeMidiOutPort(i);
 							}
 							else
 							{
-								mVDSession->openMidiInPort(i);
+								mVDSession->openMidiOutPort(i);
 							}
 						}
 						ImGui::NextColumn();
 						ImGui::Separator();
 					}
+					ImGui::Columns(1);
 				}
-				ImGui::Columns(1);
-			}
-			// Midi out
-			if (ImGui::CollapsingHeader("MidiOut", "20", true, true))
-			{
-				ImGui::Columns(2, "dataout", true);
-				ImGui::Text("Name"); ImGui::NextColumn();
-				ImGui::Text("Connect"); ImGui::NextColumn();
-				ImGui::Separator();
-				for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
-				{
-					ImGui::Text(mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
-
-					if (mVDSession->isMidiOutConnected(i))
-					{
-						sprintf(buf, "Disconnect  %d", i);
-					}
-					else
-					{
-						sprintf(buf, "Connect  %d", i);
-					}
-
-					if (ImGui::Button(buf))
-					{
-						if (mVDSession->isMidiOutConnected(i))
-						{
-							mVDSession->closeMidiOutPort(i);
-						}
-						else
-						{
-							mVDSession->openMidiOutPort(i);
-						}
-					}
-					ImGui::NextColumn();
-					ImGui::Separator();
-				}
-				ImGui::Columns(1);
 			}
 		}
 
@@ -410,7 +414,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::SameLine();
 			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
 		}
-		
+
 		// Websocket
 		if (ImGui::CollapsingHeader("Websocket", "8088", true, true))
 		{
