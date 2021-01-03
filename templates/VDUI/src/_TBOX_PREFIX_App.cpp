@@ -101,17 +101,17 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mVDMix = VDMix::create(mVDSettings, mVDAnimation, mVDUniforms);
 	// Session
 	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms, mVDMix)
-		->setUniformValue(mVDUniform->IBPM, 160.0f)
-		->setUniformValue(mVDUniform->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniform->IMOUSEY, 0.5648f)
-		->setMode(1)
+		->setUniformValue(mVDUniforms->IBPM, 160.0f)
+		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
+		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
+		->setMode(7)
 		->setupWSClient()
 		->wsConnect()
 		//->setupOSCReceiver()
 		//->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort)
 		->addUIObserver(mVDSettings, mVDUniforms)
 		->toggleUI()
-		->toggleValue(mVDUniform->IFLIPV);
+		->toggleValue(mVDUniforms->IFLIPV);
 
 	// sos only mVDSessionFacade->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
 	mFadeInDelay = true;
@@ -275,14 +275,19 @@ void _TBOX_PREFIX_App::draw()
 			mSpoutOut.sendTexture(mVDSessionFacade->getFboShaderTexture(m));
 		}
 		else {
-			gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth(), mVDParams->getFboHeight()));
-			//gl::draw(mVDSessionFacade->getPostFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
+			if (m == 8) {
+				gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0));
+			} else if (m == 7) {
+				gl::draw(mVDSessionFacade->buildPostFboTexture());
+			}
+			else {
+				gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth()/2, mVDParams->getFboHeight()/2));
+				gl::draw(mVDSessionFacade->buildPostFboTexture(), Area(mVDParams->getFboWidth() / 2, mVDParams->getFboHeight() / 2, mVDParams->getFboWidth() , mVDParams->getFboHeight() ));
+			}
 			//gl::draw(mVDSession->getRenderedMixetteTexture(0), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()
 			//mSpoutOut.sendTexture(mVDSession->getRenderedMixetteTexture(0));
 		}
-		gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth(), mVDParams->getFboHeight()));
-
 		/*vec2 videoSize = vec2(mVideo.getWidth(), mVideo.getHeight());
 		mGlslVideoTexture->uniform("uVideoSize", videoSize);
 		videoSize *= 0.25f;
@@ -293,11 +298,7 @@ void _TBOX_PREFIX_App::draw()
 		//gl::draw(mPostFbo->getColorTexture());
 		//gl::draw(mVDSessionFacade->getFboRenderedTexture(0));
 	}
-	// Spout Send
-	// KO mSpoutOut.sendViewport();
-	// OK
-	 mSpoutOut.sendTexture(mVDSessionFacade->buildRenderedMixetteTexture(0));
-
+	
 	// imgui
 	if (mVDSessionFacade->showUI()) {
 		mVDUI->Run("UI", (int)getAverageFps());

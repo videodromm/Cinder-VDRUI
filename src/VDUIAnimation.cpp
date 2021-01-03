@@ -230,6 +230,86 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopItemWidth();
 		} // Audio
 
+		if (ImGui::CollapsingHeader("Midi", NULL, true))
+		{
+			sprintf(buf, "Enable");
+			if (ImGui::Button(buf)) mVDSession->setupMidiReceiver();
+			if (ImGui::CollapsingHeader("MidiIn", "20", true, true))
+			{
+				ImGui::Columns(2, "datain", true);
+				ImGui::Text("Name"); ImGui::NextColumn();
+				ImGui::Text("Connect"); ImGui::NextColumn();
+				ImGui::Separator();
+				for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
+				{
+					if (mVDSession->getMidiInPortName(i) != "Ableton Push 2 1") {
+						ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+
+						if (mVDSession->isMidiInConnected(i))
+						{
+							sprintf(buf, "Disconnect %d", i);
+						}
+						else
+						{
+							sprintf(buf, "Connect %d", i);
+						}
+
+						if (ImGui::Button(buf))
+						{
+							if (mVDSession->isMidiInConnected(i))
+							{
+								mVDSession->closeMidiInPort(i);
+							}
+							else
+							{
+								mVDSession->openMidiInPort(i);
+							}
+						}
+						ImGui::NextColumn();
+						ImGui::Separator();
+					}
+				}
+				ImGui::Columns(1);
+			}
+			// Midi out
+			if (ImGui::CollapsingHeader("MidiOut", "20", true, true))
+			{
+				ImGui::Columns(2, "dataout", true);
+				ImGui::Text("Name"); ImGui::NextColumn();
+				ImGui::Text("Connect"); ImGui::NextColumn();
+				ImGui::Separator();
+				for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
+				{
+					ImGui::Text(mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
+
+					if (mVDSession->isMidiOutConnected(i))
+					{
+						sprintf(buf, "Disconnect  %d", i);
+					}
+					else
+					{
+						sprintf(buf, "Connect  %d", i);
+					}
+
+					if (ImGui::Button(buf))
+					{
+						if (mVDSession->isMidiOutConnected(i))
+						{
+							mVDSession->closeMidiOutPort(i);
+						}
+						else
+						{
+							mVDSession->openMidiOutPort(i);
+						}
+					}
+					ImGui::NextColumn();
+					ImGui::Separator();
+				}
+				ImGui::Columns(1);
+			}
+		}
+
+
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }

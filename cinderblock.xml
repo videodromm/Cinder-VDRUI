@@ -23,6 +23,8 @@
 	<requires>org.libcinder.OSC</requires>
 	<platform os="msw">
 		<requires>fr.batchass.spout</requires>
+		<requires>mb.cinder.midi2</requires>
+		<requires>org.libcinder.HTTPS</requires>
 	</platform>
 </block>
 <template>templates/VDUI/template.xml</template>
