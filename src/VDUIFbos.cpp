@@ -77,7 +77,7 @@ int w = 0;
 
 
 #pragma region tex
-			for (int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
+			for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
 				xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t);
 				yPos = mVDParams->getUIYPosRow2();
 

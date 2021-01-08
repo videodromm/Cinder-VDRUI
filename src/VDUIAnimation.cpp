@@ -200,7 +200,8 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopStyleColor(3);
 			hue++;
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
-
+			ImGui::TextColored(ImColor(0, 255, 0), "%.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
+			
 			static int iFreq0 = mVDSession->getFreqIndex(0);
 			sprintf(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
 			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))

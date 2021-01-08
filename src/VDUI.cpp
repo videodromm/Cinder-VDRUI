@@ -9,7 +9,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	// Params
 	mVDParams = VDParams::create();
 	// UITextures
-	//mUITextures = VDUITextures::create(mVDSettings, mVDSession);
+	mUITextures = VDUITextures::create(mVDUniforms, mVDSession);
 	// UIFbos
 	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIAnimation
@@ -615,7 +615,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		mUIWarps->Run("Warps");
 	}
 	// textures
-	//mUITextures->Run("Textures");
+	mUITextures->Run("Textures");
 	// Fbos
 	if (mShowFbos) {
 		mUIFbos->Run("Fbos");

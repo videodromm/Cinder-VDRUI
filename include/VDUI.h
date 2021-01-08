@@ -12,8 +12,8 @@
 #include "VDSessionFacade.h"
 // UIFbos
 #include "VDUIFbos.h"
-// UIShaders
-#include "VDUIShaders.h"
+// UITextures
+#include "VDUITextures.h"
 // Animation
 #include "VDUIAnimation.h"
 // Warps
@@ -59,8 +59,8 @@ namespace videodromm
 		VDUIFbosRef					mUIFbos;
 		bool						showUIFbos;
 		bool						mShowFbos;
-		// UIShaders
-		//VDUIShadersRef				mUIShaders;
+		// UITextures
+		VDUITexturesRef				mUITextures;
 		// UIAnimation
 		VDUIAnimationRef			mUIAnimation;
 		bool						showUIAnimation;
