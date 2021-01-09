@@ -16,7 +16,7 @@ void VDUIWarps::Run(const char* title) {
 	yPos = mVDParams->getUIYPosRow3();
 	for (int w = 0; w < mVDSession->getWarpCount(); w++) {
 
-		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
+		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol3() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
 		
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), 150.0f), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);

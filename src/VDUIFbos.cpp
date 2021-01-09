@@ -62,11 +62,11 @@ int w = 0;
 			ImGui::SameLine();
 			sprintf(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
-			ImGui::SameLine();
+			/*ImGui::SameLine();
 			sprintf(buf, "audio##fboinputaudiotex%d", f);
 			if (ImGui::Button(buf)) mVDSession->setFboAudioInputTexture(f);
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to Audio");
-		
+		*/
 			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 
@@ -77,7 +77,22 @@ int w = 0;
 
 
 #pragma region tex
-			for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
+			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
+				if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
+				if (mVDSession->getFboInputTextureIndex(f) == t) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 0.1f, 0.1f));
+				}
+				sprintf(buf, "%d##fboit%d%d", t, f, t);
+				if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, t);
+
+				sprintf(buf, "Set input texture to %s", mVDSession->getInputTextureName(t).c_str());
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+				ImGui::PopStyleColor(1);
+			}
+			/*for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
 				xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t);
 				yPos = mVDParams->getUIYPosRow2();
 
@@ -92,6 +107,8 @@ int w = 0;
 					ImGui::Image((void*)mVDSession->buildFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 					ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 0.7);
 
+					sprintf(buf, "tex %s", mVDSession->getFboInputTextureName(t).c_str());
+					ImGui::TextColored(ImColor(150, 220, 0), buf);*/
 
 					/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
 						sprintf(buf, "p##s%d", t);
@@ -146,12 +163,12 @@ int w = 0;
 					else {
 
 					}*/
-					ImGui::PopItemWidth();
+					/*ImGui::PopItemWidth();
 					ImGui::PopID();
 					ImGui::PopItemWidth();
 				}
 				ImGui::End();
-			}
+			}*/
 #pragma endregion tex
 
 
