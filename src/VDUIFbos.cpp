@@ -25,14 +25,7 @@ void VDUIFbos::Run(const char* title) {
 	static int XRight[64];
 	static int YBottom[64];
 	static bool rnd[64];
-	static bool anim[64];
-int w = 0;
-	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
-	yPos = mVDParams->getUIYPosRow2();
-
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
-	
+	static bool anim[64];	
 
 #pragma region fbos
 
@@ -41,8 +34,8 @@ int w = 0;
 	*/
 
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
-		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));//+1
-
+		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));
+		yPos = mVDParams->getUIYPosRow2();
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.7f));
@@ -62,11 +55,7 @@ int w = 0;
 			ImGui::SameLine();
 			sprintf(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
-			/*ImGui::SameLine();
-			sprintf(buf, "audio##fboinputaudiotex%d", f);
-			if (ImGui::Button(buf)) mVDSession->setFboAudioInputTexture(f);
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to Audio");
-		*/
+			
 			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 
@@ -92,23 +81,7 @@ int w = 0;
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 				ImGui::PopStyleColor(1);
 			}
-			/*for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
-				xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t);
-				yPos = mVDParams->getUIYPosRow2();
-
-				ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
-				ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
-				int hue = 0;
-				printf(buf, "%s##s%d", mVDSession->getFboInputTextureName(t).c_str(), t);
-				ImGui::Begin(buf, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings);
-				{
-					ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-					ImGui::PushID(t);
-					ImGui::Image((void*)mVDSession->buildFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-					ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 0.7);
-
-					sprintf(buf, "tex %s", mVDSession->getFboInputTextureName(t).c_str());
-					ImGui::TextColored(ImColor(150, 220, 0), buf);*/
+			
 
 					/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
 						sprintf(buf, "p##s%d", t);
@@ -163,12 +136,7 @@ int w = 0;
 					else {
 
 					}*/
-					/*ImGui::PopItemWidth();
-					ImGui::PopID();
-					ImGui::PopItemWidth();
-				}
-				ImGui::End();
-			}*/
+					
 #pragma endregion tex
 
 

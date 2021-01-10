@@ -156,10 +156,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			values[values_offset] = fps;
 			values_offset = (values_offset + 1) % values.size();
 		}
-		if (fps < 12.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+		if (fps < 24.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
 		// TODO ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, mVDSession->getTargetFps(), ImVec2(0, 30));
-		ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, 100.0f, ImVec2(0, 30));
-		if (fps < 12.0) ImGui::PopStyleColor();
+		//ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, 100.0f, ImVec2(0, 30));
+		sprintf(buf, "%d", fps);
+		ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
+		if (fps < 24.0) ImGui::PopStyleColor();
 		// audio
 		ImGui::SameLine();
 		static ImVector<float> timeValues; if (timeValues.empty()) { timeValues.resize(40); memset(&timeValues.front(), 0, timeValues.size() * sizeof(float)); }
