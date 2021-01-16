@@ -25,7 +25,7 @@ void VDUIFbos::Run(const char* title) {
 	static int XRight[64];
 	static int YBottom[64];
 	static bool rnd[64];
-	static bool anim[64];	
+	static bool anim[64];
 
 #pragma region fbos
 
@@ -55,12 +55,17 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::SameLine();
 			sprintf(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
-			
+
 			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 
 			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
+				ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				ImGui::SameLine();
+				sprintf(buf, "%s", mVDSession->getFboInputTextureName(mVDSession->getFboInputTextureIndex(f)).c_str());
+				ImGui::TextColored(ImColor(220, 150, 0), buf);
+			}
 			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 
@@ -81,67 +86,69 @@ void VDUIFbos::Run(const char* title) {
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 				ImGui::PopStyleColor(1);
 			}
-			
 
-					/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
-						sprintf(buf, "p##s%d", t);
-						if (ImGui::Button(buf))
-						{
-							mVDSession->togglePlayPause(t);
-						}
-						if (ImGui::IsItemHovered()) ImGui::SetTooltip("Play/Pause");
+
+			/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
+				sprintf(buf, "p##s%d", t);
+				if (ImGui::Button(buf))
+				{
+					mVDSession->togglePlayPause(t);
+				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Play/Pause");
+			}
+			if (mVDSession->isSequence(t)) {
+				ImGui::SameLine();
+				sprintf(buf, "b##sqs%d", t);
+				if (ImGui::Button(buf))
+				{
+					mVDSession->syncToBeat(t);
+				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sync to beat");
+
+				ImGui::SameLine();
+				sprintf(buf, "r##rs%d", t);
+				if (ImGui::Button(buf))
+				{
+					mVDSession->reverse(t);
+				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reverse");
+
+				if (mVDSession->isLoadingFromDisk(t)) {
+					ImGui::SameLine();
+					sprintf(buf, "l##ts%d", t);
+					if (ImGui::Button(buf))
+					{
+						mVDSession->toggleLoadingFromDisk(t);
 					}
-					if (mVDSession->isSequence(t)) {
-						ImGui::SameLine();
-						sprintf(buf, "b##sqs%d", t);
-						if (ImGui::Button(buf))
-						{
-							mVDSession->syncToBeat(t);
-						}
-						if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sync to beat");
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pause loading from disk");
+				}
+				speeds[t] = mVDSession->getSpeed(t);
+				sprintf(buf, "speed##spd%d", t);
+				if (ImGui::SliderFloat(buf, &speeds[t], 0.0f, 1.0f))
+				{
+					mVDSession->setSpeed(t, speeds[t]);
+				}
 
-						ImGui::SameLine();
-						sprintf(buf, "r##rs%d", t);
-						if (ImGui::Button(buf))
-						{
-							mVDSession->reverse(t);
-						}
-						if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reverse");
-
-						if (mVDSession->isLoadingFromDisk(t)) {
-							ImGui::SameLine();
-							sprintf(buf, "l##ts%d", t);
-							if (ImGui::Button(buf))
-							{
-								mVDSession->toggleLoadingFromDisk(t);
-							}
-							if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pause loading from disk");
-						}
-						speeds[t] = mVDSession->getSpeed(t);
-						sprintf(buf, "speed##spd%d", t);
-						if (ImGui::SliderFloat(buf, &speeds[t], 0.0f, 1.0f))
-						{
-							mVDSession->setSpeed(t, speeds[t]);
-						}
-
-						playheadPositions[t] = mVDSession->getPosition(t);
-						sprintf(buf, "scrub##srb%d", t);
-						if (ImGui::SliderInt(buf, &playheadPositions[t], 0, mVDSession->getMaxFrame(t)))
-						{
-							mVDSession->setPlayheadPosition(t, playheadPositions[t]);
-						}
+				playheadPositions[t] = mVDSession->getPosition(t);
+				sprintf(buf, "scrub##srb%d", t);
+				if (ImGui::SliderInt(buf, &playheadPositions[t], 0, mVDSession->getMaxFrame(t)))
+				{
+					mVDSession->setPlayheadPosition(t, playheadPositions[t]);
+				}
 
 
-					}
-					else {
+			}
+			else {
 
-					}*/
-					
+			}*/
+
 #pragma endregion tex
 
 
 			// uniforms
 			int hue = 0;
+			int channelIndex = 0;
+			int texNameEndIndex = 0;
 			for (auto u : mVDSession->getUniforms(f)) {
 				string uName = u.getName(); // TODO use getIndex?
 				ctrl = mVDSession->getUniformIndexForName(uName);
@@ -173,13 +180,21 @@ void VDUIFbos::Run(const char* title) {
 					break;
 				case GL_SAMPLER_2D:
 					// sampler2d 35678 GL_SAMPLER_2D 0x8B5E
-					sprintf(buf, "%s##texuniform%d", uName.c_str(), f);
-					mShowInputTexture ^= ImGui::Button(buf);
+					
+					texNameEndIndex = uName.find("tex");
+					if (texNameEndIndex != std::string::npos && texNameEndIndex != -1) {
+						// hydra fbo
+						ImGui::Image(mVDSession->getFboInputTextureListItem(f, channelIndex), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+						channelIndex++;
+						ImGui::SameLine();
+					}
+					sprintf(buf, "%s", uName.c_str());
+					ImGui::TextColored(ImColor(220, 150, 0), buf);
 					break;
 				case GL_FLOAT:
 					// float 5126 GL_FLOAT 0x1406
 					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-					if (ctrl > 0) {						
+					if (ctrl > 0) {
 						sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
 						if (ImGui::DragFloat(buf, &localValues[ctrl], 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 						{
@@ -192,15 +207,15 @@ void VDUIFbos::Run(const char* title) {
 							// don't display
 						}
 						else {
-							location = u.getLocation();							
+							location = u.getLocation();
 							mUniformValueByLocation[location] = mVDSession->getUniformValueByLocation(f, location);
 							sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
 							if (ImGui::DragFloat(buf, &mUniformValueByLocation[location], 0.001f, 0.0001f, 50.0f))
 							{
 								mVDSession->setUniformValueByLocation(f, location, mUniformValueByLocation[location]);
-								
+
 							}
-							
+
 						}
 					}
 					break;
@@ -276,7 +291,7 @@ void VDUIFbos::Run(const char* title) {
 			float fh = mVDSession->getFboTextureHeight(f);
 			sprintf(buf, "th %.0f", fh);
 			ImGui::TextColored(ImColor(120, 120, 120), buf);
-			
+
 			ImGui::PopItemWidth();
 			ImGui::PopID();
 		}
