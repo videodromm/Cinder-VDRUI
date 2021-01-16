@@ -177,19 +177,12 @@ void VDUIAnimation::Run(const char* title) {
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
-			ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			//ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 
-			ImGui::SameLine();
-			// wave
-			(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Wave")) {
-				mVDSession->toggleAudioBuffered();
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
-			ImGui::SameLine();
+			//ImGui::SameLine();
+
+
+
 			// mic
 			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
@@ -199,8 +192,41 @@ void VDUIAnimation::Run(const char* title) {
 			}
 			ImGui::PopStyleColor(3);
 			hue++;
+			ImGui::SameLine();
+			// monitor
+			(mVDSession->getUseWaveMonitor()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+			if (ImGui::Button("Monitor")) {
+				mVDSession->toggleUseWaveMonitor();
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
+			ImGui::SameLine();
+
+			// random
+			(mVDSession->getUseRandom()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+			if (ImGui::Button("Rnd")) {
+				mVDSession->toggleUseRandom();
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
+			ImGui::SameLine();
+			// wave
+			(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.2f, 0.2f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+			if (ImGui::Button("Buf")) {
+				mVDSession->toggleAudioBuffered();
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
+			ImGui::SameLine();
+
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
-			ImGui::TextColored(ImColor(0, 255, 0), "%.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
+			ImGui::TextColored(ImColor(0, 255, 0), "Max %.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
 			
 			static int iFreq0 = mVDSession->getFreqIndex(0);
 			sprintf(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
