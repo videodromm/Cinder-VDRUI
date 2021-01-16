@@ -185,10 +185,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 13
-		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 12.0f)) {
-			mVDSession->setUniformValue(13, multx);
+		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 30.0f)) {
+			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
-
 
 		// mouse
 		mouseX = getFloatValue(mVDUniforms->IMOUSEX);
