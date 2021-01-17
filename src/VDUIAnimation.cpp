@@ -53,15 +53,15 @@ void VDUIAnimation::Run(const char* title) {
 			}
 
 			// background color
-			backcolor[0] = getFloatValue(mVDUniforms->IBR);
-			backcolor[1] = getFloatValue(mVDUniforms->IBG);
-			backcolor[2] = getFloatValue(mVDUniforms->IBB);
+			backcolor[0] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORX);
+			backcolor[1] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORY);
+			backcolor[2] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORZ);
 			ImGui::ColorEdit3("g", backcolor);
 			for (int i = 0; i < 3; i++)
 			{
-				if (getFloatValue(i + mVDUniforms->IBR) != backcolor[i])
+				if (getFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX) != backcolor[i])
 				{
-					setFloatValue(i + mVDUniforms->IBR, backcolor[i]);
+					setFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX, backcolor[i]);
 				}
 
 			}
@@ -70,7 +70,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 		if (ImGui::CollapsingHeader("Animation", true))
 		{
-			for (size_t iUniform = 5; iUniform < 19; iUniform++)
+			for (size_t iUniform = 1; iUniform < 29; iUniform++)
 			{
 				sprintf(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {

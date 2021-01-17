@@ -184,7 +184,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		ImGui::SameLine();
 
-		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 13
+		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 40
 		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 30.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
