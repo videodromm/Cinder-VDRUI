@@ -29,7 +29,7 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.2), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 	int hue = 0;
 	ImGui::Begin("Animation", NULL, ImGuiWindowFlags_NoSavedSettings);
@@ -70,7 +70,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 		if (ImGui::CollapsingHeader("Animation", true))
 		{
-			for (size_t iUniform = 1; iUniform < 29; iUniform++)
+			for (size_t iUniform = 5; iUniform < 29; iUniform++)
 			{
 				sprintf(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {

@@ -1,6 +1,6 @@
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;
 uniform float iTime;uniform float iTempoTime;uniform float iRatio;
-uniform float iExposure;uniform float iSobel;uniform float iChromatic;
+uniform float iExposure;uniform float iSobel;uniform float iChromatic;uniform float iGreyScale;
 uniform float iFlipV;uniform float iFlipH;uniform float iInvert;uniform float iTrixels;
 uniform float iPixelate;uniform float iGlitch;
 uniform float       iRedMultiplier;			// red multiplier 
@@ -86,6 +86,10 @@ float glitchNse(float x)
 	return mix(glitchHash(fl), glitchHash(fl + 1.0), smoothstep(0.0, 1.0, fract(x)));
 }
 // glitch end
+vec4 greyScale( vec4 colored )
+{
+   return vec4( (colored.r+colored.g+colored.b)/3.0 );
+}
 void main() {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
 	// zoom centered
@@ -127,6 +131,7 @@ void main() {
 
 	c = t0;c *= iExposure;
 	if (iInvert > 0.0) { c = 1.0 - c; }
+	if (iGreyScale > 0.0) { c = greyScale( c ); }
 	c.r *= iRedMultiplier;
 	c.g *= iGreenMultiplier;
 	c.b *= iBlueMultiplier;
