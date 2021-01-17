@@ -14,7 +14,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIFbos = VDUIFbos::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIAnimation
 	mUIAnimation = VDUIAnimation::create(mVDSettings, mVDSession, mVDUniforms);
-	
+
 	// UIWarps
 	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// imgui
@@ -225,7 +225,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 
 		int hue = 0;
-	
+
 		// debug
 		ctrl = mVDUniforms->IDEBUG;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
@@ -338,6 +338,18 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 		if (ImGui::Button("Greyscale")) {
+			toggleValue(ctrl);
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		// iVignette
+		ctrl = mVDUniforms->IVIGNETTE;
+		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Vignette")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);

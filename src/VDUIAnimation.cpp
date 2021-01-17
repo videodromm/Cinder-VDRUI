@@ -562,16 +562,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopStyleColor(3);
 			hue++;
 
-			// iVignette
-			ctrl = mVDUniforms->IVIGN;
-			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-			if (ImGui::Button("vignette")) {
-				toggleValue(ctrl);
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
+			
 			ctrl = mVDUniforms->IVAMOUNT;
 			iVAmount = mVDSession->getUniformValue(ctrl);
 			if (ImGui::DragFloat("Amount", &iVAmount, 0.001f, 0.0f, 1.0f))
