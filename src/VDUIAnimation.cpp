@@ -561,7 +561,7 @@ void VDUIAnimation::Run(const char* title) {
 			hue++;*/
 
 			// iVignette
-			ctrl = mVDUniforms->IVIGN;
+			/*ctrl = mVDUniforms->IVIGN;
 			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
@@ -599,7 +599,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::DragFloat("mincr", &minContour, 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl));
 			ImGui::SameLine();
 			ImGui::DragFloat("maxcr", &maxContour, 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl));
-
+			*/
 
 			/*if (ImGui::Button("Create Window")) {
 				mVDSession->createWindow();
