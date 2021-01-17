@@ -39,16 +39,16 @@ void VDUIAnimation::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(200.0f);
 			// foreground color
-			color[0] = getFloatValue(mVDUniforms->IFR);
-			color[1] = getFloatValue(mVDUniforms->IFG);
-			color[2] = getFloatValue(mVDUniforms->IFB);
-			color[3] = getFloatValue(mVDUniforms->IFA);
+			color[0] = getFloatValue(mVDUniforms->ICOLORX);
+			color[1] = getFloatValue(mVDUniforms->ICOLORY);
+			color[2] = getFloatValue(mVDUniforms->ICOLORZ);
+			color[3] = getFloatValue(mVDUniforms->IALPHA);
 			ImGui::ColorEdit4("f", color);
 			for (int i = 0; i < 4; i++)
 			{
-				if (getFloatValue(i + mVDUniforms->IFR) != color[i])
+				if (getFloatValue(i + mVDUniforms->ICOLORX) != color[i])
 				{
-					setFloatValue(i + mVDUniforms->IFR, color[i]);
+					setFloatValue(i + mVDUniforms->ICOLORX, color[i]);
 				}
 			}
 
@@ -174,6 +174,7 @@ void VDUIAnimation::Run(const char* title) {
 			}*/
 		} // Uniforms
 
+		// Audio
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
@@ -340,7 +341,7 @@ void VDUIAnimation::Run(const char* title) {
 			}
 		}
 
-
+		// Tempo
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
@@ -406,6 +407,7 @@ void VDUIAnimation::Run(const char* title) {
 
 		}
 
+		// OSC
 		if (ImGui::CollapsingHeader("OSC", true))
 		{
 			static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
@@ -558,10 +560,10 @@ void VDUIAnimation::Run(const char* title) {
 				toggleValue(ctrl);
 			}
 			ImGui::PopStyleColor(3);
-			hue++;*/
+			hue++;
 
 			// iVignette
-			/*ctrl = mVDUniforms->IVIGN;
+			ctrl = mVDUniforms->IVIGN;
 			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
