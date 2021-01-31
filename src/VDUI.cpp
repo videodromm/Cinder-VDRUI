@@ -430,10 +430,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		// windows
 		ImGui::Text(" Render window %dx%d", mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
 
-
-
-
-
 		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
 		ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
@@ -558,7 +554,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			//string tooltip = mVDSession->getFboName(m) + " - " + mVDSession->getFboInputTextureName(m);
 			//sprintf(buf, "%s", tooltip.c_str());
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-
 
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))

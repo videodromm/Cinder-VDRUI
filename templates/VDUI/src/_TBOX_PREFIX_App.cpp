@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013-2020, Bruce Lane - All rights reserved.
+ Copyright (c) 2013-2021, Bruce Lane - All rights reserved.
  This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Using Cinder-Warping from Paul Houx.
@@ -256,7 +256,7 @@ void _TBOX_PREFIX_App::resize()
 }
 void _TBOX_PREFIX_App::draw()
 {
-	// clear the window and set the drawing color to black
+	// clear the window and set the drawing color to white
 	gl::clear();
 	gl::color(Color::white());
 	if (mFadeInDelay) {
