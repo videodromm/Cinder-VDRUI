@@ -51,8 +51,8 @@ namespace videodromm
 		// uniforms
 		unsigned int					ctrl;
 		unsigned int					location;
-		std::map<int, float>					localValues;
-		std::map<unsigned int, float>			mUniformValueByLocation;
+		std::map<int, float>			localValues;
+		std::map<unsigned int, float>	mUniformValueByLocation;
 		float							getValue(unsigned int aCtrl, unsigned int aFboIndex) {
 			float rtn;
 			rtn = mVDSession->getUniformValue(aCtrl);
@@ -71,9 +71,9 @@ namespace videodromm
 			mVDSession->toggleValue(aCtrl); //toggleFboValue(aCtrl, aFboIndex);
 		};
 		// mouse
-		float						mouseX, mouseY;
-		bool						mouseZ;
-		bool						mShowRenderedTexture = true;
-		bool						mShowInputTexture = true;
+		float							mouseX, mouseY;
+		bool							mouseZ;
+		bool							mShowRenderedTexture = true;
+		bool							mShowInputTexture = false;
 	};
 }

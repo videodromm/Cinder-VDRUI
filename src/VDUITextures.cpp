@@ -83,7 +83,7 @@ void VDUITextures::Run(const char* title) {
 
 
 			} // end seq
-			*/
+			
 			ImGui::SameLine();
 			(rnd[t]) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 7.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 7.0f, 0.7f, 0.7f));
@@ -91,7 +91,7 @@ void VDUITextures::Run(const char* title) {
 			sprintf(buf, "rnd##r%d", t);
 			rnd[t] ^= ImGui::Button(buf);
 			ImGui::PopStyleColor(3);
-			hue++;
+			hue++;*/
 
 
 			//}
