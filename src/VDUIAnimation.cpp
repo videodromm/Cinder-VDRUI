@@ -467,14 +467,14 @@ void VDUIAnimation::Run(const char* title) {
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			// multiple extra screens resolution
-			ImGui::TextColored(ImColor(0, 255, 0), "rw %d", mVDSettings->mRenderWidth);
+			ImGui::TextColored(ImColor(178, 0, 240), "rw %d", mVDSettings->mRenderWidth);
 			ImGui::SameLine();
-			ImGui::TextColored(ImColor(0, 255, 0), " rh %d", mVDSettings->mRenderHeight);
+			ImGui::TextColored(ImColor(178, 0, 240), " rh %d", mVDSettings->mRenderHeight);
 			// output resolution
 			ctrl = mVDUniforms->IOUTW;
 			if (ImGui::Button("x##ioutw")) { iOutW = 1280; setFloatValue(ctrl, 1280); }
 			ImGui::SameLine();
-			if (ImGui::SliderInt("iOutW", &iOutW, 320, 7000))
+			if (ImGui::SliderInt("iOutW", &iOutW, 320, 5000))
 			{
 				setFloatValue(ctrl, iOutW);
 			}
