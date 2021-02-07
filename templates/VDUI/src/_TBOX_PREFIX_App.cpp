@@ -224,7 +224,7 @@ void _TBOX_PREFIX_App::cleanup()
 {
 	CI_LOG_V("cleanup and save");
 	ui::Shutdown();
-
+	mVDSessionFacade->saveWarps();
 	mVDSettings->save();
 	CI_LOG_V("quit");
 }
@@ -269,6 +269,10 @@ void _TBOX_PREFIX_App::draw()
 	else {
 		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight(), false);
 		//gl::setMatricesWindow(mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
+		// textures needs updating
+		for (int t = 0; t < mVDSessionFacade->getInputTexturesCount(); t++) {
+			mVDSessionFacade->getInputTexture(t);
+		}
 		int m = mVDSessionFacade->getMode();
 		if (m < mVDSessionFacade->getFboShaderListSize()) {
 			gl::draw(mVDSessionFacade->getFboShaderTexture(m));
