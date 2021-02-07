@@ -91,7 +91,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #pragma endregion style
 	}
 #pragma region menu
-	if (ImGui::BeginMainMenuBar()) {
+	/*if (ImGui::BeginMainMenuBar()) {
 
 		if (ImGui::BeginMenu("Options"))
 		{
@@ -100,7 +100,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::EndMainMenuBar();
 	}
-
+	*/
 #pragma endregion menu
 	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);

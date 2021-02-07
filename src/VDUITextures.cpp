@@ -30,7 +30,9 @@ void VDUITextures::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			ImGui::PushID(t);
-			ImGui::Image((void*)mVDSession->getInputTexture(t)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			if (mVDSession->getInputTexture(t)) {
+				ImGui::Image((void*)mVDSession->getInputTexture(t)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			}
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 0.7);
 			/* 20210108 TODO
 			if (mVDSession->isSequence(t) ) {
