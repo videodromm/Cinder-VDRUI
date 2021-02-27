@@ -59,6 +59,7 @@ namespace videodromm
 		VDUIFbosRef					mUIFbos;
 		bool						showUIFbos;
 		bool						mShowFbos;
+		bool						mShowTextures;
 		// UITextures
 		VDUITexturesRef				mUITextures;
 		// UIAnimation
@@ -88,6 +89,9 @@ namespace videodromm
 		}
 		void mToggleShowFbos() {
 			mShowFbos = !mShowFbos;
+		}
+		void mToggleShowTextures() {
+			mShowTextures = !mShowTextures;
 		}
 		void setFloatValue(unsigned int aCtrl, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);

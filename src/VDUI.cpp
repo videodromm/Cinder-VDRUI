@@ -23,6 +23,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mIsResizing = true;
 	mShowWarps = true;
 	mShowFbos = true;
+	mShowTextures = false;
 }
 
 void VDUI::Run(const char* title, unsigned int fps) {
@@ -239,12 +240,11 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 
 
-
-		/*if (ImGui::Button("CreateWarp")) {
+		if (ImGui::Button("Warp++")) {
 			mVDSession->createWarp();
 		}
 		hue++;
-		ImGui::SameLine();*/
+		ImGui::SameLine();
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -261,6 +261,16 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 		if (ImGui::Button("Fbos")) {
 			mToggleShowFbos();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();	
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Tex")) {
+			mToggleShowTextures();
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
@@ -623,7 +633,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		mUIWarps->Run("Warps");
 	}
 	// textures
-	mUITextures->Run("Textures");
+	if (mShowTextures) {
+		mUITextures->Run("Textures");
+	}
 	// Fbos
 	if (mShowFbos) {
 		mUIFbos->Run("Fbos");
