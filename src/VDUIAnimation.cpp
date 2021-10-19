@@ -347,25 +347,25 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			ImGui::SameLine();
 			ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
-
+			/* 20211018 replaced by iSpeed
 			if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
 			ImGui::SameLine();
 			ImGui::SliderFloat("speed x", &mVDSettings->iSpeedMultiplier, 0.01f, 1.0f, "%.4f");//, 2.01f
 
-			/*static int tf = 5;
+			static int tf = 5;
 			if (ImGui::Button("x##tfx")) { tf = 5; mVDSession->setTimeFactor(5); }
 			ImGui::SameLine();
 			if (ImGui::SliderInt("time x", &tf, 0, 9)) mVDSession->setTimeFactor(tf);
 
 			ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-			*/
-			// iTimeFactor
+			
+			// iTimeFactor KO 0.0 on 1st touch
 			ctrl = mVDUniforms->ITIMEFACTOR;
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 			if (ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
-			}
+			}*/
 
 			//ImGui::Text("Elapsed %.2f", mVDSession->getUniformValue(mVDUniforms->IELAPSED));
 			// duration			
