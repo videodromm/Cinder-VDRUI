@@ -1,5 +1,5 @@
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;
-uniform float iTime;uniform float iTempoTime;uniform float iRatio;uniform float iVignette;
+uniform float iTime;uniform float iTempoTime;uniform float iRatio;uniform float iVignette;uniform float iToggle;
 uniform float iExposure;uniform float iSobel;uniform float iChromatic;uniform float iGreyScale;
 uniform float iFlipV;uniform float iFlipH;uniform float iInvert;uniform float iTrixels;
 uniform float iPixelate;uniform float iGlitch;
@@ -131,13 +131,23 @@ void main() {
 
 	c = t0;c *= iExposure;
 	if (iInvert > 0.0) { c.r = 1.0 - c.r; c.g = 1.0 - c.g; c.b = 1.0 - c.b; }
+	if (iToggle > 0.0) { c.rgb = c.brg; }
 	if (iGreyScale > 0.0) { c = greyScale( c ); }
 	c.r *= iRedMultiplier;
 	c.g *= iGreenMultiplier;
 	c.b *= iBlueMultiplier;
+	/* old vignette
 	if (iVignette > 0.0) { 
 		vec2 p = 1.0 + -2.0 * uv;
-		c = mix( c, vec4( 0.1 ), dot( p, p )*iRatio ); 
+		p.y *= 0.4;
+		c = mix( c, vec4( 0.1 ), dot( p, p )*iVignette*3.0 ); 
+	}*/
+	// new vignette
+	if (iVignette > 0.0) { 
+		vec2 p = 1.0 + -2.0 * uv;
+		p.y *= 1.1;
+		p.x *= 2.0;
+		c -= pow(length(p), 500.0);
 	}
    	gl_FragColor = c;
 }
