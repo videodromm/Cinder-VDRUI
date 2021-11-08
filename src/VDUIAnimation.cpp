@@ -97,9 +97,17 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf(buf, "%d %s", iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f))//PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-				{
-					setFloatValue(iUniform, localValues[iUniform]);
+				if (iUniform>24) {
+					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+					{
+						setFloatValue(iUniform, localValues[iUniform]);
+					}
+				}
+				else {
+					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+					{
+						setFloatValue(iUniform, localValues[iUniform]);
+					}
 				}
 			}
 
