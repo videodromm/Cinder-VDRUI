@@ -196,7 +196,10 @@ void VDUIFbos::Run(const char* title) {
 					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 					if (ctrl > 0) {
 						sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
-						if (ImGui::DragFloat(buf, &localValues[ctrl], 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+
+						float spd = (ctrl == mVDUniforms->IPIXELX || ctrl == mVDUniforms->IPIXELY) ? 1.0f : 0.001f;
+						
+						if (ImGui::DragFloat(buf, &localValues[ctrl], spd, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 						{
 							setValue(ctrl, f, localValues[ctrl]);
 						}
