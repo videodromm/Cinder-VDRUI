@@ -14,6 +14,8 @@
 #include "VDUIFbos.h"
 // UITextures
 #include "VDUITextures.h"
+// UIBlend
+//#include "VDUIBlend.h"
 // Animation
 #include "VDUIAnimation.h"
 // Warps
@@ -60,6 +62,10 @@ namespace videodromm
 		bool						showUIFbos;
 		bool						mShowFbos;
 		bool						mShowTextures;
+
+		bool						mShowBlend;		
+		// 		VDUIBlendRef				mUIBlend;
+
 		// UITextures
 		VDUITexturesRef				mUITextures;
 		// UIAnimation
@@ -92,6 +98,9 @@ namespace videodromm
 		}
 		void mToggleShowTextures() {
 			mShowTextures = !mShowTextures;
+		}
+		void mToggleShowBlend() {
+			mShowBlend = !mShowBlend;
 		}
 		void setFloatValue(unsigned int aCtrl, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);

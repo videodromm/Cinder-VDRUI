@@ -74,6 +74,7 @@ namespace videodromm
 
 		// render
 		float							contour, iVAmount, iVFallOff;
+		int								iBlendmode;
 		int								iResolutionX, iResolutionY;
 		int								iOutW, iOutH, iBarBeat;
 		// contour

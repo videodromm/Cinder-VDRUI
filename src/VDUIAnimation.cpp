@@ -23,6 +23,7 @@ VDUIAnimation::VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSe
 	iOutW = (int)mVDSession->getUniformValue(mVDUniforms->IOUTW);
 	iOutH = (int)mVDSession->getUniformValue(mVDUniforms->IOUTH);
 	iBarBeat = (int)mVDSession->getUniformValue(mVDUniforms->IBARBEAT);
+	iBlendmode = 0.0f;
 }
 VDUIAnimation::~VDUIAnimation() {
 
@@ -563,6 +564,15 @@ void VDUIAnimation::Run(const char* title) {
 				mVDSettings->myRight = myRight;
 			}
 
+			const char* blendModes[] = { "mix", "multiply", "colorBurn", "linearBurn", "darkerColor", "lighten", "screen", "colorDodge", "linearDodge", "lighterColor", "overlay", "softLight", "hardLight", "vividLight", "linearLight", "pinLight", "hardMix", "difference", "exclusion", "subtract", "divide", "hue", "color", "saturation", "luminosity", "darken", "left", "right" };
+
+			ctrl = mVDUniforms->IBLENDMODE;
+			iBlendmode = mVDSession->getUniformValue(ctrl);
+			sprintf(buf, "Blendmode %s##ibl", blendModes[iBlendmode]);
+			if (ImGui::SliderInt(buf, &iBlendmode, 0, 20))
+			{
+				setFloatValue(ctrl, (float)iBlendmode);
+			}
 			// debug
 			/*ctrl = mVDUniforms->IDEBUG;
 			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
@@ -574,7 +584,6 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopStyleColor(3);
 			hue++;
 
-			
 			ctrl = mVDUniforms->IVAMOUNT;
 			iVAmount = mVDSession->getUniformValue(ctrl);
 			if (ImGui::DragFloat("Amount", &iVAmount, 0.001f, 0.0f, 1.0f))
