@@ -569,7 +569,7 @@ void VDUIAnimation::Run(const char* title) {
 			ctrl = mVDUniforms->IBLENDMODE;
 			iBlendmode = mVDSession->getUniformValue(ctrl);
 			sprintf(buf, "Blendmode %s##ibl", blendModes[iBlendmode]);
-			if (ImGui::SliderInt(buf, &iBlendmode, 0, 20))
+			if (ImGui::SliderInt(buf, &iBlendmode, 0, 25))
 			{
 				setFloatValue(ctrl, (float)iBlendmode);
 			}

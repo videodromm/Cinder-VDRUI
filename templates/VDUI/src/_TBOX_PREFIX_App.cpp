@@ -101,9 +101,6 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mVDMix = VDMix::create(mVDSettings, mVDAnimation, mVDUniforms);
 	// Session
 	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms, mVDMix)
-		->setUniformValue(mVDUniforms->IBPM, 160.0f)
-		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
 		->setMode(7)
 		->setupWSClient()
 		->wsConnect()
@@ -111,6 +108,9 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 		//->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort)
 		->addUIObserver(mVDSettings, mVDUniforms)
 		->toggleUI()
+		->setUniformValue(mVDUniforms->IBPM, 160.0f)
+		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
+		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
 		->toggleValue(mVDUniforms->IFLIPV);
 
 	// sos only mVDSessionFacade->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
