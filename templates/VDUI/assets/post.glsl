@@ -131,7 +131,7 @@ void main() {
 
 	c = t0;c *= iExposure;
 	if (iInvert > 0.0) { c.r = 1.0 - c.r; c.g = 1.0 - c.g; c.b = 1.0 - c.b; }
-	if (iToggle > 0.0) { c.rgb = c.brg; }
+	//if (iToggle > 0.0) { c.rgb = c.brg; }
 	if (iGreyScale > 0.0) { c = greyScale( c ); }
 	c.r *= iRedMultiplier;
 	c.g *= iGreenMultiplier;

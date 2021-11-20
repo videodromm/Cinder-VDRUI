@@ -61,7 +61,9 @@ void VDUIFbos::Run(const char* title) {
 
 			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
-				ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				//ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				ImGui::Image(mVDSession->getFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				
 				ImGui::SameLine();
 				sprintf(buf, "%s", mVDSession->getFboInputTextureName(mVDSession->getFboInputTextureIndex(f)).c_str());
 				ImGui::TextColored(ImColor(220, 150, 0), buf);
