@@ -356,6 +356,8 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			ImGui::SameLine();
 			ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
+			ImGui::SameLine();
+			ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
 			/* 20211018 replaced by iSpeed
 			if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
 			ImGui::SameLine();
