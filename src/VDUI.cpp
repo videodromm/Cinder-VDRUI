@@ -112,7 +112,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	{
 		if (ImGui::Button("Clear")) {
 			mVDSettings->mMsg = "";
-			mVDSettings->mMidiMsg = "";
+			// TODO mVDSettings->mMidiMsg = ""; mVDSession->setmi("");
 			mVDSettings->mSocketIOMsg = "";
 			mVDSession->setOSCMsg("");
 			mVDSettings->mErrorMsg = "";
@@ -121,7 +121,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 		ImGui::TextColored(ImColor(200, 200, 0), "Msg: %s", mVDSettings->mMsg.c_str());
 		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
-		ImGui::TextWrapped("Midi: %s", mVDSettings->mMidiMsg.c_str());
+		ImGui::TextWrapped("Midi: %s", mVDSession->getMidiMsg().c_str());
 		ImGui::TextWrapped("WS Msg: %s", mVDSession->getWSMsg().c_str());
 		ImGui::TextWrapped("OSC Msg: %s", mVDSession->getOSCMsg().c_str());
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->mErrorMsg.c_str());
@@ -189,6 +189,17 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 40
 		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 30.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
+		}
+		// audio preferred
+		ImGui::SameLine();
+		if (ImGui::Button("Mic In")) {
+			mVDSession->toggleUseLineIn();
+		}
+		// midi preferred
+		if (!mVDSession->isMidiSetup()) {
+			ImGui::SameLine();
+			sprintf(buf, "Midi");
+			if (ImGui::Button(buf)) mVDSession->setupMidiReceiver();
 		}
 
 		// mouse
@@ -265,7 +276,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
-		ImGui::SameLine();	
+		ImGui::SameLine();
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));

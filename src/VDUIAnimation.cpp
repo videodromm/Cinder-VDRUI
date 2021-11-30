@@ -188,11 +188,7 @@ void VDUIAnimation::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			//ImGui::Image((void*)mVDSession->getAudioTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-
 			//ImGui::SameLine();
-
-
-
 			// mic
 			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
@@ -356,6 +352,11 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			ImGui::SameLine();
 			ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
+
+			if (ImGui::Button("x##istartx")) {
+				setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
+				setFloatValue(mVDUniforms->ISTART, mVDSession->getUniformValue(mVDUniforms->ITIME)); 
+			}
 			ImGui::SameLine();
 			ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
 			/* 20211018 replaced by iSpeed
