@@ -477,6 +477,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
 		ImGui::SameLine();
 		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
+		ImGui::SameLine();
+		ImGui::Text(" Track %.0f", mVDSession->getUniformValue(mVDUniforms->ITRACK));
 
 		// line 3
 		/*ImGui::RadioButton("Warp", &currentWindowRow1, 0); ImGui::SameLine();
