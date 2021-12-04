@@ -27,7 +27,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mShowBlend = false;
 }
 
-void VDUI::Run(const char* title, unsigned int fps) {
+void VDUI::Run(const char* title, float fps) {
 	static int currentWindowRow1 = 1;
 	static int currentWindowRow2 = 0;
 
@@ -111,23 +111,38 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	ImGui::Begin("Messages");
 	{
 		if (ImGui::Button("Clear")) {
-			mVDSettings->mMsg = "";
+			mVDSettings->setMsg("");
+			mVDSettings->setErrorMsg("");
 			// TODO mVDSettings->mMidiMsg = ""; mVDSession->setmi("");
+
 			mVDSettings->mSocketIOMsg = "";
 			mVDSession->setOSCMsg("");
-			mVDSettings->mErrorMsg = "";
 			//mVDSettings->mShaderMsg = "";
 		}
 
-		ImGui::TextColored(ImColor(200, 200, 0), "Msg: %s", mVDSettings->mMsg.c_str());
+		ImGui::TextColored(ImColor(200, 200, 0), "Msg: %s", mVDSettings->getMsg().c_str());
+		int ec = mVDSession->getErrorCode();
+		if (ec > 0) {
+			switch (ec)
+			{
+			case 1:
+				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform max=0");
+				break;
+			case 2:
+				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform value out of bounds");
+				break;
+			default:
+				break;
+			}
+		}
 		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
 		ImGui::TextWrapped("Midi: %s", mVDSession->getMidiMsg().c_str());
 		ImGui::TextWrapped("WS Msg: %s", mVDSession->getWSMsg().c_str());
 		ImGui::TextWrapped("OSC Msg: %s", mVDSession->getOSCMsg().c_str());
-		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->mErrorMsg.c_str());
+		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->getErrorMsg().c_str());
 	}
 	ImGui::End();
-	ImGui::SetNextWindowSize(ImVec2(800, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(800.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
 	sprintf(buf, "Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
@@ -558,7 +573,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
 		ImGui::PushID("fbomixes");
-		for (int m = 0; m < mVDSession->getFboShaderListSize(); m++)//mVDSession->getModesCount()
+		for (unsigned int m = 0; m < mVDSession->getFboShaderListSize(); m++)//mVDSession->getModesCount()
 		{
 			if (m > 0) ImGui::SameLine();
 			/*if (mVDSession->getMode() == m) {
