@@ -27,7 +27,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mShowBlend = false;
 }
 
-void VDUI::Run(const char* title, float fps) {
+void VDUI::Run(const char* title, unsigned int fps) {
 	static int currentWindowRow1 = 1;
 	static int currentWindowRow2 = 0;
 
@@ -131,7 +131,11 @@ void VDUI::Run(const char* title, float fps) {
 			case 2:
 				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform value out of bounds");
 				break;
+			case 3:
+				ImGui::TextColored(ImColor(255, 0, 0), "Uniform value not set");
+				break;
 			default:
+				ImGui::TextColored(ImColor( 0, 255, 0), "Code:%d", ec);
 				break;
 			}
 		}

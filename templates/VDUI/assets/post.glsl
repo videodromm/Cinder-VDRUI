@@ -93,7 +93,7 @@ vec4 greyScale( vec4 colored )
 void main() {
 	vec2 uv = gl_FragCoord.xy / iResolution.xy;
 	// zoom centered
-	if ( iZoom < 1.0 )
+	if ( iZoom != 1.0 )
 	{
 	  float xZ = (uv.x - 0.5)*(1.0-iZoom)*2.0;
 	  float yZ = (uv.y - 0.5)*(1.0-iZoom)*2.0;
