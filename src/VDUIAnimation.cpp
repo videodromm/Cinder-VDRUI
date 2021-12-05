@@ -87,8 +87,8 @@ void VDUIAnimation::Run(const char* title) {
 				sprintf(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_MID); }
 				ImGui::SameLine();
-				sprintf(buf, "t##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_TREBLE); }
+				sprintf(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
+				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_SMOOTH); }
 				ImGui::SameLine();
 				sprintf(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {

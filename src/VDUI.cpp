@@ -483,6 +483,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
+		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
+		ImGui::SameLine();
 		ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
 		ImGui::SameLine();
 		ImGui::Text(" Delta Time %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
