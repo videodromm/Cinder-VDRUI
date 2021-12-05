@@ -83,6 +83,7 @@ namespace videodromm
 		float						color[4];
 		float						backcolor[4];
 		float						multx;
+		float						smooth;
 		bool						mouseGlobal;
 		int							ctrl;
 		float						contour, iVAmount, iVFallOff, iWeight0, iWeight1, iWeight2, iWeight3, iWeight4, iWeight5, iWeight6, iWeight7;

@@ -480,7 +480,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 		// windows
 		ImGui::Text(" Render window %dx%d", mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
-
+		// time
+		smooth = mVDSession->getUniformValue(mVDUniforms->ISMOOTH);
+		if (ImGui::SliderFloat("Smooth", &smooth, 0.001f, 0.02f)) {
+			mVDSession->setUniformValue(mVDUniforms->ISMOOTH, smooth);
+		}
+		ImGui::SameLine();
 		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
 		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
