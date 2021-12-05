@@ -71,6 +71,9 @@ void VDUIAnimation::Run(const char* title) {
 		}
 		if (ImGui::CollapsingHeader("Animation", true))
 		{
+			if (ImGui::Button("Reset")) {
+				mVDSession->resetAnim();
+			}
 			for (size_t iUniform = 5; iUniform < 29; iUniform++)
 			{
 				sprintf(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
