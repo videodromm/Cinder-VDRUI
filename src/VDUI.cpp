@@ -19,7 +19,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// imgui
 	mouseGlobal = false;
-	mouseZ = false;
+	//mouseZ = false;
 	mIsResizing = true;
 	mShowWarps = true;
 	mShowFbos = true;
@@ -179,9 +179,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			tempoValues_offset = (tempoValues_offset + 1) % tempoValues.size();
 		}
 
-		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) > 0.3) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) < 0.1) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
 		ImGui::PlotLines("T", &tempoValues.front(), (int)tempoValues.size(), tempoValues_offset, toString(int(mVDSession->getUniformValue(mVDUniforms->IBPM))).c_str(), 0.0f, 0.6f, ImVec2(0, 30));
-		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) > 0.3) ImGui::PopStyleColor();
+		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) < 0.1) ImGui::PopStyleColor();
 		ImGui::SameLine();
 
 
@@ -240,7 +240,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 
 		// mouse
-		mouseX = getFloatValue(mVDUniforms->IMOUSEX);
+		/*mouseX = getFloatValue(mVDUniforms->IMOUSEX);
 		if (ImGui::SliderFloat("MouseX", &mouseX, 0.0f, mVDParams->getFboWidth(), "%.4f", 3.0f))
 		{
 			setFloatValue(mVDUniforms->IMOUSEX, mouseX);
@@ -257,7 +257,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		{
 			setFloatValue(mVDUniforms->IMOUSEZ, !mouseZ);
 		}
-		ImGui::SameLine();
+		ImGui::SameLine();*/
 
 		/*mouseZ ^= ImGui::Button("mouse click");
 		if (mouseZ)
@@ -507,14 +507,14 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
 		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
-		ImGui::SameLine();
-		ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
+		//ImGui::SameLine();
+		//ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
 		ImGui::SameLine();
 		ImGui::Text(" Delta Time %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
 		// LiveOSC Obsolete ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
-		ImGui::SameLine();
+		//ImGui::SameLine();
 		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);
-		ImGui::Text(" Tempo %.2f", mVDSession->getUniformValue(mVDUniforms->IBPM));
+		//ImGui::Text(" Tempo %.2f", mVDSession->getUniformValue(mVDUniforms->IBPM));
 		ImGui::SameLine();
 		ImGui::Text(" Beat %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT));
 		ImGui::SameLine();

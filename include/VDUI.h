@@ -116,8 +116,8 @@ namespace videodromm
 			return mVDSession->getUniformValue(aCtrl);
 		};
 		// mouse
-		float						mouseX, mouseY;
-		bool						mouseZ;
+		//float						mouseX, mouseY;
+		//bool						mouseZ;
 		
 	};
 }
