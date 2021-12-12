@@ -50,27 +50,31 @@ void VDUIFbos::Run(const char* title) {
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getMsg(f).c_str());
 			}
-			sprintf(buf, "fbo##rdrtexuniform%d", f);
+			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
 			sprintf(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
-
+			ImGui::SameLine();
+			sprintf(buf, "audio##audio%d", f);
+			if (ImGui::Button(buf)) {
+				mVDSession->setFboTextureMode(f, 6);
+			}
 			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-
+			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
 			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
 				//ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				ImGui::Image(mVDSession->getFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				
+
 				ImGui::SameLine();
-				sprintf(buf, "%s", mVDSession->getFboInputTextureName(mVDSession->getFboInputTextureIndex(f)).c_str());
+				//sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());// only one for now mVDSession->getFboInputTextureIndex(f)
 				ImGui::TextColored(ImColor(220, 150, 0), buf);
 			}
-			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-
+			else {
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+			}
 
 #pragma region tex
 			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
@@ -182,7 +186,7 @@ void VDUIFbos::Run(const char* title) {
 					break;
 				case GL_SAMPLER_2D:
 					// sampler2d 35678 GL_SAMPLER_2D 0x8B5E
-					
+
 					texNameEndIndex = uName.find("tex");
 					if (texNameEndIndex != std::string::npos && texNameEndIndex != -1) {
 						// hydra fbo
@@ -200,7 +204,7 @@ void VDUIFbos::Run(const char* title) {
 						sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
 
 						float spd = (ctrl == mVDUniforms->IPIXELX || ctrl == mVDUniforms->IPIXELY) ? 1.0f : 0.001f;
-						
+
 						if (ImGui::DragFloat(buf, &localValues[ctrl], spd, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 						{
 							setValue(ctrl, f, localValues[ctrl]);
