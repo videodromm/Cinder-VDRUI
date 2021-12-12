@@ -167,28 +167,46 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Warp");
 
 		ImGui::SameLine();
+
+		// tempo
+		static ImVector<float> tempoValues; if (tempoValues.empty()) { tempoValues.resize(40); memset(&tempoValues.front(), 0, tempoValues.size() * sizeof(float)); }
+		static int tempoValues_offset = 0;
+		static float tRefresh_time = -1.0f + 1.0f / 20.0f;
+		if (ImGui::GetTime() > tRefresh_time)
+		{
+			tRefresh_time = ImGui::GetTime();
+			tempoValues[tempoValues_offset] = mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME);
+			tempoValues_offset = (tempoValues_offset + 1) % tempoValues.size();
+		}
+
+		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) > 0.3) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+		ImGui::PlotLines("T", &tempoValues.front(), (int)tempoValues.size(), tempoValues_offset, toString(int(mVDSession->getUniformValue(mVDUniforms->IBPM))).c_str(), 0.0f, 0.6f, ImVec2(0, 30));
+		if (mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME) > 0.3) ImGui::PopStyleColor();
+		ImGui::SameLine();
+
+
 		// fps
-		static ImVector<float> values; if (values.empty()) { values.resize(100); memset(&values.front(), 0, values.size() * sizeof(float)); }
-		static int values_offset = 0;
+		static ImVector<float> fpsValues; if (fpsValues.empty()) { fpsValues.resize(100); memset(&fpsValues.front(), 0, fpsValues.size() * sizeof(float)); }
+		static int fpsValues_offset = 0;
 		static float refresh_time = -1.0f + 1.0f / 6.0f;
 		if (ImGui::GetTime() > refresh_time)
 		{
 			refresh_time = ImGui::GetTime();
-			values[values_offset] = fps;
-			values_offset = (values_offset + 1) % values.size();
+			fpsValues[fpsValues_offset] = fps;
+			fpsValues_offset = (fpsValues_offset + 1) % fpsValues.size();
 		}
 		if (fps < 24.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
 		// TODO ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, mVDSession->getTargetFps(), ImVec2(0, 30));
 		//ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, 100.0f, ImVec2(0, 30));
 		sprintf(buf, "%d", fps);
-		ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
+		ImGui::PlotLines("F", &fpsValues.front(), (int)fpsValues.size(), fpsValues_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
 		if (fps < 24.0) ImGui::PopStyleColor();
 		// audio
 		ImGui::SameLine();
 		static ImVector<float> timeValues; if (timeValues.empty()) { timeValues.resize(40); memset(&timeValues.front(), 0, timeValues.size() * sizeof(float)); }
 		static int timeValues_offset = 0;
 		// audio maxVolume
-		static float tRefresh_time = -1.0f + 1.0f / 20.0f;
+		
 		if (ImGui::GetTime() > tRefresh_time)
 		{
 			tRefresh_time = ImGui::GetTime();
@@ -501,6 +519,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text(" Beat %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT));
 		ImGui::SameLine();
 		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
+		ImGui::SameLine();
+		ImGui::Text(" Start %.0f", mVDSession->getUniformValue(mVDUniforms->IBARSTART));
 		ImGui::SameLine();
 		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
 		ImGui::SameLine();

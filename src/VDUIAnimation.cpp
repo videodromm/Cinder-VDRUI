@@ -356,9 +356,10 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::SameLine();
 			ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
 
-			if (ImGui::Button("x##istartx")) {
+			if (ImGui::Button("0##istartx")) {
 				setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
-				setFloatValue(mVDUniforms->ISTART, mVDSession->getUniformValue(mVDUniforms->ITIME)); 
+				setFloatValue(mVDUniforms->ISTART, mVDSession->getUniformValue(mVDUniforms->ITIME));
+				setFloatValue(mVDUniforms->IBARSTART, mVDSession->getUniformValue(mVDUniforms->IBAR));
 			}
 			ImGui::SameLine();
 			ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
