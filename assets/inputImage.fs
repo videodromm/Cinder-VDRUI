@@ -54,20 +54,7 @@
 void main(void)
 {
     vec2 uv = gl_FragCoord.xy / RENDERSIZE.xy; 
-    // flip horizontally
-	if (iFlipH)
-	{
-		uv.x = 1.0 - uv.x;
-	}
-	// flip vertically
-	if (iFlipV)
-	{
-		uv.y = 1.0 - uv.y;
-	}
-	// rotate
-	//float rad = radians(360.0 * fract(iTime*iRotationSpeed));
-	//mat2 rotate = mat2(cos(rad),sin(rad),-sin(rad),cos(rad));
-	//uv = rotate * (uv - 0.5) + 0.5;
+    
     vec3 rgb = IMG_NORM_PIXEL(inputImage, uv).xyz;
     fragColor=vec4(rgb, 1.0);	
 }
