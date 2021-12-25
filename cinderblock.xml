@@ -26,6 +26,7 @@
 		<requires>fr.batchass.spout</requires>
 		<requires>mb.cinder.midi2</requires>
 		<requires>org.libcinder.HTTPS</requires>
+		<requires>org.libcinder.wmfvideo</requires>
 	</platform>
 </block>
 <template>templates/VDUI/template.xml</template>

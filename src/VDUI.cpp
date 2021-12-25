@@ -165,6 +165,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 		ImGui::Image((void*)mVDSession->buildRenderedWarpFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Warp");
+		ImGui::SameLine();
+		ImGui::Image((void*)mVDSession->buildFxFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fx");
 
 		ImGui::SameLine();
 
@@ -224,11 +227,11 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 40
-		if (ImGui::SliderFloat("AudioX", &multx, 0.01f, 30.0f)) {
+		if (ImGui::SliderFloat("AX", &multx, 0.01f, 20.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
-		// audio preferred
 		ImGui::SameLine();
+		// audio preferred
 		if (ImGui::Button("Mic In")) {
 			mVDSession->toggleUseLineIn();
 		}
