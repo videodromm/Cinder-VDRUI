@@ -115,9 +115,5 @@ namespace videodromm
 		float							getFloatValue(unsigned int aCtrl) {
 			return mVDSession->getUniformValue(aCtrl);
 		};
-		// mouse
-		//float						mouseX, mouseY;
-		//bool						mouseZ;
-		
 	};
 }
