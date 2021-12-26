@@ -24,7 +24,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
 {
 	// trixels https://www.shadertoy.com/view/4lj3Dm
 	vec4 rtn;
-
+	
     float height = iResolution.x/(1.01 - iTrixels)/90.0;
     float halfHeight = height*0.5;
     float halfBase = height/sqrt(3.0);
@@ -68,6 +68,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
         {
             vec2 screenPos = vec2(startX+x*halfBase,startY+y*halfHeight);
             vec2 uv1 = screenPos / iResolution.xy;
+			uv1.y = 1.0 - uv1.y;
 			blend += texture2D(tex, uv1);         
         }
     }
@@ -101,15 +102,15 @@ void main() {
 	  uv = uv+cZ;
 	}
 	// flip horizontally
-	if (iFlipH > 0.0)
+	/*if (iFlipH > 0.0)
 	{
 		uv.x = 1.0 - uv.x;
 	}
 	// flip vertically
 	if (iFlipV > 0.0)
-	{
+	{*/
 		uv.y = 1.0 - uv.y;
-	}
+	//}
 	if ( iPixelate < 1.0 )
 	{
 		vec2 divs = vec2(iResolution.x * iPixelate / iResolution.y*60.0, iPixelate*60.0);

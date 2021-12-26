@@ -244,7 +244,7 @@ void _TBOX_PREFIX_App::draw()
 		}
 	}
 	else {
-		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight(), false);
+		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight());
 		//gl::setMatricesWindow(mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
 		// textures needs updating
 		for (int t = 0; t < mVDSessionFacade->getInputTexturesCount(); t++) {

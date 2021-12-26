@@ -154,19 +154,16 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	{
 		// line 1
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		/*ImGui::Image((void*)mVDSession->getMixetteTexture(0)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Mixette");
-		ImGui::SameLine();*/
-		ImGui::Image((void*)mVDSession->buildRenderedMixetteTexture(0)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildRenderedMixetteTexture(0), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Mixette");
 		ImGui::SameLine();
-		ImGui::Image((void*)mVDSession->buildPostFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildPostFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Post");
 		ImGui::SameLine();
-		ImGui::Image((void*)mVDSession->buildRenderedWarpFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildRenderedWarpFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Warp");
 		ImGui::SameLine();
-		ImGui::Image((void*)mVDSession->buildFxFboTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildFxFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fx");
 
 		ImGui::SameLine();
@@ -540,40 +537,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::RadioButton("Hydra", &currentWindowRow1, 7); ImGui::SameLine();
 		ImGui::RadioButton("Midi", &currentWindowRow1, 8);*/
 
-		// modes
-		/*for (int m = 0; m < mVDSession->getModesCount(); m++) {
-			if (m > 0) ImGui::SameLine();
-			switch (m)
-			{
-			case 0:
-				ImGui::Image((void*)mVDSession->getMixetteTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 1:
-				ImGui::Image((void*)mVDSession->getMixTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 2:
-				ImGui::Image((void*)mVDSession->getRenderTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 3:
-				ImGui::Image((void*)mVDSession->getHydraTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 4:
-				ImGui::Image((void*)mVDSession->getFboTexture(0)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 5:
-				ImGui::Image((void*)mVDSession->getFboTexture(1)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 6:
-				ImGui::Image((void*)mVDSession->getFboTexture(2)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			case 7:
-				ImGui::Image((void*)mVDSession->getFboTexture(3)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			default:
-				ImGui::Image((void*)mVDSession->getMixetteTexture()->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				break;
-			}
-		}*/
+		
 		/*for (int m = 0; m < mVDSession->getModesCount(); m++) {
 			if (m > 0) ImGui::SameLine();
 			ctrl = mVDUniforms->IWEIGHT0 + m;
@@ -633,7 +597,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.6f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(m / 16.0f, 0.9f, 0.9f));
-			ImGui::Image((void*)mVDSession->buildFboRenderedTexture(m)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			ImGui::Image(mVDSession->buildFboRenderedTexture(m), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+
 			//string tooltip = mVDSession->getFboName(m) + " - " + mVDSession->getFboInputTextureName(m);
 			//sprintf(buf, "%s", tooltip.c_str());
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);

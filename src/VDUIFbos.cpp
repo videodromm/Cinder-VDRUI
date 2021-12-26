@@ -60,13 +60,10 @@ void VDUIFbos::Run(const char* title) {
 			if (ImGui::Button(buf)) {
 				mVDSession->setFboTextureMode(f, 6);
 			}
-			//if (mVDSession->getFboRenderedTexture(f)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
 			ImGui::TextColored(ImColor(220, 150, 0), buf);
-			//if (mVDSession->getFboInputTexture(f)) ImGui::Image((void*)mVDSession->getFboInputTexture(f)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
-				//ImGui::Image(mVDSession->buildFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				ImGui::Image(mVDSession->getFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				//sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());// only one for now mVDSession->getFboInputTextureIndex(f)
 			}

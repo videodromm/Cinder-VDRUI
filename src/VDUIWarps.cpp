@@ -95,11 +95,8 @@ void VDUIWarps::Run(const char* title) {
 				ImGui::PushID(w);
 				int fboa = mVDSession->getWarpAFboIndex(w);
 
-				//if (mVDSession->getFboRenderedTexture(fboa)) ImGui::Image((void*)mVDSession->getFboRenderedTexture(fboa)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				if (mVDSession->buildFboRenderedTexture(fboa)) ImGui::Image(mVDSession->buildFboRenderedTexture(fboa), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-
-				/*ImGui::Image((void*)mVDSession->getMixTexture(w)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->getWarpName(w).c_str());*/
+				//if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->getWarpName(w).c_str());
 				// loop on the fbos A
 				for (unsigned int a = 0; a < mVDSession->getFboShaderListSize(); a++) {
 					if (a > 0 && (a % 6 != 0)) ImGui::SameLine();
