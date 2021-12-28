@@ -53,26 +53,42 @@ void VDUIFbos::Run(const char* title) {
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
+
+			int hue = 0;
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 			sprintf(buf, "tex##rdrtexuniform%d", f);
-			mShowInputTexture ^= ImGui::Button(buf);
+			//mShowInputTexture ^= ImGui::Button(buf);
+			if (ImGui::Button(buf)) {
+				//mShowInputTexture = !mShowInputTexture;
+				mVDSession->setSelectedFbo(f);
+			}
+			ImGui::PopStyleColor(3);
+			hue++;
 			ImGui::SameLine();
+
+
 			sprintf(buf, "audio##audio%d", f);
 			if (ImGui::Button(buf)) {
 				mVDSession->setFboTextureMode(f, 6);
 			}
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
+			/*sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
 			ImGui::TextColored(ImColor(220, 150, 0), buf);
 			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
 				ImGui::Image(mVDSession->getFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				ImGui::Image(mVDSession->getFboInputTexture(f, 1), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				ImGui::Image(mVDSession->getFboInputTexture(f, 2), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+				ImGui::Image(mVDSession->getFboInputTexture(f, 3), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 				//sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());// only one for now mVDSession->getFboInputTextureIndex(f)
 			}
 			else {
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-			}
+			}*/
 
 #pragma region tex
-			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
+			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
 				if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
 				if (mVDSession->getFboInputTextureIndex(f) == t) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
@@ -147,7 +163,6 @@ void VDUIFbos::Run(const char* title) {
 
 
 			// uniforms
-			int hue = 0;
 			int channelIndex = 0;
 			int texNameEndIndex = 0;
 			for (auto u : mVDSession->getUniforms(f)) {
