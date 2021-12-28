@@ -71,7 +71,7 @@ void VDUIFbos::Run(const char* title) {
 
 			sprintf(buf, "audio##audio%d", f);
 			if (ImGui::Button(buf)) {
-				mVDSession->setFboTextureMode(f, 6);
+				mVDSession->setFboTextureAudioMode(f);
 			}
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			/*sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());

@@ -21,21 +21,20 @@ void VDUITextures::Run(const char* title) {
 	static bool rnd[64];
 	static bool anim[64];
 
+	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
+	yPos = mVDParams->getUIYPosRow3();
 	for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t), mVDParams->getUIYPosRow3()), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getPreviewHeight()), ImGuiSetCond_Once);
+
+		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		int hue = 0;
 		sprintf(buf, "%s##s%d", mVDSession->getInputTextureName(t).c_str(), t);
 		ImGui::Begin(buf, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings);
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			ImGui::PushID(t);
-			// 20211227 why? if (mVDSession->getInputTexture(t)) {
-				//ImGui::Image((void*)mVDSession->getInputTexture(t)->getId(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::Image(mVDSession->getInputTexture(t), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::Image(mVDSession->getFboInputTexture(mVDSession->getSelectedFbo(), t), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			//}
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 0.7);
+			ImGui::Image(mVDSession->getFboInputTexture(t), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			/* 20210108 TODO
 			if (mVDSession->isSequence(t) ) {
 				sprintf(buf, "p##s%d", t);
@@ -44,7 +43,7 @@ void VDUITextures::Run(const char* title) {
 					mVDSession->togglePlayPause(t);
 				}
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Play/Pause");
-			
+
 				ImGui::SameLine();
 				sprintf(buf, "b##sqs%d", t);
 				if (ImGui::Button(buf))
@@ -87,7 +86,7 @@ void VDUITextures::Run(const char* title) {
 
 
 			} // end seq
-			
+
 			ImGui::SameLine();
 			(rnd[t]) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 7.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 7.0f, 0.7f, 0.7f));
@@ -105,6 +104,15 @@ void VDUITextures::Run(const char* title) {
 			ImGui::PopItemWidth();
 		}
 		ImGui::End();
+		xPos += mVDParams->getUILargePreviewW() + mVDParams->getUIMargin();
+		//if (xPos > (mVDSettings->mRenderWidth - mVDSettings->uiLargePreviewW))
+		//ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() + mVDParams->getUIXPosCol1()
+		//	+ ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t), mVDParams->getUIYPosRow3()), ImGuiSetCond_Once);
+		if (t % 13 == 12)
+		{
+			xPos = mVDParams->getUIMargin();
+			yPos += mVDParams->getPreviewHeight() + 10.0f + mVDParams->getUIMargin();
+		}
 	}
 
 }
