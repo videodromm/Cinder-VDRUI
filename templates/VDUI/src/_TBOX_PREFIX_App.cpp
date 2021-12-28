@@ -96,7 +96,7 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mVDMix = VDMix::create(mVDSettings, mVDAnimation, mVDUniforms);
 	// Session
 	mVDSessionFacade = VDSessionFacade::createVDSession(mVDSettings, mVDAnimation, mVDUniforms, mVDMix)
-		->setMode(7)
+		->setDisplayMode(VDDisplayMode::POST)
 		->setupWSClient()
 		->wsConnect()
 		//->setupOSCReceiver()
@@ -250,16 +250,16 @@ void _TBOX_PREFIX_App::draw()
 		/*for (int t = 0; t < mVDSessionFacade->getInputTexturesCount(); t++) {
 			mVDSessionFacade->getInputTexture(t);
 		}*/
-		int m = mVDSessionFacade->getMode();
-		if (m == 8) {
+		int m = mVDSessionFacade->getDisplayMode();
+		if (m == VDDisplayMode::MIXETTE) {
 			gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0));
 			mSpoutOut.sendTexture(mVDSessionFacade->buildRenderedMixetteTexture(0));
 		}
-		else if (m == 7) {
+		else if (m == VDDisplayMode::POST) {
 			gl::draw(mVDSessionFacade->buildPostFboTexture());
 			mSpoutOut.sendTexture(mVDSessionFacade->buildPostFboTexture());
 		}
-		else if (m == 6) {
+		else if (m == VDDisplayMode::FX) {
 			gl::draw(mVDSessionFacade->buildFxFboTexture());
 			mSpoutOut.sendTexture(mVDSessionFacade->buildFxFboTexture());
 		}
