@@ -45,7 +45,7 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::PushID(f);
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			if (!mVDSession->isFboValid(f)) {
-				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getError(f).c_str());
+				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getFboError(f).c_str());
 			}
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getFboMsg(f).c_str());

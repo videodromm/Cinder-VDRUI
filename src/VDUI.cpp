@@ -486,6 +486,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
 		ImGui::SameLine();
 		ImGui::Text(" Track %.0f", mVDSession->getUniformValue(mVDUniforms->ITRACK));
+		ImGui::SameLine();
+		ImGui::Text(" ", mVDSession->getTrackName());
 
 		// line 3
 		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
