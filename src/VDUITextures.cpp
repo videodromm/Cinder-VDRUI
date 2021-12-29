@@ -25,7 +25,6 @@ void VDUITextures::Run(const char* title) {
 	yPos = mVDParams->getUIYPosRow3();
 	for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getPreviewHeight()), ImGuiSetCond_Once);
-
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		int hue = 0;
 		sprintf(buf, "%s##s%d", mVDSession->getInputTextureName(t).c_str(), t);
@@ -108,9 +107,9 @@ void VDUITextures::Run(const char* title) {
 		//if (xPos > (mVDSettings->mRenderWidth - mVDSettings->uiLargePreviewW))
 		//ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() + mVDParams->getUIXPosCol1()
 		//	+ ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t), mVDParams->getUIYPosRow3()), ImGuiSetCond_Once);
-		if (t % 13 == 12)
+		if (t % 8 == 7)
 		{
-			xPos = mVDParams->getUIMargin();
+			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 			yPos += mVDParams->getPreviewHeight() + 10.0f + mVDParams->getUIMargin();
 		}
 	}
