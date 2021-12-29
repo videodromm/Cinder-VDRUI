@@ -491,7 +491,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
 			if (m > 0) ImGui::SameLine();
 			sprintf(buf, "%s##mode", mVDSession->getModeName(m).c_str());
-			if (mVDSession->getDisplayMode() == m) {
+			if (mVDSession->getUniformValue(mVDUniforms->IDISPLAYMODE) == m) {
 				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
 			}
 			else {
@@ -499,7 +499,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			}
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
-			if (ImGui::Button(buf)) mVDSession->setDisplayMode(m);
+			if (ImGui::Button(buf)) mVDSession->setUniformValue(mVDUniforms->IDISPLAYMODE, m);
 			sprintf(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 			ImGui::PopStyleColor(3);
