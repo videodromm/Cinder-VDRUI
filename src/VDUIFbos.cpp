@@ -48,7 +48,7 @@ void VDUIFbos::Run(const char* title) {
 				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getError(f).c_str());
 			}
 			else {
-				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getMsg(f).c_str());
+				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getFboMsg(f).c_str());
 			}
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
@@ -300,8 +300,6 @@ void VDUIFbos::Run(const char* title) {
 				}
 
 			} //for uniforms
-
-
 
 			float fw = mVDSession->getFboTextureWidth(f);
 			sprintf(buf, "tw %.0f", fw);
