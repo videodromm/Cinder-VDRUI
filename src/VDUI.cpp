@@ -196,8 +196,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			fpsValues_offset = (fpsValues_offset + 1) % fpsValues.size();
 		}
 		if (fps < 24.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
-		// TODO ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, mVDSession->getTargetFps(), ImVec2(0, 30));
-		//ImGui::PlotLines("F", &values.front(), (int)values.size(), values_offset, mVDSettings->sFps.c_str(), 0.0f, 100.0f, ImVec2(0, 30));
 		sprintf(buf, "%d", fps);
 		ImGui::PlotLines("F", &fpsValues.front(), (int)fpsValues.size(), fpsValues_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
 		if (fps < 24.0) ImGui::PopStyleColor();
@@ -236,7 +234,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (!mVDSession->isMidiSetup()) {
 			ImGui::SameLine();
 			sprintf(buf, "Midi");
-			if (ImGui::Button(buf)) mVDSession->setupMidiReceiver();
+			if (ImGui::Button(buf)) mVDSession->setupMidi();
 		}
 
 		int hue = 0;

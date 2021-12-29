@@ -267,7 +267,7 @@ void VDUIAnimation::Run(const char* title) {
 		if (ImGui::CollapsingHeader("Midi", NULL, true))
 		{
 			sprintf(buf, "Enable");
-			if (ImGui::Button(buf)) mVDSession->setupMidiReceiver();
+			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			if (mVDSession->isMidiSetup()) {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
 				ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
