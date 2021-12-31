@@ -76,31 +76,31 @@ void VDUIAnimation::Run(const char* title) {
 			}
 			for (size_t iUniform = 5; iUniform < 29; iUniform++)
 			{
-				sprintf(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME);
 				}
 				ImGui::SameLine();
-				sprintf(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
 				ImGui::SameLine();
-				sprintf(buf, "b##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "b##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_BASS); }
 				ImGui::SameLine();
-				sprintf(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_MID); }
 				ImGui::SameLine();
-				sprintf(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_SMOOTH); }
 				ImGui::SameLine();
-				sprintf(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
 					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
 				}
 				ImGui::SameLine();
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
-				sprintf(buf, "%d %s", iUniform, mVDSession->getUniformName(iUniform).c_str());
+				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
 				if (iUniform>22) {
 					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 					{
@@ -154,7 +154,7 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, iBarBeat);
 			}
-			/*sprintf(buf, "XorY");
+			/*sprintf_s(buf, "XorY");
 			mVDSettings->iXorY ^= ImGui::Button(buf);*/
 
 			// steps
@@ -236,27 +236,27 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::TextColored(ImColor(0, 255, 0), "Max %.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
 			
 			static int iFreq0 = mVDSession->getFreqIndex(0);
-			sprintf(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
+			sprintf_s(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
 			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(0, iFreq0);
 			}
 			static int iFreq1 = mVDSession->getFreqIndex(1);
-			sprintf(buf, "f1 %4.2f##f1", mVDSession->getFreq(1));
+			sprintf_s(buf, "f1 %4.2f##f1", mVDSession->getFreq(1));
 			if (ImGui::SliderInt(buf, &iFreq1, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(1, iFreq1);
 			}
 
 			static int iFreq2 = mVDSession->getFreqIndex(2);
-			sprintf(buf, "f2 %4.2f##f2", mVDSession->getFreq(2));
+			sprintf_s(buf, "f2 %4.2f##f2", mVDSession->getFreq(2));
 			if (ImGui::SliderInt(buf, &iFreq2, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(2, iFreq2);
 			}
 
 			static int iFreq3 = mVDSession->getFreqIndex(3);
-			sprintf(buf, "f3 %4.2f##f3", mVDSession->getFreq(3));
+			sprintf_s(buf, "f3 %4.2f##f3", mVDSession->getFreq(3));
 			if (ImGui::SliderInt(buf, &iFreq3, 0, mVDSession->getFFTWindowSize()))
 			{
 				mVDSession->setFreqIndex(3, iFreq3);
@@ -266,7 +266,7 @@ void VDUIAnimation::Run(const char* title) {
 
 		if (ImGui::CollapsingHeader("Midi", NULL, true))
 		{
-			sprintf(buf, "Enable");
+			sprintf_s(buf, "Enable");
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			if (mVDSession->isMidiSetup()) {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
@@ -284,11 +284,11 @@ void VDUIAnimation::Run(const char* title) {
 
 							if (mVDSession->isMidiInConnected(i))
 							{
-								sprintf(buf, "Disconnect %d", i);
+								sprintf_s(buf, "Disconnect %d", i);
 							}
 							else
 							{
-								sprintf(buf, "Connect %d", i);
+								sprintf_s(buf, "Connect %d", i);
 							}
 
 							if (ImGui::Button(buf))
@@ -321,11 +321,11 @@ void VDUIAnimation::Run(const char* title) {
 
 						if (mVDSession->isMidiOutConnected(i))
 						{
-							sprintf(buf, "Disconnect  %d", i);
+							sprintf_s(buf, "Disconnect  %d", i);
 						}
 						else
 						{
-							sprintf(buf, "Connect  %d", i);
+							sprintf_s(buf, "Connect  %d", i);
 						}
 
 						if (ImGui::Button(buf))
@@ -518,26 +518,26 @@ void VDUIAnimation::Run(const char* title) {
 			hue++;
 			// mRenderXY
 			static float mx = mVDSettings->mRenderXY.x;
-			if (ImGui::SliderFloat("mx", &mx, 0.01, 1.0))
+			if (ImGui::SliderFloat("mx", &mx, 0.01f, 1.0f))
 			{
 				mVDSettings->mRenderXY.x = mx;
 			}
 			ImGui::SameLine();
 			static float my = mVDSettings->mRenderXY.y;
-			if (ImGui::SliderFloat("my", &my, 0.01, 1.0))
+			if (ImGui::SliderFloat("my", &my, 0.01f, 1.0f))
 			{
 				mVDSettings->mRenderXY.y = my;
 			}
 
 			// mRenderXY
 			static float texMultW = mVDSettings->mTexMult.x;
-			if (ImGui::SliderFloat("texWx", &texMultW, 0.2, 4.0))
+			if (ImGui::SliderFloat("texWx", &texMultW, 0.2f, 4.0f))
 			{
 				mVDSettings->mTexMult.x = texMultW;
 			}
 			ImGui::SameLine();
 			static float texMultH = mVDSettings->mTexMult.y;
-			if (ImGui::SliderFloat("texHx", &texMultH, 0.2, 4.0))
+			if (ImGui::SliderFloat("texHx", &texMultH, 0.2f, 4.0f))
 			{
 				mVDSettings->mTexMult.x = texMultH;
 			}
@@ -572,8 +572,8 @@ void VDUIAnimation::Run(const char* title) {
 			const char* blendModes[] = { "mix", "multiply", "colorBurn", "linearBurn", "darkerColor", "lighten", "screen", "colorDodge", "linearDodge", "lighterColor", "overlay", "softLight", "hardLight", "vividLight", "linearLight", "pinLight", "hardMix", "difference", "exclusion", "subtract", "divide", "hue", "color", "saturation", "luminosity", "darken", "left", "right" };
 
 			ctrl = mVDUniforms->IBLENDMODE;
-			iBlendmode = mVDSession->getUniformValue(ctrl);
-			sprintf(buf, "Blendmode %s##ibl", blendModes[iBlendmode]);
+			iBlendmode = (int)mVDSession->getUniformValue(ctrl);
+			sprintf_s(buf, "Blendmode %s##ibl", blendModes[iBlendmode]);
 			if (ImGui::SliderInt(buf, &iBlendmode, 0, 25))
 			{
 				setFloatValue(ctrl, (float)iBlendmode);

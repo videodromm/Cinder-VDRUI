@@ -50,6 +50,7 @@ void VDUIFbos::Run(const char* title) {
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getFboMsg(f).c_str());
 			}
+			ImGui::TextColored(ImColor(155, 0, 255), "%s", mVDSession->getFboStatus(f).c_str());
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
