@@ -117,7 +117,7 @@ void VDUITextures::Run(const char* title) {
 		if (t % 14 == 13)
 		{
 			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
-			yPos += mVDParams->getPreviewHeight() + mVDParams->getUIMargin();
+			yPos -= mVDParams->getPreviewHeight() + mVDParams->getUIMargin();
 		}
 	}
 

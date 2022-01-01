@@ -58,6 +58,7 @@ namespace videodromm
 			rtn = mVDSession->getUniformValue(aCtrl);
 			return rtn;
 		};
+		
 		void							setValue(unsigned int aCtrl, unsigned int aFboIndex, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);
 		};

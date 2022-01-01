@@ -104,9 +104,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 	*/
 #pragma endregion menu
+	// right panel
 	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
-
 
 	ImGui::Begin("Messages");
 	{
@@ -146,7 +146,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->getErrorMsg().c_str());
 	}
 	ImGui::End();
-	ImGui::SetNextWindowSize(ImVec2(800.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	// Center panel
+	ImGui::SetNextWindowSize(ImVec2(800.0f, mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
 	sprintf(buf, "Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
@@ -506,7 +507,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PopStyleColor(3);
 		}
 
-
+/*
 		const float spacing = 4;
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(spacing, spacing));
 
@@ -514,22 +515,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		for (unsigned int m = 0; m < mVDSession->getFboShaderListSize(); m++)
 		{
 			if (m > 0) ImGui::SameLine();
-			/*if (mVDSession->getMode() == m) {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
-			}
-			else {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 0.1f, 0.1f));
-			}
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
-			sprintf(buf, "%s##mode", mVDSession->getModeName(m).c_str());
-			if (ImGui::Button(buf)) mVDSession->setMode(m);
-			sprintf(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-			ImGui::PopStyleColor(3);
-			ImGui::SameLine();*/
 			ctrl = mVDUniforms->IWEIGHT0 + m;
-			//ctrl = math<int>::min(mVDUniforms->IWEIGHT8, mVDUniforms->IWEIGHT0 + m);
 			float iWeight = mVDSession->getUniformValue(ctrl);
 			ImGui::PushID(m);
 
@@ -538,10 +524,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(m / 16.0f, 0.9f, 0.9f));
 			ImGui::Image(mVDSession->buildFboRenderedTexture(m), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-
-			//string tooltip = mVDSession->getFboName(m) + " - " + mVDSession->getFboInputTextureName(m);
-			//sprintf(buf, "%s", tooltip.c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))
@@ -552,14 +534,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 				ImGui::SetTooltip("%.3f", iWeight);
 			ImGui::PopStyleColor(4);
 			ImGui::PopID();
-			//ImGui::SameLine();
-			//ImGui::TextColored(ImColor(255, 150, 0), "%d - %s", mVDSession->getMode(), mVDSession->getModeName(m).c_str());
 		}
 		ImGui::PopID();
-		ImGui::PopStyleVar();
-
-		//ImGui::Indent();
-
+		ImGui::PopStyleVar();*/
 
 		ImGui::PopItemWidth();
 	}

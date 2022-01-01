@@ -103,9 +103,9 @@ namespace videodromm
 		void mToggleShowBlend() {
 			mShowBlend = !mShowBlend;
 		}
-		void setFloatValue(unsigned int aCtrl, float aValue) {
+		/*void setFloatValue(unsigned int aCtrl, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);
-		}
+		}*/
 		float getMinUniformValue(unsigned int aIndex) {
 			return mVDSession->getMinUniformValue(aIndex);
 		}
