@@ -445,10 +445,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::Button("FlipPostH")) {
 			toggleValue(ctrl);
 		}
-		ImGui::PopStyleColor(3);*/
+		ImGui::PopStyleColor(3);
 
 		ImGui::Text(" Fp %dx%d F %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
-		ImGui::SameLine();
+		ImGui::SameLine();*/
 		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows

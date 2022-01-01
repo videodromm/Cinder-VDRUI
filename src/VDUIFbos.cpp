@@ -89,11 +89,10 @@ void VDUIFbos::Run(const char* title) {
 				setValue(ctrl, f, iWeight);
 			};
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to audio");
-			ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
-			//ImGui::SameLine();
-			//ImGui::TextColored(ImColor(255, 0, 0), "%d", mVDSession->getFboInputTextureIndex(f), mVDSession->getFboMsTotal(f));
+			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
+			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
 			ImGui::SameLine();
-			ImGui::TextColored(ImColor(155, 0, 255), "%s", mVDSession->getFboStatus(f).c_str());
+			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
 			/*for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
