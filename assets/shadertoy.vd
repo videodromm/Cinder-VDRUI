@@ -15,6 +15,13 @@ uniform sampler2D   iChannel5;
 uniform sampler2D   iChannel6;
 uniform sampler2D   iChannel7;
 uniform sampler2D   iChannel8;
+uniform sampler2D   iChannel9;
+uniform sampler2D   iChannel10;
+uniform sampler2D   iChannel11;
+uniform sampler2D   iChannel12;
+uniform sampler2D   iChannel13;
+uniform sampler2D   iChannel14;
+uniform sampler2D   iChannel15;
 uniform sampler1D   texFFT;
 uniform sampler1D   texFFTSmoothed;
 uniform sampler1D   texFFTIntegrated;
@@ -33,6 +40,13 @@ uniform float       iWeight5;
 uniform float       iWeight6;
 uniform float       iWeight7;
 uniform float       iWeight8;
+uniform float       iWeight9;
+uniform float       iWeight10;
+uniform float       iWeight11;
+uniform float       iWeight12;
+uniform float       iWeight13;
+uniform float       iWeight14;
+uniform float       iWeight15;
 uniform vec4      	iDate; 				// (year, month, day, time in seconds)
 // videodromm
 uniform vec3        iBackgroundColor;   // background color

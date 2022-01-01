@@ -21,7 +21,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mouseGlobal = false;
 	//mouseZ = false;
 	mIsResizing = true;
-	mShowWarps = true;
+	mShowWarps = false;
 	mShowFbos = true;
 	mShowTextures = false;
 	mShowBlend = false;
@@ -400,7 +400,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(3);
 		hue++;
 		ImGui::SameLine();
-
+		/*
 		// iflipv
 		ctrl = mVDUniforms->IFLIPV;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
@@ -444,7 +444,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::Button("FlipPostH")) {
 			toggleValue(ctrl);
 		}
-		ImGui::PopStyleColor(3);
+		ImGui::PopStyleColor(3);*/
 
 		ImGui::Text(" Fp %dx%d F %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
 		ImGui::SameLine();

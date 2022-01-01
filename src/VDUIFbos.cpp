@@ -45,12 +45,12 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::PushID(f);
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			if (!mVDSession->isFboValid(f)) {
-				ImGui::TextColored(ImColor(255, 0, 0), "Invalid: %s", mVDSession->getFboError(f).c_str());
+				ImGui::TextColored(ImColor(255, 0, 0), "err: %s", mVDSession->getFboError(f).c_str());
 			}
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getFboMsg(f).c_str());
 			}
-			ImGui::TextColored(ImColor(155, 0, 255), "%s", mVDSession->getFboStatus(f).c_str());
+			
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
@@ -75,21 +75,16 @@ void VDUIFbos::Run(const char* title) {
 				mVDSession->setFboTextureAudioMode(f);
 			}
 			if (mVDSession->buildFboRenderedTexture(f) && mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			/*sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());
-			ImGui::TextColored(ImColor(220, 150, 0), buf);
-			if (mVDSession->buildFboInputTexture(f) && mShowInputTexture) {
-				ImGui::Image(mVDSession->getFboInputTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::Image(mVDSession->getFboInputTexture(f, 1), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::Image(mVDSession->getFboInputTexture(f, 2), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				ImGui::Image(mVDSession->getFboInputTexture(f, 3), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-				//sprintf(buf, "%s", mVDSession->getFboInputTextureName(f).c_str());// only one for now mVDSession->getFboInputTextureIndex(f)
-			}
-			else {
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-			}*/
+			
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to audio");
+			ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
+			ImGui::SameLine();
+			ImGui::TextColored(ImColor(255, 0, 0), "%d", mVDSession->getFboInputTextureIndex(f), mVDSession->getFboMsTotal(f));
+			ImGui::SameLine();
+			ImGui::TextColored(ImColor(155, 0, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
-			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
+			/*for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
 				if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
 				if (mVDSession->getFboInputTextureIndex(f) == t) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
@@ -103,7 +98,7 @@ void VDUIFbos::Run(const char* title) {
 				sprintf(buf, "Set input texture to %s", mVDSession->getInputTextureName(t).c_str());
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 				ImGui::PopStyleColor(1);
-			}
+			}*/
 
 
 			/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
@@ -205,8 +200,8 @@ void VDUIFbos::Run(const char* title) {
 						channelIndex++;
 						ImGui::SameLine();
 					}
-					sprintf(buf, "%s", uName.c_str());
-					ImGui::TextColored(ImColor(220, 150, 0), buf);
+					//sprintf(buf, "%s", uName.c_str());
+					//ImGui::TextColored(ImColor(220, 150, 0), buf);
 					break;
 				case GL_FLOAT:
 					// float 5126 GL_FLOAT 0x1406
@@ -241,37 +236,29 @@ void VDUIFbos::Run(const char* title) {
 					break;
 				case GL_FLOAT_VEC2:
 					// vec2 35664		
-					if (uName == "RENDERSIZE" || uName == "resolution") {
+					/*if (uName == "RENDERSIZE" || uName == "resolution") {
 						float fw = mVDSession->buildFboRenderedTexture(f)->getWidth();
-						//ctrl = mVDSession->getUniformIndexForName("iResolutionX");
-						//localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-						//sprintf(buf, "rw %.0f##v2x%d", localValues[ctrl], f);
-						sprintf(buf, "rw %.0f", fw);
-						//ImGui::Button(buf);
+						sprintf(buf, "rw %.0f", fw);						
 						ImGui::TextColored(ImColor(100, 100, 100), buf);
 						ImGui::SameLine();
-						float fh = mVDSession->buildFboRenderedTexture(f)->getHeight();
-						//ctrl = mVDSession->getUniformIndexForName("iResolutionY");
-						//localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-						//sprintf(buf, "rh %.0f##v2y%d", localValues[ctrl], f);
+						float fh = mVDSession->buildFboRenderedTexture(f)->getHeight();				
 						sprintf(buf, "rh %.0f", fh);
-						ImGui::TextColored(ImColor(100, 100, 100), buf);
-						//ImGui::Button(buf);
+						ImGui::TextColored(ImColor(100, 100, 100), buf);					
 					}
 					else {
 						sprintf(buf, "vec2 %s", uName.c_str(), f);
 						ImGui::TextColored(ImColor(150, 220, 0), buf);
-					}
+					}*/
 					break;
 				case GL_FLOAT_VEC3:
 					// vec3 35665
-					sprintf(buf, "vec3 %s", uName.c_str(), f);
-					ImGui::TextColored(ImColor(100, 100, 0), buf);
+					//sprintf(buf, "vec3 %s", uName.c_str(), f);
+					//ImGui::TextColored(ImColor(100, 100, 0), buf);
 
 					break;
 				case GL_FLOAT_VEC4:
 					// vec4 35666 GL_FLOAT_VEC4
-					sprintf(buf, "vec4 %s %d", uName.c_str(), u.getType());
+					/*sprintf(buf, "vec4 %s %d", uName.c_str(), u.getType());
 					ImGui::TextColored(ImColor(100, 100, 100), buf);
 					if (ctrl == mVDUniforms->IMOUSE) {
 						mouseX = getValue(mVDUniforms->IMOUSEX, f);
@@ -284,7 +271,7 @@ void VDUIFbos::Run(const char* title) {
 						{
 							setValue(mVDUniforms->IMOUSEY, mouseY, f);
 						}
-					}
+					}*/
 					break;
 				default:
 					//ciModelViewProjection 35676 GL_FLOAT_MAT4 0x8B5C
@@ -302,13 +289,13 @@ void VDUIFbos::Run(const char* title) {
 
 			} //for uniforms
 
-			float fw = mVDSession->getFboTextureWidth(f);
+			/*float fw = mVDSession->getFboTextureWidth(f);
 			sprintf(buf, "tw %.0f", fw);
 			ImGui::TextColored(ImColor(120, 120, 120), buf);
 			ImGui::SameLine();
 			float fh = mVDSession->getFboTextureHeight(f);
 			sprintf(buf, "th %.0f", fh);
-			ImGui::TextColored(ImColor(120, 120, 120), buf);
+			ImGui::TextColored(ImColor(120, 120, 120), buf);*/
 
 			ImGui::PopItemWidth();
 			ImGui::PopID();

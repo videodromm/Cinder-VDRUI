@@ -14,26 +14,33 @@ VDUITextures::~VDUITextures() {
 
 void VDUITextures::Run(const char* title) {
 
-	static int XLeft[64];
+	/*static int XLeft[64];
 	static int YTop[64];
 	static int XRight[64];
 	static int YBottom[64];
 	static bool rnd[64];
-	static bool anim[64];
+	static bool anim[64];*/
 
 	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 	yPos = mVDParams->getUIYPosRow3();
 	for (int t = 0; t < mVDSession->getInputTexturesCount(); t++) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getPreviewHeight()), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW(), mVDParams->getPreviewHeight()), ImGuiSetCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
 		int hue = 0;
+		unsigned int ms = mVDSession->getFboMs(t);
 		sprintf(buf, "%s##s%d", mVDSession->getInputTextureName(t).c_str(), t);
 		ImGui::Begin(buf, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings);
 		{
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW());
 			ImGui::PushID(t);
-			ImGui::Image(mVDSession->getFboInputTexture(t), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::Image(mVDSession->getFboInputTexture(t), ivec2(mVDParams->getUISmallPreviewW(), mVDParams->getUISmallPreviewH()));
+			
+			if (ms > 30) {
+				ImGui::TextColored(ImColor(255, 0, 0), "%d", ms);
+			}
+			else {
+				ImGui::TextColored(ImColor(155, 155, 0), "%d", ms);
+			}
 			/* 20210108 TODO
 			if (mVDSession->isSequence(t) ) {
 				sprintf(buf, "p##s%d", t);
@@ -98,19 +105,19 @@ void VDUITextures::Run(const char* title) {
 
 			//}
 		//}
-			ImGui::PopItemWidth();
+
 			ImGui::PopID();
 			ImGui::PopItemWidth();
 		}
 		ImGui::End();
-		xPos += mVDParams->getUILargePreviewW() + mVDParams->getUIMargin();
+		xPos += mVDParams->getUISmallPreviewW() + 6 * mVDParams->getUIMargin();
 		//if (xPos > (mVDSettings->mRenderWidth - mVDSettings->uiLargePreviewW))
 		//ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() + mVDParams->getUIXPosCol1()
 		//	+ ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * t), mVDParams->getUIYPosRow3()), ImGuiSetCond_Once);
-		if (t % 8 == 7)
+		if (t % 14 == 13)
 		{
 			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
-			yPos += mVDParams->getPreviewHeight() + 10.0f + mVDParams->getUIMargin();
+			yPos += mVDParams->getPreviewHeight() + mVDParams->getUIMargin();
 		}
 	}
 
