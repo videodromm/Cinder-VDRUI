@@ -105,12 +105,12 @@ void main() {
 	/*if (iFlipH > 0.0)
 	{
 		uv.x = 1.0 - uv.x;
-	}
+	}*/
 	// flip vertically
-	if (iFlipV > 0.0)
-	{*/
+	if (iFlipV == 0.0)
+	{
 		uv.y = 1.0 - uv.y;
-	//}
+	}
 	if ( iPixelate < 1.0 )
 	{
 		vec2 divs = vec2(iResolution.x * iPixelate / iResolution.y*60.0, iPixelate*60.0);

@@ -426,7 +426,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(3);
 		hue++;
 		ImGui::SameLine();
-
+		*/
 		// post flip		
 		ctrl = mVDUniforms->IFLIPPOSTV;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
@@ -437,8 +437,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
+		/*
 		ImGui::SameLine();
-
 		ctrl = mVDUniforms->IFLIPPOSTH;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
