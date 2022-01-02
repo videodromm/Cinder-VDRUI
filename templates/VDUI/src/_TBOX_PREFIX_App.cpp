@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013-2021, Bruce Lane - All rights reserved.
+ Copyright (c) 2013-2022, Bruce Lane - All rights reserved.
  This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Using Cinder-Warping from Paul Houx.
@@ -28,8 +28,6 @@
 #include "VDSessionFacade.h"
 // Spout
 #include "CiSpoutOut.h"
-// Video
-//#include "ciWMFVideoPlayer.h"
 // Uniforms
 #include "VDUniforms.h"
 // Params
@@ -106,13 +104,10 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 		->toggleUI()
 		->setUniformValue(mVDUniforms->IBPM, 160.0f)
 		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f)
-		->toggleValue(mVDUniforms->IFLIPV);
+		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f);
 
-	// sos only mVDSessionFacade->setUniformValue(mVDSettings->IEXPOSURE, 1.93f);
 	mFadeInDelay = true;
 	// UI
-	
 	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade, mVDUniforms);
 }
 
@@ -191,11 +186,7 @@ void _TBOX_PREFIX_App::keyUp(KeyEvent event)
 
 	// let your application perform its keyUp handling here
 	if (!mVDSessionFacade->handleKeyUp(event)) {
-		/*switch (event.getCode()) {
-		default:
-			CI_LOG_V("main keyup: " + toString(event.getCode()));
-			break;
-		}*/
+		
 	}
 }
 void _TBOX_PREFIX_App::cleanup()
@@ -209,17 +200,8 @@ void _TBOX_PREFIX_App::cleanup()
 
 void _TBOX_PREFIX_App::update()
 {
-	/*switch (mVDSessionFacade->getCmd()) {
-	case 0:
-		//createControlWindow();
-		break;
-	case 1:
-		//deleteControlWindows();
-		break;
-	}*/
 	mVDSessionFacade->setUniformValue(mVDUniforms->IFPS, getAverageFps());
 	mVDSessionFacade->update();
-
 }
 
 
@@ -241,12 +223,8 @@ void _TBOX_PREFIX_App::draw()
 	}
 	else {
 		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight());
-		//gl::setMatricesWindow(mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTW), mVDSessionFacade->getIntUniformValueByIndex(mVDSettings->IOUTH), true);
-		// textures needs updating ?
-		/*for (int t = 0; t < mVDSessionFacade->getInputTexturesCount(); t++) {
-			mVDSessionFacade->getInputTexture(t);
-		}*/
-		int m = mVDSessionFacade->getDisplayMode();
+		
+		int m = mVDSessionFacade->getUniformValue(mVDUniforms->IDISPLAYMODE);
 		if (m == VDDisplayMode::MIXETTE) {
 			gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0));
 			mSpoutOut.sendTexture(mVDSessionFacade->buildRenderedMixetteTexture(0));

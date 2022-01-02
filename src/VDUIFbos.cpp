@@ -44,8 +44,8 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));
 
-		sprintf(buf, "%s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
-		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings);
+		sprintf(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
+		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
 			ImGui::PushID(f);
 			ctrl = mVDUniforms->IWEIGHT0 + f;
@@ -77,20 +77,19 @@ void VDUIFbos::Run(const char* title) {
 			hue++;
 			ImGui::SameLine();
 
-
 			sprintf(buf, "audio##audio%d", f);
 			if (ImGui::Button(buf)) {
 				mVDSession->setFboTextureAudioMode(f);
 			}//mVDSession->buildFboRenderedTexture(f) && 
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to audio");
 			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setValue(ctrl, f, iWeight);
 			};
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to audio");
 			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
-			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
+			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMsTotal(f));
 			ImGui::SameLine();
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 

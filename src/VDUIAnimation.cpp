@@ -33,7 +33,7 @@ void VDUIAnimation::Run(const char* title) {
 	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 	int hue = 0;
-	ImGui::Begin("Animation", NULL, ImGuiWindowFlags_NoSavedSettings);
+	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		if (ImGui::CollapsingHeader("Color", true))

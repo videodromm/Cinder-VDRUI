@@ -51,7 +51,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		style.FrameRounding = 6;
 		style.ItemSpacing = ImVec2(3, 3);
 		style.ItemInnerSpacing = ImVec2(3, 3);
-		style.WindowMinSize = ImVec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight());
+		//style.WindowMinSize = ImVec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight());
+		style.WindowMinSize = ImVec2(mVDParams->getUISmallPreviewW(), mVDParams->getUISmallPreviewH());
 		style.Alpha = 0.65f;
 
 		style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
@@ -108,7 +109,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
-	ImGui::Begin("Messages");
+	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		if (ImGui::Button("Clear")) {
 			mVDSettings->setMsg("");
@@ -150,8 +151,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	ImGui::SetNextWindowSize(ImVec2(800.0f, mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
-	sprintf(buf, "Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
-	ImGui::Begin(buf);
+	sprintf(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
+	ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		// line 1
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
