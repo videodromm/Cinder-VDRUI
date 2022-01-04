@@ -101,7 +101,7 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (iUniform>22) {
+				if (iUniform>24) {
 					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 					{
 						setFloatValue(iUniform, localValues[iUniform]);
