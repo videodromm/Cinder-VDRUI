@@ -76,6 +76,7 @@ uniform float     	iTimeFactor;
 uniform float     	iRotationSpeed;
 uniform float     	iPixelX;
 uniform float     	iPixelY;
+uniform float     	iFactor;
 uniform bool		iDebug;
 uniform sampler2D 	inputImage;
 out vec4 fragColor;
