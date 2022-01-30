@@ -83,7 +83,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.3f));
 				}
 				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
@@ -97,7 +97,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
 				}
 				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
@@ -109,7 +109,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
 				}
 				sprintf_s(buf, "b##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_BASS); }
@@ -121,7 +121,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
 				}
 				sprintf_s(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_MID); }
@@ -133,7 +133,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
 				}
 				sprintf_s(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_SMOOTH); }
@@ -145,7 +145,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
 				}
 				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
 				}
 				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
