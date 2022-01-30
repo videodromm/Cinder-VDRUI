@@ -69,6 +69,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopItemWidth();
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		}
+		
 		if (ImGui::CollapsingHeader("Animation", true))
 		{
 			if (ImGui::Button("Reset")) {
@@ -76,35 +77,100 @@ void VDUIAnimation::Run(const char* title) {
 			}
 			for (size_t iUniform = 5; iUniform < 29; iUniform++)
 			{
+				int hue = 0;
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_TIME) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME);
 				}
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_AUTO) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_BASS) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "b##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_BASS); }
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_MID) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_MID); }
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_SMOOTH) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_SMOOTH); }
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_NONE) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.2f));
+				}
 				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
 					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
 				}
+				ImGui::PopStyleColor(1);
+				hue++;
 				ImGui::SameLine();
+
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
 				if (iUniform>24) {
-					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-					{
-						setFloatValue(iUniform, localValues[iUniform]);
+					if (iUniform == 25) {
+						// iZoom
+						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.49f))
+						{
+							setFloatValue(iUniform, localValues[iUniform]);
+						}
+					}
+					else {
+						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+						{
+							setFloatValue(iUniform, localValues[iUniform]);
+						}
 					}
 				}
 				else {

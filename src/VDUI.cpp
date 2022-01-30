@@ -461,12 +461,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text(" Pos: %.1f,%.1f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
 
 		// time
-		smooth = mVDSession->getUniformValue(mVDUniforms->ISMOOTH);
+		/*smooth = mVDSession->getUniformValue(mVDUniforms->ISMOOTH);
 		if (ImGui::SliderFloat("Smooth", &smooth, 0.001f, 0.02f)) {
 			mVDSession->setUniformValue(mVDUniforms->ISMOOTH, smooth);
 		}
-		ImGui::SameLine();
-		ImGui::Text("Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
+		ImGui::SameLine();*/
+		ImGui::Text(" Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
 		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
 		//ImGui::SameLine();
