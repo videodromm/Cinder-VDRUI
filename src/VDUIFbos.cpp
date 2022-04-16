@@ -58,7 +58,10 @@ void VDUIFbos::Run(const char* title) {
 			else {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", mVDSession->getFboMsg(f).c_str());
 			}
-			
+			ImGui::SameLine();
+			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
+			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMsTotal(f));
+
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
@@ -88,9 +91,7 @@ void VDUIFbos::Run(const char* title) {
 			{
 				setValue(ctrl, f, iWeight);
 			};
-			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
-			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMsTotal(f));
-			ImGui::SameLine();
+			
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
