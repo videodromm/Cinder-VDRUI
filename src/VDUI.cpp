@@ -468,6 +468,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();*/
 		ImGui::Text(" Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
 		ImGui::SameLine();
+		ImGui::Text(" TStart %.2f", mVDSession->getUniformValue(mVDUniforms->ISTART));
+		ImGui::SameLine();
 		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
 		//ImGui::SameLine();
 		//ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
@@ -482,7 +484,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
 		ImGui::SameLine();
-		ImGui::Text(" Start %.0f", mVDSession->getUniformValue(mVDUniforms->IBARSTART));
+		ImGui::Text(" BStart %.0f", mVDSession->getUniformValue(mVDUniforms->IBARSTART));
 		ImGui::SameLine();
 		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
 		ImGui::SameLine();

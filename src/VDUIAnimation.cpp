@@ -416,9 +416,9 @@ void VDUIAnimation::Run(const char* title) {
 		// Tempo
 		if (ImGui::CollapsingHeader("Tempo", true))
 		{
-			if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
-			ImGui::SameLine();
-			ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
+			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
+			//ImGui::SameLine();
+			//ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
 
 			if (ImGui::Button("0##istartx")) {
 				setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
