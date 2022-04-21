@@ -583,16 +583,18 @@ void VDUIAnimation::Run(const char* title) {
 
 			hue++;
 			// mRenderXY
-			static float mx = mVDSettings->mRenderXY.x;
-			if (ImGui::SliderFloat("mx", &mx, 0.01f, 1.0f))
+			ctrl = mVDUniforms->IRENDERXYX;
+			static float mx = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
+			if (ImGui::SliderFloat("RenderX", &mx, -0.05f, 0.05f))
 			{
-				mVDSettings->mRenderXY.x = mx;
+				setFloatValue(ctrl, mx);
 			}
 			ImGui::SameLine();
-			static float my = mVDSettings->mRenderXY.y;
-			if (ImGui::SliderFloat("my", &my, 0.01f, 1.0f))
+			ctrl = mVDUniforms->IRENDERXYY;
+			static float my = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
+			if (ImGui::SliderFloat("RenderY", &my, -0.05f, 0.05f))
 			{
-				mVDSettings->mRenderXY.y = my;
+				setFloatValue(ctrl, my);
 			}
 
 			// mRenderXY
