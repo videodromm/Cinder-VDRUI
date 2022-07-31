@@ -158,7 +158,7 @@ void VDUIAnimation::Run(const char* title) {
 
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (iUniform>24) {
+				if (iUniform>24 || iUniform == 14 || iUniform == 8) {
 					if (iUniform == 25) {
 						// iZoom
 						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.49f))
