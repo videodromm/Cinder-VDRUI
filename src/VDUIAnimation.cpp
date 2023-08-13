@@ -251,7 +251,25 @@ void VDUIAnimation::Run(const char* title) {
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
 		} // Uniforms
+		if (ImGui::CollapsingHeader("Params", NULL, true, true))
+		{
 
+			for (size_t iUniform = 54; iUniform < 60; iUniform++)
+			{
+				int hue = 0;
+
+				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
+				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
+
+				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 40.0f))
+				{
+					setFloatValue(iUniform, localValues[iUniform]);
+				}
+
+			}
+
+
+		} // Params
 		// Audio
 		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
 		{
