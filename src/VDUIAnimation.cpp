@@ -261,11 +261,16 @@ void VDUIAnimation::Run(const char* title) {
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
 
-				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 40.0f))
+				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 10.0f))
 				{
 					setFloatValue(iUniform, localValues[iUniform]);
 				}
-
+				ImGui::SameLine();
+				sprintf_s(buf, "%d", (int)iUniform);
+				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 3.0f))
+				{
+					setFloatValue(iUniform, localValues[iUniform]);
+				}
 			}
 
 
@@ -602,19 +607,31 @@ void VDUIAnimation::Run(const char* title) {
 			hue++;
 			// mRenderXY
 			ctrl = mVDUniforms->IRENDERXYX;
+			if (ImGui::Button("x##IRENDERX")) { setFloatValue(ctrl, 0.0); }
+			ImGui::SameLine();
 			static float mx = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
-			if (ImGui::SliderFloat("RenderX", &mx, -0.05f, 0.05f))
+			if (ImGui::SliderFloat("RenderX", &mx, -1.0f, 1.0f))
 			{
 				setFloatValue(ctrl, mx);
 			}
-			ImGui::SameLine();
+			/*ImGui::SameLine();
+			if (ImGui::InputFloat("RenderX", &mx, 0.00f, 3.0f))
+			{
+				setFloatValue(ctrl, mx);
+			}*/
 			ctrl = mVDUniforms->IRENDERXYY;
+			if (ImGui::Button("x##IRENDERY")) { setFloatValue(ctrl, 0.0); }
+			ImGui::SameLine();
 			static float my = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
-			if (ImGui::SliderFloat("RenderY", &my, -0.05f, 0.05f))
+			if (ImGui::SliderFloat("RenderY", &my, -1.0f, 1.0f))
 			{
 				setFloatValue(ctrl, my);
 			}
-
+			/*ImGui::SameLine();
+			if (ImGui::InputFloat("RenderY", &my, 0.00f, 3.0f))
+			{
+				setFloatValue(ctrl, my);
+			}*/
 			// mRenderXY
 			static float texMultW = mVDSettings->mTexMult.x;
 			if (ImGui::SliderFloat("texWx", &texMultW, 0.2f, 4.0f))
