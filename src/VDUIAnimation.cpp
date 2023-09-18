@@ -36,7 +36,7 @@ void VDUIAnimation::Run(const char* title) {
 	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		if (ImGui::CollapsingHeader("Color", true))
+		if (ImGui::CollapsingHeader("Color", NULL, true, true))
 		{
 			ImGui::PushItemWidth(200.0f);
 			// foreground color
@@ -69,8 +69,8 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopItemWidth();
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		}
-		
-		if (ImGui::CollapsingHeader("Animation", true))
+
+		if (ImGui::CollapsingHeader("Animation", NULL, true, true))
 		{
 			if (ImGui::Button("Reset")) {
 				mVDSession->resetAnim();
@@ -158,18 +158,28 @@ void VDUIAnimation::Run(const char* title) {
 
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (iUniform>24 || iUniform == 14 || iUniform == 8) {
+				if (iUniform > 22 || iUniform == 14 || iUniform == 8 ) {
 					if (iUniform == 25) {
 						// iZoom
-						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.49f))
+						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f))
 						{
 							setFloatValue(iUniform, localValues[iUniform]);
 						}
 					}
 					else {
-						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-						{
-							setFloatValue(iUniform, localValues[iUniform]);
+						if (iUniform == 23 || iUniform == 24) {
+							// iRenderXY
+							if (ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f))
+							{
+								setFloatValue(iUniform, localValues[iUniform]);
+							}
+						}
+						else {
+
+							if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+							{
+								setFloatValue(iUniform, localValues[iUniform]);
+							}
 						}
 					}
 				}
@@ -251,7 +261,7 @@ void VDUIAnimation::Run(const char* title) {
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
 		} // Uniforms
-		if (ImGui::CollapsingHeader("Params", NULL, true, true))
+		if (ImGui::CollapsingHeader("Params", NULL, true, false))
 		{
 
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
@@ -276,7 +286,7 @@ void VDUIAnimation::Run(const char* title) {
 
 		} // Params
 		// Audio
-		if (ImGui::CollapsingHeader("Audio", NULL, true, true))
+		if (ImGui::CollapsingHeader("Audio", NULL, true, false))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			// mic
@@ -323,7 +333,7 @@ void VDUIAnimation::Run(const char* title) {
 
 			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
 			ImGui::TextColored(ImColor(0, 255, 0), "Max %.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
-			
+
 			static int iFreq0 = mVDSession->getFreqIndex(0);
 			sprintf_s(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
 			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
@@ -437,7 +447,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 
 		// Tempo
-		if (ImGui::CollapsingHeader("Tempo", true))
+		if (ImGui::CollapsingHeader("Tempo", NULL, true, false))
 		{
 			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			//ImGui::SameLine();
@@ -461,7 +471,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::SliderInt("time x", &tf, 0, 9)) mVDSession->setTimeFactor(tf);
 
 			ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-			
+
 			// iTimeFactor KO 0.0 on 1st touch
 			ctrl = mVDUniforms->ITIMEFACTOR;
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
@@ -548,7 +558,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 
 		// Websocket
-		if (ImGui::CollapsingHeader("Websocket", "8088", true, true))
+		if (ImGui::CollapsingHeader("Websocket", "8088", true, false))
 		{
 			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
 
@@ -606,7 +616,7 @@ void VDUIAnimation::Run(const char* title) {
 
 			hue++;
 			// mRenderXY
-			ctrl = mVDUniforms->IRENDERXYX;
+			/*ctrl = mVDUniforms->IRENDERXYX;
 			if (ImGui::Button("x##IRENDERX")) { setFloatValue(ctrl, 0.0); }
 			ImGui::SameLine();
 			static float mx = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
@@ -614,11 +624,7 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, mx);
 			}
-			/*ImGui::SameLine();
-			if (ImGui::InputFloat("RenderX", &mx, 0.00f, 3.0f))
-			{
-				setFloatValue(ctrl, mx);
-			}*/
+
 			ctrl = mVDUniforms->IRENDERXYY;
 			if (ImGui::Button("x##IRENDERY")) { setFloatValue(ctrl, 0.0); }
 			ImGui::SameLine();
@@ -627,11 +633,7 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, my);
 			}
-			/*ImGui::SameLine();
-			if (ImGui::InputFloat("RenderY", &my, 0.00f, 3.0f))
-			{
-				setFloatValue(ctrl, my);
-			}*/
+			*/
 			// mRenderXY
 			static float texMultW = mVDSettings->mTexMult.x;
 			if (ImGui::SliderFloat("texWx", &texMultW, 0.2f, 4.0f))
