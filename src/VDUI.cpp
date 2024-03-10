@@ -224,7 +224,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 40 was 12
-		if (ImGui::SliderFloat("AX", &multx, 0.01f, 20.0f)) {
+		if (ImGui::SliderFloat("AX", &multx, 0.01f, 7.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
 		ImGui::SameLine();
