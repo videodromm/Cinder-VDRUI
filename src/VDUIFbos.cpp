@@ -77,20 +77,31 @@ void VDUIFbos::Run(const char* title) {
 				mVDSession->setSelectedFbo(f);
 			}
 			ImGui::PopStyleColor(3);
+
 			hue++;
 			ImGui::SameLine();
-
-			sprintf(buf, "audio##audio%d", f);
+			sprintf(buf, "au##audio%d", f);
 			if (ImGui::Button(buf)) {
 				mVDSession->setFboTextureAudioMode(f);
-			}//mVDSession->buildFboRenderedTexture(f) && 
+			}
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Set input texture to audio");
+
+			hue++;
+			ImGui::SameLine();
+			sprintf(buf, "tn##tn%d", f);
+			if (ImGui::Button(buf)) {
+				mVDSession->saveThumbnail(f);
+			}
+			//mVDSession->buildFboRenderedTexture(f) && 
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save thumbnail");
+
 			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setValue(ctrl, f, iWeight);
 			};
+
 			
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
