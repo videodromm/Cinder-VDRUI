@@ -75,7 +75,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("Reset")) {
 				mVDSession->resetAnim();
 			}
-			for (size_t iUniform = 5; iUniform < 29; iUniform++)
+			for (size_t iUniform = 5; iUniform < 28; iUniform++)
 			{
 				int hue = 0;
 
@@ -266,16 +266,19 @@ void VDUIAnimation::Run(const char* title) {
 
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
 			{
-				int hue = 0;
-
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
-				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-
+				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
+				if (ImGui::Button(buf)) {
+					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
+				}
+				ImGui::SameLine();
+				sprintf_s(buf, "%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 10.0f))
 				{
 					setFloatValue(iUniform, localValues[iUniform]);
 				}
 				ImGui::SameLine();
+				
 				sprintf_s(buf, "%d", (int)iUniform);
 				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 3.0f))
 				{
@@ -460,6 +463,26 @@ void VDUIAnimation::Run(const char* title) {
 			}
 			ImGui::SameLine();
 			ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
+			// Time factor
+			localValues[mVDUniforms->ITIMEFACTOR] = mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR);
+			sprintf_s(buf, "x##%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
+			if (ImGui::Button(buf)) {
+				mVDSession->setUniformValue(mVDUniforms->ITIMEFACTOR, mVDSession->getDefaultUniformValue(mVDUniforms->ITIMEFACTOR));
+			}
+			ImGui::SameLine();
+			sprintf_s(buf, "%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
+			if (ImGui::SliderFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 10.0f))
+			{
+				setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
+			}
+			ImGui::SameLine();
+
+			sprintf_s(buf, "%d", mVDUniforms->ITIMEFACTOR);
+			if (ImGui::InputFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 3.0f))
+			{
+				setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
+			}
+			// ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
 			/* 20211018 replaced by iSpeed
 			if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
 			ImGui::SameLine();
