@@ -260,7 +260,92 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
-		} // Uniforms
+		} 
+		
+		// FX boolean
+		if (ImGui::CollapsingHeader("Fx", NULL, true, true))
+		{
+			for (size_t iUniform = 86; iUniform < 89; iUniform++)
+			{
+				int hue = 0;
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_TIME) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.3f));
+				}
+				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
+				if (ImGui::Button(buf)) {
+					mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME);
+				}
+				ImGui::PopStyleColor(1);
+				hue++;
+				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_AUTO) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
+				}
+				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
+				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
+				ImGui::PopStyleColor(1);
+				hue++;
+				ImGui::SameLine();
+
+				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_NONE) {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				}
+				else {
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
+				}
+				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
+				if (ImGui::Button(buf)) {
+					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
+					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
+				}
+				ImGui::PopStyleColor(1);
+				hue++;
+				ImGui::SameLine();
+
+				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
+				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
+				if (iUniform > 22 || iUniform == 14 || iUniform == 8) {
+					if (iUniform == 25) {
+						// iZoom
+						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f))
+						{
+							setFloatValue(iUniform, localValues[iUniform]);
+						}
+					}
+					else {
+						if (iUniform == 23 || iUniform == 24) {
+							// iRenderXY
+							if (ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f))
+							{
+								setFloatValue(iUniform, localValues[iUniform]);
+							}
+						}
+						else {
+
+							if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+							{
+								setFloatValue(iUniform, localValues[iUniform]);
+							}
+						}
+					}
+				}
+				else {
+					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+					{
+						setFloatValue(iUniform, localValues[iUniform]);
+					}
+				}
+			}
+		}
+		// Uniforms
 		if (ImGui::CollapsingHeader("Params", NULL, true, false))
 		{
 
