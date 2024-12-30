@@ -142,7 +142,23 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
 		ImGui::TextWrapped("Midi: %s", mVDSession->getMidiMsg().c_str());
-		ImGui::TextWrapped("WS: %s", mVDSession->getWSMsg().c_str());
+
+		// websockets
+		// ImGui::TextWrapped("WS");
+		if (ImGui::Button("WS"))
+		{
+			mVDSession->wsConnect();
+		}
+		ImGui::SameLine();
+		if (mVDSession->isWSClientConnected()) 
+		{
+			if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
+		}
+		
+		ImGui::SameLine();		
+		ImGui::Text(": %s", mVDSession->getWSMsg().c_str());
+
+		// OSC
 		ImGui::TextWrapped("OSC: %s", mVDSession->getOSCMsg().c_str());
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->getErrorMsg().c_str());
 	}

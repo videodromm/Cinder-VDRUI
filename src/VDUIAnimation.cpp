@@ -594,22 +594,20 @@ void VDUIAnimation::Run(const char* title) {
 			//ImGui::Text("duration", &mVDSettings->iBarDuration);
 			//ImGui::SameLine();
 			//ImGui::Text("phase %.2f ", mVDSession->getUniformValue(mVDUniforms->IPHASE));
-			// BUG taptempo
-			if (ImGui::Button("Tap toggle")) { toggleSpinalTap(); }
-			if (spinalTap) {
-				static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
-				//ImGui::Text("Tempo %.2f ", tempo);
-				if (ImGui::DragFloat("Tempo", &tempo, 0.01f, 0.01f, 200.0f, "%.2f"))
-				{
-					setFloatValue(mVDUniforms->IBPM, tempo);
-				}
-				if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
-					setFloatValue(mVDUniforms->IBPM, tempo);
-				}
+
+
+			static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
+			//ImGui::Text("Tempo %.2f ", tempo);
+			if (ImGui::DragFloat("Tempo", &tempo, 0.01f, 0.01f, 200.0f, "%.2f"))
+			{
+				setFloatValue(mVDUniforms->IBPM, tempo);
 			}
-			else {
-				if (ImGui::Button("Tap tempo")) { mVDSession->tapTempo(); }
+			if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
+				setFloatValue(mVDUniforms->IBPM, tempo);
 			}
+			
+			if (ImGui::Button("Tap tempo")) { mVDSession->tapTempo(); }
+
 
 			if (mVDSession->getUseTimeWithTempo()) {
 				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 1.0f, 0.5f));
