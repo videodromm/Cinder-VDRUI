@@ -265,7 +265,7 @@ void VDUIAnimation::Run(const char* title) {
 		// FX boolean
 		if (ImGui::CollapsingHeader("Fx", NULL, true, true))
 		{
-			for (size_t iUniform = 86; iUniform < 89; iUniform++)
+			for (size_t iUniform = 86; iUniform < 90; iUniform++)
 			{
 				int hue = 0;
 
