@@ -157,7 +157,12 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
+				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
+				if (isSelected) {
+					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+				} 
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
+				
 				if (iUniform > 22 || iUniform == 14 || iUniform == 8 ) {
 					if (iUniform == 8) {
 						// iZoom
@@ -188,6 +193,9 @@ void VDUIAnimation::Run(const char* title) {
 					{
 						setFloatValue(iUniform, localValues[iUniform]);
 					}
+				}
+				if (isSelected) {
+					ImGui::PopStyleColor(1);
 				}
 			}
 
@@ -311,6 +319,10 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
+				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
+				if (isSelected) {
+					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+				}
 				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
 				if (iUniform > 22 || iUniform == 14 || iUniform == 8) {
 					if (iUniform == 25) {
@@ -343,6 +355,9 @@ void VDUIAnimation::Run(const char* title) {
 						setFloatValue(iUniform, localValues[iUniform]);
 					}
 				}
+				if (isSelected) {
+					ImGui::PopStyleColor(1);
+				}
 			}
 		}
 		// Uniforms
@@ -352,6 +367,10 @@ void VDUIAnimation::Run(const char* title) {
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
 			{
 				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
+				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
+				if (isSelected) {
+					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+				}
 				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
 				if (ImGui::Button(buf)) {
 					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
@@ -368,6 +387,9 @@ void VDUIAnimation::Run(const char* title) {
 				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 3.0f))
 				{
 					setFloatValue(iUniform, localValues[iUniform]);
+				}
+				if (isSelected) {
+					ImGui::PopStyleColor(1);
 				}
 			}
 
