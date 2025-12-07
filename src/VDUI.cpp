@@ -106,7 +106,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	*/
 #pragma endregion menu
 	// right panel
-	ImGui::SetNextWindowSize(ImVec2(242.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
 	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
@@ -121,7 +121,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			//mVDSettings->mShaderMsg = "";
 		}
 
-		ImGui::TextColored(ImColor(200, 200, 0), "Msg: %s", mVDSettings->getMsg().c_str());
+		ImGui::TextColored(ImColor(200, 200, 0), "Msg %s", mVDSettings->getMsg().c_str());
 		int ec = mVDSession->getErrorCode();
 		if (ec > 0) {
 			switch (ec)
@@ -136,12 +136,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 				ImGui::TextColored(ImColor(255, 0, 0), "Uniform value not set");
 				break;
 			default:
-				ImGui::TextColored(ImColor(0, 255, 0), "Code:%d", ec);
+				ImGui::TextColored(ImColor(0, 255, 0), "Code %d", ec);
 				break;
 			}
 		}
 		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
-		ImGui::TextWrapped("Midi: %s", mVDSession->getMidiMsg().c_str());
+		ImGui::TextWrapped("Midi %s", mVDSession->getMidiMsg().c_str());
 
 		// websockets
 		// ImGui::TextWrapped("WS");
@@ -156,15 +156,15 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		
 		ImGui::SameLine();		
-		ImGui::Text(": %s", mVDSession->getWSMsg().c_str());
+		ImGui::Text("%s", mVDSession->getWSMsg().c_str());
 
 		// OSC
-		ImGui::TextWrapped("OSC: %s", mVDSession->getOSCMsg().c_str());
-		ImGui::TextColored(ImColor(255, 0, 0), "Last error: %s", mVDSettings->getErrorMsg().c_str());
+		ImGui::TextWrapped("OSC %s", mVDSession->getOSCMsg().c_str());
+		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
 	}
 	ImGui::End();
 	// Center panel
-	ImGui::SetNextWindowSize(ImVec2(800.0f, mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(748.0f, mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
 
 	sprintf(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
@@ -247,25 +247,21 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(1);		
 		ImGui::SameLine();
 
-		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX); // 40 was 12
+		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
 		if (ImGui::SliderFloat("AX", &multx, 0.01f, 7.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
 		
 
+		int hue = 0;
 		ImGui::SameLine();
+		(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		// audio preferred
-		if (ImGui::Button("Mic In")) {
+		if (ImGui::Button("Mic")) {
 			mVDSession->toggleUseLineIn();
 		}
-		// midi preferred
-		if (!mVDSession->isMidiSetup()) {
-			ImGui::SameLine();
-			sprintf(buf, "Midi");
-			if (ImGui::Button(buf)) mVDSession->setupMidi();
-		}
+		ImGui::PopStyleColor(1);
 
-		int hue = 0;
 
 		// debug
 		ctrl = mVDUniforms->IDEBUG;
@@ -463,6 +459,14 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
+		// midi preferred
+		if (!mVDSession->isMidiSetup()) {
+			ImGui::SameLine();
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+			sprintf(buf, "Midi");
+			if (ImGui::Button(buf)) mVDSession->setupMidi();
+			ImGui::PopStyleColor(1);
+		}
 		/*
 		ImGui::SameLine();
 		ctrl = mVDUniforms->IFLIPPOSTH;
