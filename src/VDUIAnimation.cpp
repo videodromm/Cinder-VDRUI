@@ -619,11 +619,7 @@ void VDUIAnimation::Run(const char* title) {
 
 
 			static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
-			//ImGui::Text("Tempo %.2f ", tempo);
-			if (ImGui::DragFloat("Tempo", &tempo, 0.01f, 0.01f, 200.0f, "%.2f"))
-			{
-				setFloatValue(mVDUniforms->IBPM, tempo);
-			}
+			
 			if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
 				setFloatValue(mVDUniforms->IBPM, tempo);
 			}
