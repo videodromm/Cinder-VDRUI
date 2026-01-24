@@ -30,13 +30,13 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), 1);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), 1);
 	int hue = 0;
-	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
-	{
-		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		if (ImGui::CollapsingHeader("Color", NULL, true, true))
+	ImGui::Begin( " Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse );
+	/* 	{ */
+	ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+		if (ImGui::CollapsingHeader("Color"))
 		{
 			ImGui::PushItemWidth(200.0f);
 			// foreground color
@@ -70,7 +70,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		}
 
-		if (ImGui::CollapsingHeader("Animation", NULL, true, true))
+		if (ImGui::CollapsingHeader("Animation"))
 		{
 			if (ImGui::Button("Reset")) {
 				mVDSession->resetAnim();
@@ -199,37 +199,7 @@ void VDUIAnimation::Run(const char* title) {
 				}
 			}
 
-			// badTv
-			/*ctrl = mVDUniforms->IBADTV;
-			if (ImGui::Button("a##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME); }
-			ImGui::SameLine();
-			if (ImGui::Button("f##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
-			ImGui::SameLine();
-			if (ImGui::Button("x##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::DragFloat("badTv", &localValues[ctrl], 0.01f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// iPixelX
-			ctrl = mVDUniforms->IPIXELX;
-			if (ImGui::Button("x##iPixelX")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("iPixelX/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// iPixelY
-			ctrl = mVDUniforms->IPIXELY;
-			if (ImGui::Button("x##iPixelY")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("iPixelY/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
+			
 			// iBarBeat
 			ctrl = mVDUniforms->IBARBEAT;
 			if (ImGui::Button("x##iBarBeat")) { iBarBeat = 1; setFloatValue(ctrl, 1); }
@@ -238,40 +208,17 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, iBarBeat);
 			}
-			/*sprintf_s(buf, "XorY");
-			mVDSettings->iXorY ^= ImGui::Button(buf);*/
-
-			// steps
-			/*ctrl = mVDUniforms->ISTEPS;
-			if (ImGui::Button("x##steps")) { localValues[ctrl] = 16.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("steps", &localValues[ctrl], 1.0f, 128.0f))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// pixelate
-			ctrl = mVDUniforms->IPIXELATE;
-			if (ImGui::Button("x##pixelate")) { localValues[ctrl] = 1.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("pixelate", &localValues[ctrl], 0.01f, 1.0f))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// trixels
-			ctrl = mVDUniforms->ITRIXELS;
-			if (ImGui::Button("x##trixels")) { localValues[ctrl] = 0.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
+			
+		
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 			if (ImGui::SliderFloat("trixels", &localValues[ctrl], 0.00f, 1.0f))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
+			}
 		} 
 		
 		// FX boolean
-		if (ImGui::CollapsingHeader("Fx", NULL, true, true))
+		if (ImGui::CollapsingHeader("Fx"))
 		{
 			for (size_t iUniform = 86; iUniform < 90; iUniform++)
 			{
@@ -361,7 +308,7 @@ void VDUIAnimation::Run(const char* title) {
 			}
 		}
 		// Uniforms
-		if (ImGui::CollapsingHeader("Params", NULL, true, false))
+		if (ImGui::CollapsingHeader("Params", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
@@ -396,7 +343,7 @@ void VDUIAnimation::Run(const char* title) {
 
 		} // Params
 		// Audio
-		if (ImGui::CollapsingHeader("Audio", NULL, true, false))
+		if (ImGui::CollapsingHeader("Audio"))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			// mic
@@ -480,7 +427,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (mVDSession->isMidiSetup()) {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
 				ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
-				if (ImGui::CollapsingHeader("MidiIn", "20", true, true))
+				if (ImGui::CollapsingHeader(  "MidiIn", 0, true))
 				{
 					ImGui::Columns(2, "datain", true);
 					ImGui::Text("Name"); ImGui::NextColumn();
@@ -518,7 +465,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Columns(1);
 				}
 				// Midi out
-				if (ImGui::CollapsingHeader("MidiOut", "20", true, true))
+				if (ImGui::CollapsingHeader("MidiOut"))
 				{
 					ImGui::Columns(2, "dataout", true);
 					ImGui::Text("Name"); ImGui::NextColumn();
@@ -557,11 +504,9 @@ void VDUIAnimation::Run(const char* title) {
 		}
 
 		// Tempo
-		if (ImGui::CollapsingHeader("Tempo", NULL, true, false))
+		if (ImGui::CollapsingHeader("Tempo", 0, false))
 		{
-			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
-			//ImGui::SameLine();
-			//ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
+			
 
 			if (ImGui::Button("0##istartx")) {
 				setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
@@ -589,41 +534,12 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
 			}
-			// ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-			/* 20211018 replaced by iSpeed
-			if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
-			ImGui::SameLine();
-			ImGui::SliderFloat("speed x", &mVDSettings->iSpeedMultiplier, 0.01f, 1.0f, "%.4f");//, 2.01f
-
-			static int tf = 5;
-			if (ImGui::Button("x##tfx")) { tf = 5; mVDSession->setTimeFactor(5); }
-			ImGui::SameLine();
-			if (ImGui::SliderInt("time x", &tf, 0, 9)) mVDSession->setTimeFactor(tf);
-
-			ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-
-			// iTimeFactor KO 0.0 on 1st touch
-			ctrl = mVDUniforms->ITIMEFACTOR;
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
-
-			//ImGui::Text("Elapsed %.2f", mVDSession->getUniformValue(mVDUniforms->IELAPSED));
-			// duration			
-			//ImGui::SameLine();
-			//ImGui::Text("duration", &mVDSettings->iBarDuration);
-			//ImGui::SameLine();
-			//ImGui::Text("phase %.2f ", mVDSession->getUniformValue(mVDUniforms->IPHASE));
+			
 
 
 			static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
 			//ImGui::Text("Tempo %.2f ", tempo);
-			if (ImGui::DragFloat("Tempo", &tempo, 0.01f, 0.01f, 200.0f, "%.2f"))
-			{
-				setFloatValue(mVDUniforms->IBPM, tempo);
-			}
+			
 			if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
 				setFloatValue(mVDUniforms->IBPM, tempo);
 			}
@@ -680,13 +596,11 @@ void VDUIAnimation::Run(const char* title) {
 				}
 			}
 
-			/* TODO if useful ImGui::Text("Sending to 2nd host %s", mVDSettings->mOSCDestinationHost2.c_str());
-			ImGui::SameLine();
-			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
+		
 		}
 
 		// Websocket
-		if (ImGui::CollapsingHeader("Websocket", "8088", true, false))
+		if (ImGui::CollapsingHeader("Websocket", 0, false))
 		{
 			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
 
@@ -743,25 +657,7 @@ void VDUIAnimation::Run(const char* title) {
 			}
 
 			hue++;
-			// mRenderXY
-			/*ctrl = mVDUniforms->IRENDERXYX;
-			if (ImGui::Button("x##IRENDERX")) { setFloatValue(ctrl, 0.0); }
-			ImGui::SameLine();
-			static float mx = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
-			if (ImGui::SliderFloat("RenderX", &mx, -1.0f, 1.0f))
-			{
-				setFloatValue(ctrl, mx);
-			}
-
-			ctrl = mVDUniforms->IRENDERXYY;
-			if (ImGui::Button("x##IRENDERY")) { setFloatValue(ctrl, 0.0); }
-			ImGui::SameLine();
-			static float my = mVDSession->getUniformValue(mVDUniforms->IRENDERXYX);
-			if (ImGui::SliderFloat("RenderY", &my, -1.0f, 1.0f))
-			{
-				setFloatValue(ctrl, my);
-			}
-			*/
+			
 			// mRenderXY
 			static float texMultW = mVDSettings->mTexMult.x;
 			if (ImGui::SliderFloat("texWx", &texMultW, 0.2f, 4.0f))
@@ -811,63 +707,11 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, (float)iBlendmode);
 			}
-			// debug
-			/*ctrl = mVDUniforms->IDEBUG;
-			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-			if (ImGui::Button("debug")) {
-				toggleValue(ctrl);
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
-
-			ctrl = mVDUniforms->IVAMOUNT;
-			iVAmount = mVDSession->getUniformValue(ctrl);
-			if (ImGui::DragFloat("Amount", &iVAmount, 0.001f, 0.0f, 1.0f))
-			{
-				setFloatValue(ctrl, iVAmount);
-			}
-			ctrl = mVDUniforms->IVFALLOFF;
-			iVFallOff = mVDSession->getUniformValue(ctrl);
-			if (ImGui::DragFloat("FallOff", &iVFallOff, 0.001f, 0.0f, 0.99f))
-			{
-				setFloatValue(ctrl, iVFallOff);
-			}
-
-			// iContour
-			ctrl = mVDUniforms->ICONTOUR;
-			if (ImGui::Button("a##contour")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_TIME); }
-			ImGui::SameLine();
-			if (ImGui::Button("t##contour")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_AUTO); }
-			ImGui::SameLine();
-			if (ImGui::Button("x##contour")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			contour = mVDSession->getUniformValue(ctrl);
-			if (ImGui::DragFloat("contour", &contour, 0.001f, minContour, maxContour))
-			{
-				setFloatValue(ctrl, contour);
-			}
-			ImGui::DragFloat("mincr", &minContour, 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl));
-			ImGui::SameLine();
-			ImGui::DragFloat("maxcr", &maxContour, 0.001f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl));
-			*/
-
-			/*if (ImGui::Button("Create Window")) {
-				mVDSession->createWindow();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Delete Window")) {
-				mVDSession->deleteWindow();
-			}*/
-
-
-			//ImGui::SameLine();
-			//ImGui::Text("solo %d", mVDSession->getSolo());
+			
 
 			ImGui::PopItemWidth();
 		}
 
-	}
+	/* }*/
 	ImGui::End();
 }

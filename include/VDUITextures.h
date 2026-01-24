@@ -4,7 +4,7 @@
 #include "cinder/Rand.h"
 
 // UserInterface
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 
 // Session
 #include "VDSessionFacade.h"
