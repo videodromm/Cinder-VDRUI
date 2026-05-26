@@ -52,6 +52,7 @@ void VDUIFbos::Run(const char* title) {
 			float iWeight = mVDSession->getUniformValue(ctrl);
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::TextColored(ImColor(155, 255, 0), "%d %dms", f+31, mVDSession->getFboMsTotal(f));
 			if (!mVDSession->isFboValid(f)) {
 				ImGui::TextColored(ImColor(255, 0, 0), "err: %s", mVDSession->getFboError(f).c_str());
 			}
@@ -60,7 +61,6 @@ void VDUIFbos::Run(const char* title) {
 			}
 			ImGui::SameLine();
 			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
-			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMsTotal(f));
 
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
