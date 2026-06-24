@@ -109,6 +109,8 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 	mFadeInDelay = true;
 	// UI
 	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade, mVDUniforms);
+	// Initialize ImGui context
+	ImGui::Initialize();
 }
 
 void _TBOX_PREFIX_App::toggleCursorVisibility(bool visible)
