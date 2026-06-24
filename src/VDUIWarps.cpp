@@ -18,8 +18,8 @@ void VDUIWarps::Run(const char* title) {
 
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol3() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
 		
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), 150.0f), ImGuiSetCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiSetCond_Once);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), 150.0f), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
 
 
 		sprintf(buf, "%s##sh%d", mVDSession->getWarpName(w).c_str(), w);

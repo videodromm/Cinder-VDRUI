@@ -30,13 +30,13 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
 	int hue = 0;
 	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		if (ImGui::CollapsingHeader("Color", NULL, true, true))
+		if( ImGui::CollapsingHeader( "Color", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			ImGui::PushItemWidth(200.0f);
 			// foreground color
@@ -70,7 +70,7 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 		}
 
-		if (ImGui::CollapsingHeader("Animation", NULL, true, true))
+		if( ImGui::CollapsingHeader( "Animation", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			if (ImGui::Button("Reset")) {
 				mVDSession->resetAnim();
@@ -271,7 +271,7 @@ void VDUIAnimation::Run(const char* title) {
 		} 
 		
 		// FX boolean
-		if (ImGui::CollapsingHeader("Fx", NULL, true, true))
+		if( ImGui::CollapsingHeader( "Fx", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			for (size_t iUniform = 86; iUniform < 90; iUniform++)
 			{
@@ -361,7 +361,7 @@ void VDUIAnimation::Run(const char* title) {
 			}
 		}
 		// Uniforms
-		if (ImGui::CollapsingHeader("Params", NULL, true, false))
+		if (ImGui::CollapsingHeader("Params", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
@@ -396,7 +396,7 @@ void VDUIAnimation::Run(const char* title) {
 
 		} // Params
 		// Audio
-		if (ImGui::CollapsingHeader("Audio", NULL, true, false))
+		if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 			// mic
@@ -480,7 +480,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (mVDSession->isMidiSetup()) {
 				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
 				ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
-				if (ImGui::CollapsingHeader("MidiIn", "20", true, true))
+				if (ImGui::CollapsingHeader("MidiIn", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					ImGui::Columns(2, "datain", true);
 					ImGui::Text("Name"); ImGui::NextColumn();
@@ -518,7 +518,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Columns(1);
 				}
 				// Midi out
-				if (ImGui::CollapsingHeader("MidiOut", "20", true, true))
+				if (ImGui::CollapsingHeader("MidiOut", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					ImGui::Columns(2, "dataout", true);
 					ImGui::Text("Name"); ImGui::NextColumn();
@@ -557,7 +557,7 @@ void VDUIAnimation::Run(const char* title) {
 		}
 
 		// Tempo
-		if (ImGui::CollapsingHeader("Tempo", NULL, true, false))
+		if (ImGui::CollapsingHeader("Tempo", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			//ImGui::SameLine();
@@ -681,8 +681,8 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
 		}
 
-		// Websocket
-		if (ImGui::CollapsingHeader("Websocket", "8088", true, false))
+		// Websocket TODO CHECK , "8088"
+		if( ImGui::CollapsingHeader( "Websocket", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
 

@@ -3,7 +3,7 @@
 #include "cinder/app/App.h"
 
 // UserInterface
-#include "CinderImGui.h"
+#include "cinder/CinderImGui.h"
 // Settings
 #include "VDSettings.h"
 // Session

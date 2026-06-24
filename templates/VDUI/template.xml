@@ -5,7 +5,7 @@
 	<requires>com.videodromm.vdrui</requires>
 	<requires>nl.cowlumbus.warping</requires>
 	<requires>com.wk.websocketpp</requires>
-	<requires>ocornut.imgui</requires>
+
 	<requires>org.libcinder.OSC</requires>
 	<requires>mb.cinder.midi2</requires>
 	<requires>org.libcinder.HTTPS</requires>

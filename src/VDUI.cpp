@@ -31,7 +31,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	static int currentWindowRow1 = 1;
 	static int currentWindowRow2 = 0;
 
-	ImGuiStyle& style = ImGui::GetStyle();
+	
 	//ImGuiStyle& style = ImGui::GetStyle();
 
 	if (mIsResizing) {
@@ -44,6 +44,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #endif
 
 #pragma region style
+		ImGuiStyle& style = ImGui::GetStyle();
 		// our theme variables
 		style.WindowRounding = 8;
 		style.WindowPadding = ImVec2(3, 3);
@@ -89,7 +90,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		style.Colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
 		style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
 		style.Colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.00f, 1.00f, 0.35f);
-		style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
+		// style.Colors[ImGuiCol_ModalWindowDarkening] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
 #pragma endregion style
 	}
@@ -106,8 +107,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	*/
 #pragma endregion menu
 	// right panel
-	ImGui::SetNextWindowSize(ImVec2(300.0f, mVDParams->getUILargeH()), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300.0f, mVDParams->getUILargeH()), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
 
 	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
@@ -164,8 +165,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 	ImGui::End();
 	// Center panel
-	ImGui::SetNextWindowSize(ImVec2(748.0f, mVDParams->getUILargePreviewH()), ImGuiSetCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiSetCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(748.0f, mVDParams->getUILargePreviewH()), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
 
 	sprintf(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
 	ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
