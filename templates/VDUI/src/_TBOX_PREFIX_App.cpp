@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013-2022, Bruce Lane - All rights reserved.
+ Copyright (c) 2013-2026, Bruce Lane - All rights reserved.
  This code is intended for use with the Cinder C++ library: http://libcinder.org
 
  Using Cinder-Warping from Paul Houx.
