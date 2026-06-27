@@ -76,6 +76,7 @@ private:
 	bool							mFadeInDelay = true;
 	void							toggleCursorVisibility(bool visible);
 	SpoutOut 						mSpoutOut;
+	int								mTrack = 0;
 };
 
 
@@ -103,8 +104,15 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 		->addUIObserver(mVDSettings, mVDUniforms)
 		->toggleUI()
 		->setUniformValue(mVDUniforms->IBPM, 160.0f)
-		->setUniformValue(mVDUniforms->IMOUSEX, 0.27710f)
-		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f);
+		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f) // sos only
+		->setUniformValue(mVDUniforms->IEXPOSURE, 0.965f)
+		//->setUniformValue(mVDUniforms->ISOBEL, 0.999f) // mtrlvr  only 
+		->setUniformValue(mVDUniforms->ITOGGLE, 1.0f) // sos only
+		->setUniformValue(mVDUniforms->IWEIGHT0, 1.0f)
+		->setUniformValue(mVDUniforms->IWEIGHT1, 1.0f) // yeah tests only0.1
+		->setUniformValue(mVDUniforms->IWEIGHT2, 1.0f)
+		->setUniformValue(mVDUniforms->IWEIGHT3, 0.0f) // yeah tests only0.2
+		->setUniformValue(mVDUniforms->IWEIGHT4, 0.0f);
 
 	mFadeInDelay = true;
 	// UI
@@ -202,6 +210,127 @@ void _TBOX_PREFIX_App::cleanup()
 
 void _TBOX_PREFIX_App::update()
 {
+	if (mTrack != (int)mVDSessionFacade->getUniformValue(mVDUniforms->ITRACK)) {
+		//mVDSessionFacade->setUniformValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
+		//mVDSessionFacade->setUniformValue(mVDUniforms->ISTART, mVDUniforms->getUniformValue(mVDUniforms->ITIME));
+		mVDSessionFacade->useTimeWithTempo();
+		mTrack = (int)mVDSessionFacade->getUniformValue(mVDUniforms->ITRACK);
+		switch (mTrack)
+		{
+		case 110:
+			// Zoom D7
+			// mVDSessionFacade->loadFolder("zoom");
+			mVDSessionFacade->loadFolder("boomer");
+			break;
+		case 111:
+			// Binary D#7
+			//mVDSessionFacade->loadFolder("onezero");
+			// ntb
+			mVDSessionFacade->loadFolder("dd");
+			break;
+		case 112:
+			// SOS E7
+			//mVDSessionFacade->loadFolder("sos");
+			mVDSessionFacade->loadFolder("fear"); // k21
+			break;
+		case 113:
+			// HumanET F7
+			mVDSessionFacade->loadFolder("spidermoon");
+			
+			break;
+		case 114:
+			// HumanET F#7
+			
+			mVDSessionFacade->loadFolder("julien");
+			break;
+		case 115:
+			// HumanET G#7
+			//mVDSessionFacade->loadFolder("love");
+			mVDSessionFacade->loadFolder("evolution");
+			break;
+		case 116:
+			// HumanET G7
+			//mVDSessionFacade->loadFolder("green");
+			mVDSessionFacade->loadFolder("sky");
+			break;
+		case 117:
+			// HumanET A7
+			//mVDSessionFacade->loadFolder("purple");
+			//mVDSessionFacade->loadFolder("gali");
+			mVDSessionFacade->loadFolder("lovehate");
+			break;
+		case 118:
+			// HumanET A#7 
+			//mVDSessionFacade->loadFolder("logo");
+			mVDSessionFacade->loadFolder("polo");
+			break;
+		case 119:
+			// Yeah Beauso Disco Zombification 130 B7
+			//mVDSessionFacade->loadFolder("yf");
+			mVDSessionFacade->loadFolder("onezero");
+			break;
+		case 120:
+			// welcometo C8
+			mVDSessionFacade->loadFolder("welcometo");
+			mVDSessionFacade->setUniformValue(mVDUniforms->IWEIGHT0, 1.0f);
+			mVDSessionFacade->setUniformValue(mVDUniforms->IWEIGHT1, 0.0f);
+			mVDSessionFacade->setUniformValue(mVDUniforms->IWEIGHT2, 0.0f);
+			mVDSessionFacade->setUniformValue(mVDUniforms->IDISPLAYMODE, VDDisplayMode::FX);
+			break;
+		// champo
+		case 108:
+			// galeriens C7
+			mVDSessionFacade->loadFolder("galeriens");
+			break;
+		case 109:
+			// guns C#7
+			mVDSessionFacade->loadFolder("guns");
+			break;
+		case 107:
+			// mission B6
+			mVDSessionFacade->loadFolder("mission");
+			break;
+		case 106:
+			// fous A#6
+			mVDSessionFacade->loadFolder("fous");
+			break;
+		case 105:
+			// google A6
+			mVDSessionFacade->loadFolder("google");
+			break;
+		case 121:
+			// C#8 glasses
+			mVDSessionFacade->loadFolder("glasses");
+			break;
+		case 122:
+			// D8 bombe
+			mVDSessionFacade->loadFolder("bombe");
+			break;
+		case 123:
+			// D#8 egyptien
+			mVDSessionFacade->loadFolder("egyptien");
+			break;
+		case 124:
+			// E8 house
+			mVDSessionFacade->loadFolder("house");
+			break;
+		case 125:
+			// F8 hejoe
+			mVDSessionFacade->loadFolder("hejoe");
+			break;
+		case 126:
+			// F#8 dream
+			mVDSessionFacade->loadFolder("dream");
+			break;
+		case 127:
+			// G8 heaven
+			mVDSessionFacade->loadFolder("heaven");
+			break;
+
+		default:
+			break;
+		}
+	}
 	mVDSessionFacade->setUniformValue(mVDUniforms->IFPS, getAverageFps());
 	mVDSessionFacade->update();
 }
