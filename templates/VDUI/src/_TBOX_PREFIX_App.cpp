@@ -107,7 +107,7 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 		->setUniformValue(mVDUniforms->IMOUSEY, 0.5648f) // sos only
 		->setUniformValue(mVDUniforms->IEXPOSURE, 0.965f)
 		//->setUniformValue(mVDUniforms->ISOBEL, 0.999f) // mtrlvr  only 
-		->setUniformValue(mVDUniforms->ITOGGLE, 1.0f) // sos only
+		//->setUniformValue(mVDUniforms->ITOGGLE, 1.0f) // sos only
 		->setUniformValue(mVDUniforms->IWEIGHT0, 1.0f)
 		->setUniformValue(mVDUniforms->IWEIGHT1, 1.0f) // yeah tests only0.1
 		->setUniformValue(mVDUniforms->IWEIGHT2, 1.0f)
