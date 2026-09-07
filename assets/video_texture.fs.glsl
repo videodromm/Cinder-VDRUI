@@ -8,10 +8,9 @@ in VertexData
 	vec2 texcoord0;
 } vVertex;
 
-out vec4 oFragColor;
+out vec4 fragColor;
 
 void main()
 {
-	oFragColor = texture( uSampler, vVertex.texcoord0 * uVideoSize );
-	// oFragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+	fragColor = texture( uSampler, vVertex.texcoord0 * uVideoSize );
 }

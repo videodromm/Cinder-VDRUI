@@ -36,8 +36,8 @@ void VDUIFbos::Run(const char* title) {
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));
 		yPos = mVDParams->getUIYPosRow2();
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), 1);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), 1);
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.5f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(f / 16.0f, 0.6f, 0.5f));
@@ -52,6 +52,7 @@ void VDUIFbos::Run(const char* title) {
 			float iWeight = mVDSession->getUniformValue(ctrl);
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::TextColored(ImColor(155, 255, 0), "%d %dms", f+31, mVDSession->getFboMsTotal(f));
 			if (!mVDSession->isFboValid(f)) {
 				ImGui::TextColored(ImColor(255, 0, 0), "err: %s", mVDSession->getFboError(f).c_str());
 			}
@@ -60,7 +61,6 @@ void VDUIFbos::Run(const char* title) {
 			}
 			ImGui::SameLine();
 			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
-			ImGui::TextColored(ImColor(155, 255, 0), "%dms ", mVDSession->getFboMsTotal(f));
 
 			sprintf(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);

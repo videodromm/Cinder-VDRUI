@@ -19,11 +19,11 @@ uniform float       iWeight7;
 uniform float       iWeight8;
 uniform bool		iDebug;
 uniform int			iBlendmode;
-
+out vec4 fragColor;
 // left main lines begin
 vec3 shaderLeft(vec2 uv)
 {
-	vec4 left = texture2D(iChannel0, uv);
+	vec4 left = texture(iChannel0, uv);
 	return vec3( left.r, left.g, left.b );
 }
 // left main lines end
@@ -31,7 +31,7 @@ vec3 shaderLeft(vec2 uv)
 // right main lines begin
 vec3 shaderRight(vec2 uv)
 {
-	vec4 right = texture2D(iChannel1, uv);
+	vec4 right = texture(iChannel1, uv);
 	return vec3( right.r, right.g, right.b );
 }
 
@@ -341,5 +341,5 @@ void main() {
    }
    
 
-	gl_FragColor = vec4(c.r, c.g, c.b, 1.0);	
+	fragColor = vec4(c.r, c.g, c.b, 1.0);
 }

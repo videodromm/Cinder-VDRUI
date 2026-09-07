@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <cinder>
 <block
-	name="Cinder-VDUI"
+	name="Cinder-VDRRUI"
 	id="com.videodromm.vdrui"
 	author="Bruce Lane"
 	license="MIT"
 	summary="VD UI block for Cinder 0.9: imgui wrapper"
-	url="https://github.com/videodromm/Cinder-VDRUI"
-	git="git://github.com/videodromm/Cinder-VDRUI.git"
+	url="https://github.com/videodromm/Cinder-VDRRUI"
+	git="git://github.com/videodromm/Cinder-VDRRUI.git"
 	core="true"
 	>
 	<supports os="msw" />
@@ -16,16 +16,13 @@
 	<headerPattern>include/*.h</headerPattern>
 	<sourcePattern>src/*.cpp</sourcePattern>
 	<sourcePattern>src/*.c</sourcePattern>
-
+	<requires>com.wk.websocketpp</requires>
+	<requires>mb.cinder.midi2</requires>
 	<requires>nl.cowlumbus.warping</requires>
-	<requires>com.videodromm.vd</requires>
-	<requires>com.videodromm.vdui</requires>
-
-	<platform os="msw">
-		<requires>fr.batchass.spout</requires>
-		<requires>mb.cinder.midi2</requires>
-
-	</platform>
+	<requires>com.videodromm.vdr</requires>
+	<requires>com.videodromm.vdrui</requires>
+	<requires>org.libcinder.OSC</requires>
+	
 </block>
 <template>templates/VDUI/template.xml</template>
 </cinder>

@@ -6,6 +6,7 @@ uniform float iPixelate;uniform float iGlitch;
 uniform float       iRedMultiplier;			// red multiplier 
 uniform float       iGreenMultiplier;		// green multiplier 
 uniform float       iBlueMultiplier;		// blue multiplier 
+out vec4 fragColor;
 vec2  fragCoord = gl_FragCoord.xy;
 float intensity(in vec4 c){return sqrt((c.x*c.x)+(c.y*c.y)+(c.z*c.z));}
 vec4 sobel(float stepx, float stepy, vec2 center) {
@@ -69,7 +70,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
             vec2 screenPos = vec2(startX+x*halfBase,startY+y*halfHeight);
             vec2 uv1 = screenPos / iResolution.xy;
 			uv1.y = 1.0 - uv1.y;
-			blend += texture2D(tex, uv1);         
+			blend += texture(tex, uv1);         
         }
     }
     rtn = (blend / 9.0);
@@ -150,5 +151,5 @@ void main() {
 		p.x *= 2.0;
 		c -= pow(length(p), 500.0);
 	}
-   	gl_FragColor = c;
+   	fragColor = c;
 }
