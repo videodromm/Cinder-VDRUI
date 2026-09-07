@@ -11,11 +11,6 @@
 	<requires>org.libcinder.HTTPS</requires>
 	<platform os="msw">
 		<requires>fr.batchass.spout</requires>
-		<requires>org.libcinder.wmfvideo</requires>
-	</platform>
-	<platform os="mac">
-		<!-- see cinderblock.xml for the Cinder-Syphon block id note -->
-		<requires>info.v002.syphon</requires>
 	</platform>
 	<source replaceContents="true" replaceName="true">src/_TBOX_PREFIX_App.cpp</source>
 	<asset>assets/0.jpg</asset>

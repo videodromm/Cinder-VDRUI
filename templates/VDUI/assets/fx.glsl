@@ -1,5 +1,3 @@
-#version 150
-out vec4 oFragColor;
 uniform vec3 iResolution;uniform sampler2D iChannel0;
 uniform float iTime;uniform float iFreq0;
 uniform vec4      	iMouse; 			// mouse pixel coords. xy: current (if MLB down), zw: click
@@ -60,7 +58,7 @@ bool VideoHeightFieldIntersectBox(vec3 ro, vec3 rd, vec3 boxmin, vec3 boxmax, ou
 
 float VideoHeightFieldLuminance(sampler2D tex, vec2 uv)
 {
-	vec3 c = texture(tex, uv).xyz;
+	vec3 c = texture2D(tex, uv).xyz;
 	return dot(c, vec3(0.33, 0.33, 0.33));
 }
 
@@ -145,9 +143,9 @@ void main() {
 		hit = VideoHeightFieldTraceHeightField(ro, rd*stepSize, hitPos);
 		if (hit) {
 			vec2 uv = VideoHeightFieldWorldToTex(hitPos);
-			rgb = texture(iChannel0, uv).xyz;
+			rgb = texture2D(iChannel0, uv).xyz;
 		}
      }
 	
-   	oFragColor = vec4(rgb, 1.0);
+   	gl_FragColor = vec4(rgb, 1.0);
 }

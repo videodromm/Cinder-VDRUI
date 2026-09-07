@@ -1,5 +1,3 @@
-#version 150
-out vec4 oFragColor;
 uniform vec3 iResolution;uniform sampler2D iChannel0; uniform sampler2D iChannel1;
 uniform float iTime;uniform float iFreq0;uniform float iGreyScale; uniform float iGlitch;
 uniform vec4 iMouse; // mouse pixel coords. xy: current (if MLB down), zw: click
@@ -66,7 +64,7 @@ bool VideoHeightFieldIntersectBox(vec3 ro, vec3 rd, vec3 boxmin, vec3 boxmax, ou
 
 float VideoHeightFieldLuminance(sampler2D tex, vec2 uv)
 {
-	vec3 c = texture(tex, uv).xyz;
+	vec3 c = texture2D(tex, uv).xyz;
 	return dot(c, vec3(0.33, 0.33, 0.33));
 }
 
@@ -173,7 +171,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
             vec2 screenPos = vec2(startX+x*halfBase,startY+y*halfHeight);
             vec2 uv1 = screenPos / iResolution.xy;
 			uv1.y = 1.0 - uv1.y;
-			blend += texture(tex, uv1);
+			blend += texture2D(tex, uv1);         
         }
     }
     rtn = (blend / 9.0);
@@ -296,7 +294,7 @@ void main() {
 		hit = VideoHeightFieldTraceHeightField(ro, rd*stepSize, hitPos);
 		if (hit) {
 			vec2 uvt = VideoHeightFieldWorldToTex(hitPos);
-			c = texture(iChannel0, uvt).xyz;
+			c = texture2D(iChannel0, uvt).xyz;
 		}
     }
 	//vec4 t0 = c.rgbr;//texture(iChannel0, uv);
@@ -309,5 +307,5 @@ void main() {
 	if (iGreyScale > 0.0) { c = greyScale( c ); }
 	if (iGlitch > 0.0) { c = glitch(c, pos); }
 
-   	oFragColor = vec4(c, 1.0);
+   	gl_FragColor = vec4(c, 1.0);
 }

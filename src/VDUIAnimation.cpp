@@ -1,9 +1,5 @@
 #include "VDUIAnimation.h"
 
-#if ! defined( CINDER_MSW )
-#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
-#endif
-
 using namespace videodromm;
 
 VDUIAnimation::VDUIAnimation(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {

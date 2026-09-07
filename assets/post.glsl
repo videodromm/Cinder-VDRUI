@@ -1,5 +1,3 @@
-#version 150
-out vec4 oFragColor;
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;uniform float iRenderXYX;uniform float iRenderXYY;
 uniform float iTime;uniform float iTempoTime;uniform float iRatio;uniform float iVignette;uniform float iToggle;
 uniform float iExposure;uniform float iSobel;uniform float iChromatic;uniform float iGreyScale;uniform vec3 iColor;
@@ -145,7 +143,7 @@ vec4 trixels( vec2 inUV, sampler2D tex )
             vec2 screenPos = vec2(startX+x*halfBase,startY+y*halfHeight);
             vec2 uv1 = screenPos / iResolution.xy;
 			uv1.y = 1.0 - uv1.y;
-			blend += texture(tex, uv1);
+			blend += texture2D(tex, uv1);         
         }
     }
     rtn = (blend / 9.0);
@@ -275,5 +273,5 @@ void main() {
 		float e = 1.0 / (rf2_1 * rf2_1);
 		c *= e;
 	}
-   	oFragColor = c;
+   	gl_FragColor = c;
 }

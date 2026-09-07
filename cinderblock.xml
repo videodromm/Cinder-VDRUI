@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <cinder>
 <block
-	name="Cinder-VDRUI"
+	name="Cinder-VDUI"
 	id="com.videodromm.vdrui"
 	author="Bruce Lane"
 	license="MIT"
@@ -11,27 +11,22 @@
 	core="true"
 	>
 	<supports os="msw" />
-	<supports os="mac" />
 	<includePath>include</includePath>
 	<includePath>src</includePath>
 	<headerPattern>include/*.h</headerPattern>
 	<sourcePattern>src/*.cpp</sourcePattern>
 	<sourcePattern>src/*.c</sourcePattern>
 	<requires>com.wk.websocketpp</requires>
-	<requires>ocornut.imgui</requires>
+	
 	<requires>nl.cowlumbus.warping</requires>
-	<requires>com.videodromm.vdr</requires>
+	<requires>com.videodromm.vd</requires>
+	<requires>com.videodromm.vdui</requires>
 	<requires>org.libcinder.OSC</requires>
 	<platform os="msw">
 		<requires>fr.batchass.spout</requires>
 		<requires>mb.cinder.midi2</requires>
 		<requires>org.libcinder.HTTPS</requires>
 		<requires>org.libcinder.wmfvideo</requires>
-	</platform>
-	<platform os="mac">
-		<!-- id below assumes https://github.com/naychrist/Cinder-Syphon declares itself with this id;
-		     verify against that block's own cinderblock.xml and correct if different -->
-		<requires>info.v002.syphon</requires>
 	</platform>
 </block>
 <template>templates/VDUI/template.xml</template>

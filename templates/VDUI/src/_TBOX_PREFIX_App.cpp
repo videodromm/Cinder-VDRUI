@@ -26,10 +26,8 @@
 #include "VDAnimation.h"
 // Session Facade
 #include "VDSessionFacade.h"
-// Spout (Windows only)
-#if defined( CINDER_MSW )
+// Spout
 #include "CiSpoutOut.h"
-#endif
 // Uniforms
 #include "VDUniforms.h"
 // Params
@@ -77,18 +75,12 @@ private:
 
 	bool							mFadeInDelay = true;
 	void							toggleCursorVisibility(bool visible);
-#if defined( CINDER_MSW )
 	SpoutOut 						mSpoutOut;
-#endif
-	// TODO: Mac equivalent (Syphon server output) not implemented yet
 	int								mTrack = 0;
 };
 
 
-_TBOX_PREFIX_App::_TBOX_PREFIX_App()
-#if defined( CINDER_MSW )
-	: mSpoutOut("VDRUI", app::getWindowSize())
-#endif
+_TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDRUI", app::getWindowSize())
 {
 
 	// Settings
@@ -366,28 +358,20 @@ void _TBOX_PREFIX_App::draw()
 		int m = mVDSessionFacade->getUniformValue(mVDUniforms->IDISPLAYMODE);
 		if (m == VDDisplayMode::MIXETTE) {
 			gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0));
-#if defined( CINDER_MSW )
 			mSpoutOut.sendTexture(mVDSessionFacade->buildRenderedMixetteTexture(0));
-#endif
 		}
 		else if (m == VDDisplayMode::POST) {
 			gl::draw(mVDSessionFacade->buildPostFboTexture());
-#if defined( CINDER_MSW )
 			mSpoutOut.sendTexture(mVDSessionFacade->buildPostFboTexture());
-#endif
 		}
 		else if (m == VDDisplayMode::FX) {
 			gl::draw(mVDSessionFacade->buildFxFboTexture());
-#if defined( CINDER_MSW )
 			mSpoutOut.sendTexture(mVDSessionFacade->buildFxFboTexture());
-#endif
 		}
 		else {
 			if (m < mVDSessionFacade->getFboShaderListSize()) {
 				gl::draw(mVDSessionFacade->getFboShaderTexture(m));
-#if defined( CINDER_MSW )
 				mSpoutOut.sendTexture(mVDSessionFacade->getFboShaderTexture(m));
-#endif
 			}
 			else {
 				gl::draw(mVDSessionFacade->buildRenderedMixetteTexture(0), Area(50, 50, mVDParams->getFboWidth() / 2, mVDParams->getFboHeight() / 2));
