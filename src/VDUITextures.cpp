@@ -26,7 +26,7 @@ void VDUITextures::Run(const char* title) {
 			ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
 			unsigned int ms = mVDSession->getFboMs(t);
 			sprintf(buf, " %s##s%d", mVDSession->getInputTextureName(t).c_str(), t);
-			ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+			ImGui::Begin( buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse );
 			{
 				ImGui::PushItemWidth(mVDParams->getUISmallPreviewW());
 				ImGui::PushID(t);
