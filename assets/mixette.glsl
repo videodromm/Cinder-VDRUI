@@ -1,3 +1,5 @@
+#version 150
+out vec4 oFragColor;
 uniform vec3      	iResolution;
 uniform sampler2D 	iChannel0;
 uniform sampler2D 	iChannel1;
@@ -23,7 +25,7 @@ uniform int			iBlendmode;
 // left main lines begin
 vec3 shaderLeft(vec2 uv)
 {
-	vec4 left = texture2D(iChannel0, uv);
+	vec4 left = texture(iChannel0, uv);
 	return vec3( left.r, left.g, left.b );
 }
 // left main lines end
@@ -31,7 +33,7 @@ vec3 shaderLeft(vec2 uv)
 // right main lines begin
 vec3 shaderRight(vec2 uv)
 {
-	vec4 right = texture2D(iChannel1, uv);
+	vec4 right = texture(iChannel1, uv);
 	return vec3( right.r, right.g, right.b );
 }
 
@@ -341,5 +343,5 @@ void main() {
    }
    
 
-	gl_FragColor = vec4(c.r, c.g, c.b, 1.0);	
+	oFragColor = vec4(c.r, c.g, c.b, 1.0);
 }
