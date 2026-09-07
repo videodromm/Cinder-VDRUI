@@ -29,9 +29,9 @@
 		<requires>org.libcinder.wmfvideo</requires>
 	</platform>
 	<platform os="mac">
-		<!-- id below assumes https://github.com/astellato/Cinder-Syphon declares itself with this id;
+		<!-- id below assumes https://github.com/naychrist/Cinder-Syphon declares itself with this id;
 		     verify against that block's own cinderblock.xml and correct if different -->
-		<requires>com.astellato.syphon</requires>
+		<requires>info.v002.syphon</requires>
 	</platform>
 </block>
 <template>templates/VDUI/template.xml</template>
