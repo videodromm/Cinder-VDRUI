@@ -1,3 +1,5 @@
+#version 150
+
 uniform vec3 iResolution;uniform sampler2D iChannel0;
 uniform float iTime;uniform float iFreq0;
 uniform vec4      	iMouse; 			// mouse pixel coords. xy: current (if MLB down), zw: click

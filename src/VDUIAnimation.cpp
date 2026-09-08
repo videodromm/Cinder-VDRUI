@@ -34,8 +34,9 @@ VDUIAnimation::~VDUIAnimation() {
 }
 
 void VDUIAnimation::Run(const char* title) {
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW(), mVDParams->getUILargeH() * 3.1), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
+	float uiScale = ci::app::getWindow()->getContentScale();
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 3.1f * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 	int hue = 0;
 	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{

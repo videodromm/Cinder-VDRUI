@@ -1,3 +1,5 @@
+#version 150
+
 uniform vec3 iResolution;uniform sampler2D iChannel0;uniform float iZoom;uniform float iRenderXYX;uniform float iRenderXYY;
 uniform float iTime;uniform float iTempoTime;uniform float iRatio;uniform float iVignette;uniform float iToggle;
 uniform float iExposure;uniform float iSobel;uniform float iChromatic;uniform float iGreyScale;uniform vec3 iColor;

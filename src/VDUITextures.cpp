@@ -22,16 +22,17 @@ void VDUITextures::Run(const char* title) {
 		if (mVDSession->isValidInputTexture(ti)) {
 			t = ti;
 			validImages++;
-			ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW(), mVDParams->getPreviewHeight()), ImGuiCond_Once);
-			ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+			float uiScale = ci::app::getWindow()->getContentScale();
+			ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * uiScale, mVDParams->getPreviewHeight() * uiScale), ImGuiCond_Once);
+			ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 			unsigned int ms = mVDSession->getFboMs(t);
 			sprintf(buf, " %s##s%d", mVDSession->getInputTextureName(t).c_str(), t);
 			ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 			{
-				ImGui::PushItemWidth(mVDParams->getUISmallPreviewW());
+				ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * uiScale);
 				ImGui::PushID(t);
 				if (mVDSession->getFboInputTexture(t)) {
-					ImGui::Image(mVDSession->getFboInputTexture(t), ivec2(mVDParams->getUISmallPreviewW(), mVDParams->getUISmallPreviewH()));
+					ImGui::Image(mVDSession->getFboInputTexture(t), ivec2(mVDParams->getUISmallPreviewW() * uiScale, mVDParams->getUISmallPreviewH() * uiScale));
 				}
 
 				ImGui::TextColored(ImColor(155, 50, 255), "%d-", t);

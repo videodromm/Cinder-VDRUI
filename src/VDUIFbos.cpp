@@ -36,8 +36,9 @@ void VDUIFbos::Run(const char* title) {
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));
 		yPos = mVDParams->getUIYPosRow2();
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), mVDParams->getUILargePreviewH() * 1.4), ImGuiCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+		float uiScale = ci::app::getWindow()->getContentScale();
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, mVDParams->getUILargePreviewH() * 1.4f * uiScale), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));
 		ImGui::PushStyleColor(ImGuiCol_FrameBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.5f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(f / 16.0f, 0.6f, 0.5f));
@@ -51,7 +52,7 @@ void VDUIFbos::Run(const char* title) {
 			ctrl = mVDUniforms->IWEIGHT0 + f;
 			float iWeight = mVDSession->getUniformValue(ctrl);
 
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
 			ImGui::TextColored(ImColor(155, 255, 0), "%d %dms", f+31, mVDSession->getFboMsTotal(f));
 			if (!mVDSession->isFboValid(f)) {
 				ImGui::TextColored(ImColor(255, 0, 0), "err: %s", mVDSession->getFboError(f).c_str());
@@ -95,9 +96,9 @@ void VDUIFbos::Run(const char* title) {
 			//mVDSession->buildFboRenderedTexture(f) && 
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save thumbnail");
 
-			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			ImGui::SameLine();
-			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))
+			if (ImGui::VSliderFloat("##v", ImVec2(28 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setValue(ctrl, f, iWeight);
 			};
@@ -218,7 +219,7 @@ void VDUIFbos::Run(const char* title) {
 					texNameEndIndex = uName.find("tex");
 					if (texNameEndIndex != std::string::npos && texNameEndIndex != -1) {
 						// hydra fbo
-						ImGui::Image(mVDSession->getFboInputTextureListItem(f, channelIndex), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+						ImGui::Image(mVDSession->getFboInputTextureListItem(f, channelIndex), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 						channelIndex++;
 						ImGui::SameLine();
 					}

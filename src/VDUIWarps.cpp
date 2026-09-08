@@ -17,9 +17,10 @@ void VDUIWarps::Run(const char* title) {
 	for (int w = 0; w < mVDSession->getWarpCount(); w++) {
 
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol3() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
-		
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW(), 150.0f), ImGuiCond_Once);
-		ImGui::SetNextWindowPos(ImVec2(xPos, yPos), ImGuiCond_Once);
+
+		float uiScale = ci::app::getWindow()->getContentScale();
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, 150.0f * uiScale), ImGuiCond_Once);
+		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 
 
 		sprintf(buf, "%s##sh%d", mVDSession->getWarpName(w).c_str(), w);
@@ -49,11 +50,11 @@ void VDUIWarps::Run(const char* title) {
 			}
 
 
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
 			ImGui::PushID(w);
 			int fboa = mVDSession->getWarpAFboIndex(w);
 
-			if (mVDSession->buildFboRenderedTexture(fboa)) ImGui::Image(mVDSession->buildFboRenderedTexture(fboa), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			if (mVDSession->buildFboRenderedTexture(fboa)) ImGui::Image(mVDSession->buildFboRenderedTexture(fboa), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			//if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->getWarpName(w).c_str());
 			// loop on the fbos A
 			for (unsigned int a = 0; a < mVDSession->getFboShaderListSize(); a++) {

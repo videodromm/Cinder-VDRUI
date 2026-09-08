@@ -27,7 +27,7 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mIsResizing = true;
 	mShowWarps = false;
 	mShowFbos = true;
-	mShowTextures = false;
+	mShowTextures = true;
 	mShowBlend = false;
 }
 
@@ -49,15 +49,16 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 #pragma region style
 		ImGuiStyle& style = ImGui::GetStyle();
+		float styleScale = ci::app::getWindow()->getContentScale();
 		// our theme variables
-		style.WindowRounding = 8;
-		style.WindowPadding = ImVec2(3, 3);
-		style.FramePadding = ImVec2(2, 2);
-		style.FrameRounding = 6;
-		style.ItemSpacing = ImVec2(3, 3);
-		style.ItemInnerSpacing = ImVec2(3, 3);
+		style.WindowRounding = 8 * styleScale;
+		style.WindowPadding = ImVec2(3 * styleScale, 3 * styleScale);
+		style.FramePadding = ImVec2(2 * styleScale, 2 * styleScale);
+		style.FrameRounding = 6 * styleScale;
+		style.ItemSpacing = ImVec2(3 * styleScale, 3 * styleScale);
+		style.ItemInnerSpacing = ImVec2(3 * styleScale, 3 * styleScale);
 		//style.WindowMinSize = ImVec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight());
-		style.WindowMinSize = ImVec2(mVDParams->getUISmallPreviewW(), mVDParams->getUISmallPreviewH());
+		style.WindowMinSize = ImVec2(mVDParams->getUISmallPreviewW() * styleScale, mVDParams->getUISmallPreviewH() * styleScale);
 		style.Alpha = 0.65f;
 
 		style.Colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
@@ -111,8 +112,19 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	*/
 #pragma endregion menu
 	// right panel
-	ImGui::SetNextWindowSize(ImVec2(300.0f, mVDParams->getUILargeH()), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
+	float uiScale = ci::app::getWindow()->getContentScale();
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+		ImGuiIO& dbgIo = ImGui::GetIO();
+		CI_LOG_W("CLICK uiScale=" << uiScale
+			<< " io.MousePos=(" << dbgIo.MousePos.x << "," << dbgIo.MousePos.y << ")"
+			<< " io.DisplaySize=(" << dbgIo.DisplaySize.x << "," << dbgIo.DisplaySize.y << ")"
+			<< " io.DisplayFramebufferScale=(" << dbgIo.DisplayFramebufferScale.x << "," << dbgIo.DisplayFramebufferScale.y << ")"
+			<< " WantCaptureMouse=" << dbgIo.WantCaptureMouse
+			<< " windowSizePts=(" << getWindowWidth() << "," << getWindowHeight() << ")"
+			<< " windowSizePx=(" << ci::app::getWindow()->toPixels(getWindowWidth()) << "," << ci::app::getWindow()->toPixels(getWindowHeight()) << ")");
+	}
+	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
 	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
@@ -169,21 +181,21 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 	ImGui::End();
 	// Center panel
-	ImGui::SetNextWindowSize(ImVec2(748.0f, mVDParams->getUILargePreviewH()), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1(), mVDParams->getUIYPosRow1()), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(748.0f * uiScale, mVDParams->getUILargePreviewH() * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
 	sprintf(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
 	ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		// line 1
-		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		ImGui::Image(mVDSession->buildPostFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
+		ImGui::Image(mVDSession->buildPostFboTexture(), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Post");
 		ImGui::SameLine();
-		ImGui::Image(mVDSession->buildRenderedWarpFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildRenderedWarpFboTexture(), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Warp");
 		ImGui::SameLine();
-		ImGui::Image(mVDSession->buildFxFboTexture(), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+		ImGui::Image(mVDSession->buildFxFboTexture(), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fx");
 
 		ImGui::SameLine();
@@ -238,7 +250,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PlotLines("V", &timeValues.front(), (int)timeValues.size(), timeValues_offset, toString(int(mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME))).c_str(), 0.0f, 255.0f, ImVec2(0, 30));
 		if (mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME) > 240.0) ImGui::PopStyleColor();
 
-		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
 		ImGui::SameLine();
 		// reset ax
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
@@ -246,14 +258,21 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::Button(buf)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0);
 		}
-		ImGui::PopStyleColor(1);		
+		ImGui::PopStyleColor(1);
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
+			CI_LOG_W("RECT x-button min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
+		}
 		ImGui::SameLine();
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
 		if (ImGui::SliderFloat("AX", &multx, 0.01f, 7.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 		}
-		
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
+			CI_LOG_W("RECT AX-slider min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
+		}
 
 		int hue = 0;
 		ImGui::SameLine();
@@ -263,6 +282,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDSession->toggleUseLineIn();
 		}
 		ImGui::PopStyleColor(1);
+		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
+			CI_LOG_W("RECT Mic-button min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
+		}
 
 
 		// debug
@@ -563,10 +586,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.6f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(m / 16.0f, 0.9f, 0.9f));
-			ImGui::Image(mVDSession->buildFboRenderedTexture(m), ivec2(mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight()));
+			ImGui::Image(mVDSession->buildFboRenderedTexture(m), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 
 			ImGui::SameLine();
-			if (ImGui::VSliderFloat("##v", ImVec2(18, 60), &iWeight, 0.0f, 1.0f, ""))
+			if (ImGui::VSliderFloat("##v", ImVec2(28 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setFloatValue(ctrl, iWeight);
 			};
