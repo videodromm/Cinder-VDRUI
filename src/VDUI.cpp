@@ -49,7 +49,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 #pragma region style
 		ImGuiStyle& style = ImGui::GetStyle();
-		float styleScale = ci::app::getWindow()->getContentScale();
+		// seed the user-adjustable UI scale from the real display content scale; from here on it's
+		// a manual slider (see "UI Scale" next to the Mic button) so it can be fine-tuned independently
+		mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, ci::app::getWindow()->getContentScale());
+		float styleScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 		// our theme variables
 		style.WindowRounding = 8 * styleScale;
 		style.WindowPadding = ImVec2(3 * styleScale, 3 * styleScale);
@@ -112,17 +115,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	*/
 #pragma endregion menu
 	// right panel
-	float uiScale = ci::app::getWindow()->getContentScale();
-	if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-		ImGuiIO& dbgIo = ImGui::GetIO();
-		CI_LOG_W("CLICK uiScale=" << uiScale
-			<< " io.MousePos=(" << dbgIo.MousePos.x << "," << dbgIo.MousePos.y << ")"
-			<< " io.DisplaySize=(" << dbgIo.DisplaySize.x << "," << dbgIo.DisplaySize.y << ")"
-			<< " io.DisplayFramebufferScale=(" << dbgIo.DisplayFramebufferScale.x << "," << dbgIo.DisplayFramebufferScale.y << ")"
-			<< " WantCaptureMouse=" << dbgIo.WantCaptureMouse
-			<< " windowSizePts=(" << getWindowWidth() << "," << getWindowHeight() << ")"
-			<< " windowSizePx=(" << ci::app::getWindow()->toPixels(getWindowWidth()) << "," << ci::app::getWindow()->toPixels(getWindowHeight()) << ")");
-	}
+	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
@@ -259,19 +252,11 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0);
 		}
 		ImGui::PopStyleColor(1);
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
-			CI_LOG_W("RECT x-button min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
-		}
 		ImGui::SameLine();
 
 		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
 		if (ImGui::SliderFloat("AX", &multx, 0.01f, 7.0f)) {
 			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
-		}
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
-			CI_LOG_W("RECT AX-slider min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
 		}
 
 		int hue = 0;
@@ -282,11 +267,16 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDSession->toggleUseLineIn();
 		}
 		ImGui::PopStyleColor(1);
-		if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			ImVec2 rmin = ImGui::GetItemRectMin(); ImVec2 rmax = ImGui::GetItemRectMax();
-			CI_LOG_W("RECT Mic-button min=(" << rmin.x << "," << rmin.y << ") max=(" << rmax.x << "," << rmax.y << ")");
-		}
 
+		// manual UI scale override (see IUISCALE) - lets the panel/font/spacing scale be
+		// fine-tuned independently of the display's auto-detected content scale
+		ImGui::SameLine();
+		ImGui::PushItemWidth(80.0f * uiScale);
+		float uiScaleCtrl = uiScale;
+		if (ImGui::SliderFloat("UI Scale", &uiScaleCtrl, 0.5f, 4.0f)) {
+			mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, uiScaleCtrl);
+		}
+		ImGui::PopItemWidth();
 
 		// debug
 		ctrl = mVDUniforms->IDEBUG;

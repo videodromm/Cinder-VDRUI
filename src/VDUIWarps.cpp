@@ -18,7 +18,7 @@ void VDUIWarps::Run(const char* title) {
 
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol3() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
 
-		float uiScale = ci::app::getWindow()->getContentScale();
+		float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, 150.0f * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 

@@ -36,7 +36,7 @@ void VDUIFbos::Run(const char* title) {
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));
 		yPos = mVDParams->getUIYPosRow2();
-		float uiScale = ci::app::getWindow()->getContentScale();
+		float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, mVDParams->getUILargePreviewH() * 1.4f * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));

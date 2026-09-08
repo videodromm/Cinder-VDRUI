@@ -119,6 +119,13 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App() : mSpoutOut("VDUI", app::getWindowSize())
 	mVDUI = VDUI::create(mVDSettings, mVDSessionFacade, mVDUniforms);
 	// Initialize ImGui context
 	ImGui::Initialize();
+	// VDUIParams positions/sizes are authored in logical (1x) units; scale ImGui to match
+	// on Retina displays now that the window reports real device pixels.
+#if defined( CINDER_MAC )
+	float contentScale = getWindow()->getContentScale();
+	ImGui::GetStyle().ScaleAllSizes(contentScale);
+	ImGui::GetStyle().FontScaleMain = contentScale;
+#endif
 }
 
 void _TBOX_PREFIX_App::toggleCursorVisibility(bool visible)
@@ -353,19 +360,19 @@ void _TBOX_PREFIX_App::draw()
 		}
 	}
 	else {
-		gl::setMatricesWindow(mVDParams->getFboWidth(), mVDParams->getFboHeight());
-		
+		gl::setMatricesWindow(getWindowSize());
+
 		int m = mVDSessionFacade->getUniformValue(mVDUniforms->IDISPLAYMODE);
 		if (m == VDDisplayMode::POST) {
-			gl::draw(mVDSessionFacade->buildPostFboTexture());
+			gl::draw(mVDSessionFacade->buildPostFboTexture(), getWindowBounds());
 			mSpoutOut.sendTexture(mVDSessionFacade->buildPostFboTexture());
 		}
 		else if (m == VDDisplayMode::FX) {
-			gl::draw(mVDSessionFacade->buildFxFboTexture());
+			gl::draw(mVDSessionFacade->buildFxFboTexture(), getWindowBounds());
 			mSpoutOut.sendTexture(mVDSessionFacade->buildFxFboTexture());
 		}
 		else if (m < mVDSessionFacade->getFboShaderListSize()) {
-				gl::draw(mVDSessionFacade->getFboShaderTexture(m));
+				gl::draw(mVDSessionFacade->getFboShaderTexture(m), getWindowBounds());
 				mSpoutOut.sendTexture(mVDSessionFacade->getFboShaderTexture(m));
 			}
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()	
@@ -381,5 +388,6 @@ void _TBOX_PREFIX_App::draw()
 void prepareSettings(App::Settings *settings)
 {
 	settings->setWindowSize(1280, 720);
+	settings->setHighDensityDisplayEnabled(true);
 }
 CINDER_APP(_TBOX_PREFIX_App, RendererGl(RendererGl::Options().msaa(8)),  prepareSettings)
