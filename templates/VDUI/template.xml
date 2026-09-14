@@ -16,6 +16,7 @@
 	<asset>assets/passthrough.vs</asset>
 	<asset>assets/post.glsl</asset>
 	<asset>assets/defaultvertex.fs</asset>
+	<asset>assets/session.json</asset>
 	<asset>assets/shadertoy.vd</asset>
 	<asset>assets/video_texture.fs.glsl</asset>
 	<asset>assets/video_texture.vs.glsl</asset>

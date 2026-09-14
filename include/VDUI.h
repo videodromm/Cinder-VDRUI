@@ -20,6 +20,8 @@
 #include "VDUIAnimation.h"
 // Warps
 #include "VDUIWarps.h"
+// Folders
+#include "VDUIFolders.h"
 // Params
 #include "VDParams.h"
 
@@ -77,6 +79,10 @@ namespace videodromm
 		bool						showUIWarps;
 		bool						mShowWarps;
 
+		// UIFolders
+		VDUIFoldersRef				mUIFolders;
+		bool						mShowFolders;
+
 		// imgui
 		char						buf[64];
 		bool						mIsResizing;
@@ -102,6 +108,9 @@ namespace videodromm
 		}
 		void mToggleShowBlend() {
 			mShowBlend = !mShowBlend;
+		}
+		void mToggleShowFolders() {
+			mShowFolders = !mShowFolders;
 		}
 		/*void setFloatValue(unsigned int aCtrl, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);
