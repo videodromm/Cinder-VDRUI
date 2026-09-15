@@ -8,7 +8,13 @@
 
 	<requires>org.libcinder.OSC</requires>
 	<requires>mb.cinder.midi2</requires>
-	<requires>fr.batchass.spout</requires>
+	<platform os="msw">
+		<requires>fr.batchass.spout</requires>
+		<requires>org.libcinder.wmfvideo</requires>
+	</platform>
+	<platform os="macosx">
+		<requires>info.v002.syphon</requires>
+	</platform>
 	<source replaceContents="true" replaceName="true">src/_TBOX_PREFIX_App.cpp</source>
 	<asset>assets/0.jpg</asset>
 	<asset>assets/inputImage.fs</asset>
