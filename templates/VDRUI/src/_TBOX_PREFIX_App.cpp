@@ -209,7 +209,6 @@ void _TBOX_PREFIX_App::keyUp(KeyEvent event)
 void _TBOX_PREFIX_App::cleanup()
 {
 	CI_LOG_V("cleanup and save");
-	ui::Shutdown();
 	mVDSessionFacade->saveWarps();
 	mVDSettings->save();
 	CI_LOG_V("quit");

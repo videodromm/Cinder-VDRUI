@@ -21,7 +21,6 @@
 	<requires>mb.cinder.midi2</requires>
 	<requires>nl.cowlumbus.warping</requires>
 	<requires>com.videodromm.vdr</requires>
-	<requires>com.videodromm.vdrui</requires>
 	<requires>org.libcinder.OSC</requires>
 	<requires>org.libcinder.HTTPS</requires>
 	<platform os="msw">
