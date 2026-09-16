@@ -31,6 +31,11 @@
 #if defined( CINDER_MSW )
 #include "CiSpoutOut.h"
 #endif
+// NDI (Windows only, see Cinder-NDI/cinderblock.xml's <supports os="msw"/>)
+// TODO: Mac equivalent not implemented yet (same gap as Syphon server output above)
+#if defined( CINDER_MSW )
+#include "CinderNDISender.h"
+#endif
 // Uniforms
 #include "VDUniforms.h"
 // Params
@@ -80,6 +85,7 @@ private:
 	void							toggleCursorVisibility(bool visible);
 #if defined( CINDER_MSW )
 	SpoutOut 						mSpoutOut;
+	CinderNDISender					mNdiOut;
 #endif
 	int								mTrack = 0;
 };
@@ -88,6 +94,7 @@ private:
 _TBOX_PREFIX_App::_TBOX_PREFIX_App()
 #if defined( CINDER_MSW )
 	: mSpoutOut("VDUI", app::getWindowSize())
+	, mNdiOut("VDUI")
 #endif
 {
 
@@ -371,21 +378,29 @@ void _TBOX_PREFIX_App::draw()
 
 		int m = mVDSessionFacade->getUniformValue(mVDUniforms->IDISPLAYMODE);
 		if (m == VDDisplayMode::POST) {
-			gl::draw(mVDSessionFacade->buildPostFboTexture(), getWindowBounds());
+			auto tex = mVDSessionFacade->buildPostFboTexture();
+			gl::draw(tex, getWindowBounds());
 #if defined( CINDER_MSW )
-			mSpoutOut.sendTexture(mVDSessionFacade->buildPostFboTexture());
+			mSpoutOut.sendTexture(tex);
+			// building the ci::Surface is a GPU->CPU readback, so skip it entirely when nobody's
+			// receiving rather than relying on sendSurface()'s own (later) connection check
+			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
 #endif
 		}
 		else if (m == VDDisplayMode::FX) {
-			gl::draw(mVDSessionFacade->buildFxFboTexture(), getWindowBounds());
+			auto tex = mVDSessionFacade->buildFxFboTexture();
+			gl::draw(tex, getWindowBounds());
 #if defined( CINDER_MSW )
-			mSpoutOut.sendTexture(mVDSessionFacade->buildFxFboTexture());
+			mSpoutOut.sendTexture(tex);
+			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
 #endif
 		}
 		else if (m < mVDSessionFacade->getFboShaderListSize()) {
-				gl::draw(mVDSessionFacade->getFboShaderTexture(m), getWindowBounds());
+				auto tex = mVDSessionFacade->getFboShaderTexture(m);
+				gl::draw(tex, getWindowBounds());
 #if defined( CINDER_MSW )
-				mSpoutOut.sendTexture(mVDSessionFacade->getFboShaderTexture(m));
+				mSpoutOut.sendTexture(tex);
+				if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
 #endif
 			}
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()	

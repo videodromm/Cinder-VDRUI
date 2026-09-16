@@ -26,6 +26,7 @@
 	<platform os="msw">
 		<requires>fr.batchass.spout</requires>
 		<requires>org.libcinder.wmfvideo</requires>
+		<requires>org.libcinder.ndi</requires>
 	</platform>
 	<platform os="macosx">
 		<requires>info.v002.syphon</requires>

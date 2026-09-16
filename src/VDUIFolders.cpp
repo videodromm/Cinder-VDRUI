@@ -16,7 +16,7 @@ VDUIFolders::VDUIFolders(VDUniformsRef aVDUniforms, VDSessionFacadeRef aVDSessio
 void VDUIFolders::Run(const char* title) {
 
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
 
 	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);

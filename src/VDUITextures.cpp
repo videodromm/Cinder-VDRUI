@@ -25,7 +25,9 @@ void VDUITextures::Run(const char* title) {
 		ci::gl::Texture2dRef tex = mVDSession->getFboInputTextureListItem(f, 0);
 		if (!tex) continue;
 		validImages++;
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * uiScale, mVDParams->getPreviewHeight() * uiScale), ImGuiCond_Once);
+		// twice the size of the underlying VDParams preview dimensions, scoped to this panel only
+		const float kSizeMultiplier = 2.0f;
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getPreviewHeight() * kSizeMultiplier * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		std::string texName = mVDSession->getFboInputTextureName(f);
 		unsigned int ms = mVDSession->getFboMsTotal(f);
@@ -34,9 +36,9 @@ void VDUITextures::Run(const char* title) {
 		if (isBackingSelectedFbo) ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor(200, 150, 0, 220));
 		ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
-			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * uiScale);
+			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale);
 			ImGui::PushID(f);
-			ImGui::Image(tex, ivec2(mVDParams->getUISmallPreviewW() * uiScale, mVDParams->getUISmallPreviewH() * uiScale));
+			ImGui::Image(tex, ivec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale));
 			// click a texture to assign it (by reference, no reload) to whichever fbo is
 			// currently selected via the "tex" button in the Fbos panel
 			if (ImGui::IsItemClicked()) {
@@ -57,12 +59,13 @@ void VDUITextures::Run(const char* title) {
 		}
 		ImGui::End();
 		if (isBackingSelectedFbo) ImGui::PopStyleColor(1);
-		xPos += mVDParams->getUISmallPreviewW() + mVDParams->getUIMargin();
+		xPos += mVDParams->getUISmallPreviewW() * kSizeMultiplier + mVDParams->getUIMargin();
 
-		if (validImages % 22 == 21)
+		// windows are now twice as wide/tall, so half as many fit per row before wrapping
+		if (validImages % 11 == 10)
 		{
 			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
-			yPos -= mVDParams->getPreviewHeight() + mVDParams->getUIMargin();
+			yPos -= mVDParams->getPreviewHeight() * kSizeMultiplier + mVDParams->getUIMargin();
 			if (yPos < mVDParams->getUIYPosRow2() + 200) yPos = mVDParams->getUIYPosRow3();
 		}
 	}

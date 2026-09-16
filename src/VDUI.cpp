@@ -119,7 +119,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #pragma endregion menu
 	// right panel
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * 2.2f * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
 	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
