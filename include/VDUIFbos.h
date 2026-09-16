@@ -53,6 +53,11 @@ namespace videodromm
 		// sequence
 		int								playheadPositions[12];
 		float							speeds[12];
+		// scrub slider: while actively being dragged, don't overwrite the slider's value from the
+		// live playback position (that fight is what caused the reported jitter), and mute the
+		// video for the duration (restored on release) so scrubbing doesn't play garbled audio
+		bool							mIsScrubbing[12] = { false };
+		float							mPreScrubVolume[12] = { 0.0f };
 		// uniforms
 		unsigned int					ctrl;
 		unsigned int					location;

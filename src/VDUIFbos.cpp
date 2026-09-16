@@ -115,6 +115,11 @@ void VDUIFbos::Run(const char* title) {
 			if (ImGui::VSliderFloat("##v", ImVec2(28 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setValue(ctrl, f, iWeight);
+				// fading a movie's visual weight also fades its audio - lets weight double as a
+				// volume fader instead of the video staying at full volume regardless
+				if (mVDSession->isMovie(f)) {
+					mVDSession->setVideoVolume(f, iWeight);
+				}
 			};
 
 			
@@ -172,6 +177,11 @@ void VDUIFbos::Run(const char* title) {
 					}
 					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pause loading from disk");
 				}
+			}
+			// speed/scrub - unlike sync-to-beat/reverse/loading-toggle above, these apply to
+			// movies too (getSpeed/setSpeed/getPosition/setPlayheadPosition/getMaxFrame already
+			// dispatch correctly for MOVIE, see VDFboShader.h)
+			if (mVDSession->isSequence(f) || mVDSession->isMovie(f)) {
 				speeds[f] = mVDSession->getSpeed(f);
 				sprintf(buf, "speed##spd%d", f);
 				if (ImGui::SliderFloat(buf, &speeds[f], 0.0f, 1.0f))
@@ -179,11 +189,28 @@ void VDUIFbos::Run(const char* title) {
 					mVDSession->setSpeed(f, speeds[f]);
 				}
 
-				playheadPositions[f] = mVDSession->getPosition(f);
+				// don't clobber the slider's value from the live playback position while it's
+				// actively being dragged - that fight (live position resetting the handle every
+				// frame, mid-drag) is what caused the reported jitter
+				if (!mIsScrubbing[f]) {
+					playheadPositions[f] = mVDSession->getPosition(f);
+				}
 				sprintf(buf, "scrub##srb%d", f);
 				if (ImGui::SliderInt(buf, &playheadPositions[f], 0, mVDSession->getMaxFrame(f)))
 				{
 					mVDSession->setPlayheadPosition(f, playheadPositions[f]);
+				}
+				if (ImGui::IsItemActivated()) {
+					// drag just started - mute for its duration (setVideoVolume/getVideoVolume are
+					// no-ops outside MOVIE mode, safe to call unconditionally for sequences too)
+					mPreScrubVolume[f] = mVDSession->getVideoVolume(f);
+					mVDSession->setVideoVolume(f, 0.0f);
+					mIsScrubbing[f] = true;
+				}
+				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) {
+					// drag just ended (regardless of whether the value actually changed) - restore
+					mVDSession->setVideoVolume(f, mPreScrubVolume[f]);
+					mIsScrubbing[f] = false;
 				}
 			}
 
