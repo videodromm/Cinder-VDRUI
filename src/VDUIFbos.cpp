@@ -72,11 +72,7 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 			sprintf(buf, "tex##rdrtexuniform%d", f);
-			//mShowInputTexture ^= ImGui::Button(buf);
-			if (ImGui::Button(buf)) {
-				//mShowInputTexture = !mShowInputTexture;
-				mVDSession->setSelectedFbo(f);
-			}
+			mShowInputTexture ^= ImGui::Button(buf);
 			ImGui::PopStyleColor(3);
 
 			hue++;
@@ -107,7 +103,7 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
-			/*for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
+			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
 				if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
 				if (mVDSession->getFboInputTextureIndex(f) == t) {
 					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
@@ -118,65 +114,60 @@ void VDUIFbos::Run(const char* title) {
 				sprintf(buf, "%d##fboit%d%d", t, f, t);
 				if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, t);
 
-				sprintf(buf, "Set input texture to %s", mVDSession->getInputTextureName(t).c_str());
+				sprintf(buf, "Set input texture to %s", mVDSession->getInputTextureName(f, t).c_str());
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 				ImGui::PopStyleColor(1);
-			}*/
+			}
 
-
-			/*if (mVDSession->isSequence(t) || mVDSession->isMovie(t)) {
-				sprintf(buf, "p##s%d", t);
+			// playback controls - one panel per fbo (not per texture slot), hence "f" here
+			if (mVDSession->isSequence(f) || mVDSession->isMovie(f)) {
+				sprintf(buf, "p##s%d", f);
 				if (ImGui::Button(buf))
 				{
-					mVDSession->togglePlayPause(t);
+					mVDSession->togglePlayPause(f);
 				}
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Play/Pause");
 			}
-			if (mVDSession->isSequence(t)) {
+			if (mVDSession->isSequence(f)) {
 				ImGui::SameLine();
-				sprintf(buf, "b##sqs%d", t);
+				sprintf(buf, "b##sqs%d", f);
 				if (ImGui::Button(buf))
 				{
-					mVDSession->syncToBeat(t);
+					mVDSession->syncToBeat(f);
 				}
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sync to beat");
 
 				ImGui::SameLine();
-				sprintf(buf, "r##rs%d", t);
+				sprintf(buf, "r##rs%d", f);
 				if (ImGui::Button(buf))
 				{
-					mVDSession->reverse(t);
+					mVDSession->reverse(f);
 				}
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reverse");
 
-				if (mVDSession->isLoadingFromDisk(t)) {
+				if (mVDSession->isLoadingFromDisk(f)) {
 					ImGui::SameLine();
-					sprintf(buf, "l##ts%d", t);
+					sprintf(buf, "l##ts%d", f);
 					if (ImGui::Button(buf))
 					{
-						mVDSession->toggleLoadingFromDisk(t);
+						mVDSession->toggleLoadingFromDisk(f);
 					}
 					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Pause loading from disk");
 				}
-				speeds[t] = mVDSession->getSpeed(t);
-				sprintf(buf, "speed##spd%d", t);
-				if (ImGui::SliderFloat(buf, &speeds[t], 0.0f, 1.0f))
+				speeds[f] = mVDSession->getSpeed(f);
+				sprintf(buf, "speed##spd%d", f);
+				if (ImGui::SliderFloat(buf, &speeds[f], 0.0f, 1.0f))
 				{
-					mVDSession->setSpeed(t, speeds[t]);
+					mVDSession->setSpeed(f, speeds[f]);
 				}
 
-				playheadPositions[t] = mVDSession->getPosition(t);
-				sprintf(buf, "scrub##srb%d", t);
-				if (ImGui::SliderInt(buf, &playheadPositions[t], 0, mVDSession->getMaxFrame(t)))
+				playheadPositions[f] = mVDSession->getPosition(f);
+				sprintf(buf, "scrub##srb%d", f);
+				if (ImGui::SliderInt(buf, &playheadPositions[f], 0, mVDSession->getMaxFrame(f)))
 				{
-					mVDSession->setPlayheadPosition(t, playheadPositions[t]);
+					mVDSession->setPlayheadPosition(f, playheadPositions[f]);
 				}
-
-
 			}
-			else {
-
-			}*/
 
 #pragma endregion tex
 

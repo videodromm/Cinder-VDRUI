@@ -263,30 +263,31 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 
 		int hue = 0;
-		ImGui::SameLine();
-		(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-		// audio preferred
-		if (ImGui::Button("Mic")) {
-			mVDSession->toggleUseLineIn();
-		}
-		ImGui::PopStyleColor(1);
+		// Done in UIAnimation
+		// ImGui::SameLine();
+		//(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+		//// audio preferred
+		//if (ImGui::Button("Mic")) {
+		//	mVDSession->toggleUseLineIn();
+		//}
+		//ImGui::PopStyleColor(1);
 
 		// manual UI scale override (see IUISCALE) - lets the panel/font/spacing scale be
 		// fine-tuned independently of the display's auto-detected content scale
-		ImGui::SameLine();
+		// ImGui::SameLine();
 		ImGui::PushItemWidth(80.0f * uiScale);
 		float uiScaleCtrl = uiScale;
-		if (ImGui::SliderFloat("UI Scale", &uiScaleCtrl, 0.5f, 4.0f)) {
+		if (ImGui::SliderFloat("UIX", &uiScaleCtrl, 0.5f, 4.0f)) {
 			mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, uiScaleCtrl);
 		}
 		ImGui::PopItemWidth();
-
 		// debug
+		ImGui::SameLine();
 		ctrl = mVDUniforms->IDEBUG;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Debug")) {
+		if (ImGui::Button("Dbg")) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);

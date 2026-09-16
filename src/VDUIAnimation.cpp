@@ -404,7 +404,47 @@ void VDUIAnimation::Run(const char* title) {
 		if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
-			// mic
+
+			// audio device list - populated once automatically, then on demand via Refresh,
+			// so the user can pick a device before ever touching "Mic In"
+			if (!mAudioDevicesRequested) {
+				mAudioDevicesRequested = true;
+				mVDSession->refreshAudioDevices();
+			}
+			if (ImGui::Button("Refresh audio devices")) {
+				mVDSession->refreshAudioDevices();
+			}
+
+			std::string preferredInput = mVDSession->getPreferredAudioInputDevice();
+			ImGui::TextColored(ImColor(155, 255, 0), "Inputs");
+			for (auto& inputName : mVDSession->getAudioInputDeviceNames()) {
+				bool isSelected = (inputName == preferredInput);
+				if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
+				sprintf_s(audioBuf, "%s##audioinput", inputName.c_str());
+				if (ImGui::Button(audioBuf)) {
+					mVDSession->selectAudioInputDevice(inputName);
+					preferredInput = inputName;
+				}
+				if (isSelected) ImGui::PopStyleColor(1);
+			}
+
+			std::string preferredOutput = mVDSession->getPreferredAudioOutputDevice();
+			ImGui::TextColored(ImColor(155, 255, 0), "Outputs");
+			for (auto& outputName : mVDSession->getAudioOutputDeviceNames()) {
+				bool isSelected = (outputName == preferredOutput);
+				if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
+				sprintf_s(audioBuf, "%s##audiooutput", outputName.c_str());
+				if (ImGui::Button(audioBuf)) {
+					mVDSession->selectAudioOutputDevice(outputName);
+				}
+				if (isSelected) ImGui::PopStyleColor(1);
+			}
+			ImGui::Separator();
+
+			// mic - disabled while no input device is selected, unless line in is already on
+			// (so it can still be switched back off with no device selected)
+			bool canToggleLineIn = !preferredInput.empty() || mVDSession->getUseLineIn();
+			ImGui::BeginDisabled(!canToggleLineIn);
 			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
@@ -412,6 +452,7 @@ void VDUIAnimation::Run(const char* title) {
 				mVDSession->toggleUseLineIn();
 			}
 			ImGui::PopStyleColor(3);
+			ImGui::EndDisabled();
 			hue++;
 			ImGui::SameLine();
 			// monitor

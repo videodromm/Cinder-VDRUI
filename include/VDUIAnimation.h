@@ -70,6 +70,10 @@ namespace videodromm
 		map<int, float>					localValues;
 		float							f = 0.0f;
 		char							buf[64];
+		// audio device list - a separate, larger buffer since device names (unlike the other
+		// labels using buf) can easily exceed 64 chars, and sprintf_s aborts on overflow
+		bool							mAudioDevicesRequested = false;
+		char							audioBuf[256];
 		// zoom
 		float							minZoom;
 		float							maxZoom;
