@@ -48,6 +48,24 @@ void VDUIFbos::Run(const char* title) {
 		sprintf(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
+			// drag-and-drop: this fbo's real, current window rect - the only place that knows it,
+			// since these windows can be dragged/resized independently of the initial grid layout
+			ImVec2 winMin = ImGui::GetWindowPos();
+			ImVec2 winMax = ImVec2(winMin.x + ImGui::GetWindowSize().x, winMin.y + ImGui::GetWindowSize().y);
+			mVDSession->consumePendingTextureDropIfInRect(f, vec2(winMin.x, winMin.y), vec2(winMax.x, winMax.y));
+			// whichever fbo window last had focus is the target for a drop that lands outside
+			// every fbo window (see flushPendingTextureDrop() after this loop)
+			if (ImGui::IsWindowFocused()) {
+				mVDSession->setSelectedFbo(f);
+			}
+			// keep the shared texture pool (see VDUITextures.cpp) in sync with whatever this fbo is
+			// actually showing - IMAGE/MOVIE only, since those are the modes with a stable, meaningful
+			// filename (SEQUENCE's filename changes every advanced frame and would flood the pool)
+			int textureMode = mVDSession->getInputTextureMode(f);
+			if (textureMode == VDTextureMode::IMAGE || textureMode == VDTextureMode::MOVIE) {
+				mVDSession->registerFboActiveTextureInGlobalPool(f);
+			}
+
 			ImGui::PushID(f);
 			ctrl = mVDUniforms->IWEIGHT0 + f;
 			float iWeight = mVDSession->getUniformValue(ctrl);
@@ -317,6 +335,10 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::End();
 		ImGui::PopStyleColor(5);
 	} // for getFboList
+
+	// nobody claimed it above (dropped outside every fbo window) - add it to the selected fbo's
+	// texture list instead
+	mVDSession->flushPendingTextureDrop();
 
 #pragma endregion fbos
 

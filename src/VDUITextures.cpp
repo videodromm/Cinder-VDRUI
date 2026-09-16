@@ -16,28 +16,25 @@ void VDUITextures::Run(const char* title) {
 
 	xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 	yPos = mVDParams->getUIYPosRow3();
-	int validImages = 0;
 	unsigned int selectedFbo = mVDSession->getSelectedFbo();
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	// one entry per loaded fbo's own input texture (image or audio FFT texture) -
-	// this is a gallery across every fbo*.json, not just the currently selected fbo
-	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
-		ci::gl::Texture2dRef tex = mVDSession->getFboInputTextureListItem(f, 0);
+	// one entry per uniquely-named loaded texture, deduplicated - not one per (fbo, slot); several
+	// fbos can (and often do) load the same file, and any fbo can pick any texture here, not just
+	// the ones it loaded itself. See VDMix::registerLoadedTexture()/VDUIFbos.cpp's per-frame sync.
+	unsigned int poolCount = mVDSession->getLoadedTextureCount();
+	for (unsigned int i = 0; i < poolCount; i++) {
+		ci::gl::Texture2dRef tex = mVDSession->getLoadedTexture(i);
 		if (!tex) continue;
-		validImages++;
 		// twice the size of the underlying VDParams preview dimensions, scoped to this panel only
 		const float kSizeMultiplier = 2.0f;
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getPreviewHeight() * kSizeMultiplier * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
-		std::string texName = mVDSession->getFboInputTextureName(f);
-		unsigned int ms = mVDSession->getFboMsTotal(f);
-		sprintf(buf, " %s##s%d", texName.c_str(), f);
-		bool isBackingSelectedFbo = (f == selectedFbo);
-		if (isBackingSelectedFbo) ImGui::PushStyleColor(ImGuiCol_TitleBg, (ImVec4)ImColor(200, 150, 0, 220));
+		std::string texName = mVDSession->getLoadedTextureName(i);
+		sprintf(buf, " %s##s%d", texName.c_str(), i);
 		ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
 			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale);
-			ImGui::PushID(f);
+			ImGui::PushID(i);
 			ImGui::Image(tex, ivec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale));
 			// click a texture to assign it (by reference, no reload) to whichever fbo is
 			// currently selected via the "tex" button in the Fbos panel
@@ -45,24 +42,14 @@ void VDUITextures::Run(const char* title) {
 				mVDSession->setFboInputTexture(selectedFbo, tex, texName);
 			}
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Assign to selected fbo (%d)", selectedFbo);
-
-			ImGui::TextColored(ImColor(155, 50, 255), "%d-", f);
-			ImGui::SameLine();
-			if (ms > 30) {
-				ImGui::TextColored(ImColor(255, 0, 0), "%dms", ms);
-			}
-			else {
-				ImGui::TextColored(ImColor(155, 255, 0), "%dms", ms);
-			}
 			ImGui::PopID();
 			ImGui::PopItemWidth();
 		}
 		ImGui::End();
-		if (isBackingSelectedFbo) ImGui::PopStyleColor(1);
 		xPos += mVDParams->getUISmallPreviewW() * kSizeMultiplier + mVDParams->getUIMargin();
 
-		// windows are now twice as wide/tall, so half as many fit per row before wrapping
-		if (validImages % 11 == 10)
+		// windows are twice as wide/tall as the base preview size, so half as many fit per row
+		if (i % 11 == 10)
 		{
 			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
 			yPos -= mVDParams->getPreviewHeight() * kSizeMultiplier + mVDParams->getUIMargin();
