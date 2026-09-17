@@ -111,6 +111,7 @@ void VDUIFbos::Run(const char* title) {
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save thumbnail");
 
 			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
+			if (mShowInputTexture) ImGui::Image(mVDSession->getFboInputTextureListItem(f, mVDSession->getFboInputTextureIndex(f)), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(28 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
@@ -126,20 +127,30 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
-			for (unsigned int t = 0; t < mVDSession->getInputTexturesCount(f); t++) {
-				if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
-				if (mVDSession->getFboInputTextureIndex(f) == t) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 0.1f, 0.1f));
-				}
-				sprintf(buf, "%d##fboit%d%d", t, f, t);
-				if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, t);
+			// pick this fbo's active input texture from the shared pool (see VDUITextures.cpp) -
+			// this used to loop over getInputTexturesCount(f) (this fbo's own internal texture-slot
+			// count, a leftover from the pre-shared-pool design - almost always 1, hence "only shows
+			// 0"), which has nothing to do with what's actually available to pick from; mirrors
+			// VDUITextures.cpp's click-to-assign inline, highlighting whichever pool entry is active
+			{
+				unsigned int poolCount = mVDSession->getLoadedTextureCount();
+				std::string activeName = mVDSession->getInputTextureName(f, 0);
+				for (unsigned int t = 0; t < poolCount; t++) {
+					if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
+					std::string poolName = mVDSession->getLoadedTextureName(t);
+					if (poolName == activeName) {
+						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
+					}
+					else {
+						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 0.1f, 0.1f));
+					}
+					sprintf(buf, "%d##fboit%d%d", t, f, t);
+					if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, mVDSession->getLoadedTexture(t), poolName);
 
-				sprintf(buf, "Set input texture to %s", mVDSession->getInputTextureName(f, t).c_str());
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-				ImGui::PopStyleColor(1);
+					sprintf(buf, "Set input texture to %s", poolName.c_str());
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+					ImGui::PopStyleColor(1);
+				}
 			}
 
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
