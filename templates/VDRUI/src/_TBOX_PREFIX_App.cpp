@@ -46,7 +46,11 @@
 // UI
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
 #include "VDUI.h"
+// imgui.h already defines this (pulled in transitively) - redefining it unconditionally
+// triggers "warning C4005: redéfinition de macro" on every build
+#ifndef IM_ARRAYSIZE
 #define IM_ARRAYSIZE(_ARR)			((int)(sizeof(_ARR)/sizeof(*_ARR)))
+#endif
 using namespace ci;
 using namespace ci::app;
 using namespace videodromm;
@@ -389,6 +393,21 @@ void _TBOX_PREFIX_App::draw()
 		}
 		else if (m == VDDisplayMode::FX) {
 			auto tex = mVDSessionFacade->buildFxFboTexture();
+			gl::draw(tex, getWindowBounds());
+#if defined( CINDER_MSW )
+			mSpoutOut.sendTexture(tex);
+			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
+#endif
+		}
+		else if (m == VDDisplayMode::WARP) {
+			// was missing entirely - VDDisplayMode::WARP (2) fell through to the "show fbo
+			// index m" branch below, silently showing fbo #2 instead of the actual warped
+			// output whenever "Warp" mode was selected and 3+ fbos were loaded. This is the
+			// one mode meant to show the geometrically warped/projector-mapped result (with
+			// resize handles when warp edit mode - the 'W' key - is also on); Post/Fx
+			// deliberately show the flat, un-warped composite instead (see renderPostToFbo()/
+			// renderFxToFbo()).
+			auto tex = mVDSessionFacade->buildRenderedWarpFboTexture();
 			gl::draw(tex, getWindowBounds());
 #if defined( CINDER_MSW )
 			mSpoutOut.sendTexture(tex);

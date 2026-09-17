@@ -180,7 +180,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	ImGui::SetNextWindowSize(ImVec2(748.0f * uiScale, mVDParams->getUILargePreviewH() * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
-	sprintf(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
+	sprintf_s(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
 	ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		// line 1
@@ -224,7 +224,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			fpsValues_offset = (fpsValues_offset + 1) % fpsValues.size();
 		}
 		if (fps < 24.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
-		sprintf(buf, "%d", fps);
+		sprintf_s(buf, "%d", fps);
 		ImGui::PlotLines("F", &fpsValues.front(), (int)fpsValues.size(), fpsValues_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
 		if (fps < 24.0) ImGui::PopStyleColor();
 		// audio
@@ -289,7 +289,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		// the previous single file that rotated at midnight and could mix multiple runs together.
 		ImGui::SameLine();
 		bool fileLogging = VDLog::isFileLoggingEnabled();
-		if (ImGui::Checkbox("Log to file", &fileLogging)) {
+		if (ImGui::Checkbox("FileLog", &fileLogging)) {
 			VDLog::setFileLoggingEnabled(fileLogging);
 		}
 		// debug
@@ -307,12 +307,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 
 
-		if (ImGui::Button("Warp++")) {
-			mVDSession->createWarp();
-		}
-		hue++;
-		ImGui::SameLine();
-
+		// "Warp++" (create a new warp) moved into the Warps panel itself (VDUIWarps.cpp) - this
+		// button only shows/hides that panel
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
@@ -469,7 +465,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		// line 3
 		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
 			if (m > 0) ImGui::SameLine();
-			sprintf(buf, "%s##mode", mVDSession->getModeName(m).c_str());
+			sprintf_s(buf, "%s##mode", mVDSession->getModeName(m).c_str());
 			if (mVDSession->getUniformValue(mVDUniforms->IDISPLAYMODE) == m) {
 				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
 			}
@@ -479,7 +475,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
 			if (ImGui::Button(buf)) mVDSession->setUniformValue(mVDUniforms->IDISPLAYMODE, m);
-			sprintf(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
+			sprintf_s(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 			ImGui::PopStyleColor(3);
 		}
@@ -592,7 +588,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		// not here; this button only starts up the MIDI subsystem
 		if (!mVDSession->isMidiSetup()) {
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			sprintf(buf, "Midi");
+			sprintf_s(buf, "Midi");
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			ImGui::PopStyleColor(1);
 		}
@@ -639,7 +635,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::Text(" BPM %.0f", mVDSession->getUniformValue(mVDUniforms->IBPM));
 
 		//ImGui::SameLine();
-		//sprintf(buf, "%s", mVDSession->getTrackName().c_str());
+		//sprintf_s(buf, "%s", mVDSession->getTrackName().c_str());
 		//ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
 		//ImGui::Text(" ", mVDSession->getTrackName());
 

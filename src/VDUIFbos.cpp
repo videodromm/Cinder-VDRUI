@@ -1,5 +1,9 @@
 #include "VDUIFbos.h"
 
+#if ! defined( CINDER_MSW )
+#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
+#endif
+
 using namespace videodromm;
 
 VDUIFbos::VDUIFbos(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
@@ -45,7 +49,7 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));
 
-		sprintf(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
+		sprintf_s(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
 			// drag-and-drop: this fbo's real, current window rect - the only place that knows it,
@@ -81,7 +85,7 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::SameLine();
 			//ImGui::TextColored(ImColor(155, 255, 0), "%d/%dms ", mVDSession->getFboMs(f), mVDSession->getFboMsTotal(f));
 
-			sprintf(buf, "fbo##rdrfbouniform%d", f);
+			sprintf_s(buf, "fbo##rdrfbouniform%d", f);
 			mShowRenderedTexture ^= ImGui::Button(buf);
 			ImGui::SameLine();
 
@@ -89,13 +93,13 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-			sprintf(buf, "tex##rdrtexuniform%d", f);
+			sprintf_s(buf, "tex##rdrtexuniform%d", f);
 			mShowInputTexture ^= ImGui::Button(buf);
 			ImGui::PopStyleColor(3);
 
 			hue++;
 			ImGui::SameLine();
-			sprintf(buf, "au##audio%d", f);
+			sprintf_s(buf, "au##audio%d", f);
 			if (ImGui::Button(buf)) {
 				mVDSession->setFboTextureAudioMode(f);
 			}
@@ -103,7 +107,7 @@ void VDUIFbos::Run(const char* title) {
 
 			hue++;
 			ImGui::SameLine();
-			sprintf(buf, "tn##tn%d", f);
+			sprintf_s(buf, "tn##tn%d", f);
 			if (ImGui::Button(buf)) {
 				mVDSession->saveThumbnail(f);
 			}
@@ -148,10 +152,10 @@ void VDUIFbos::Run(const char* title) {
 					else {
 						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 0.1f, 0.1f));
 					}
-					sprintf(buf, "%d##fboit%d%d", t, f, t);
+					sprintf_s(buf, "%d##fboit%d%d", t, f, t);
 					if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, mVDSession->getLoadedTexture(t), poolName);
 
-					sprintf(buf, "Set input texture to %s", poolName.c_str());
+					sprintf_s(buf, "Set input texture to %s", poolName.c_str());
 					if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 					ImGui::PopStyleColor(1);
 				}
@@ -159,7 +163,7 @@ void VDUIFbos::Run(const char* title) {
 
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
 			if (mVDSession->isSequence(f) || mVDSession->isMovie(f)) {
-				sprintf(buf, "p##s%d", f);
+				sprintf_s(buf, "p##s%d", f);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->togglePlayPause(f);
@@ -168,7 +172,7 @@ void VDUIFbos::Run(const char* title) {
 			}
 			if (mVDSession->isSequence(f)) {
 				ImGui::SameLine();
-				sprintf(buf, "b##sqs%d", f);
+				sprintf_s(buf, "b##sqs%d", f);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->syncToBeat(f);
@@ -176,7 +180,7 @@ void VDUIFbos::Run(const char* title) {
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Sync to beat");
 
 				ImGui::SameLine();
-				sprintf(buf, "r##rs%d", f);
+				sprintf_s(buf, "r##rs%d", f);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->reverse(f);
@@ -185,7 +189,7 @@ void VDUIFbos::Run(const char* title) {
 
 				if (mVDSession->isLoadingFromDisk(f)) {
 					ImGui::SameLine();
-					sprintf(buf, "l##ts%d", f);
+					sprintf_s(buf, "l##ts%d", f);
 					if (ImGui::Button(buf))
 					{
 						mVDSession->toggleLoadingFromDisk(f);
@@ -198,7 +202,7 @@ void VDUIFbos::Run(const char* title) {
 			// dispatch correctly for MOVIE, see VDFboShader.h)
 			if (mVDSession->isSequence(f) || mVDSession->isMovie(f)) {
 				speeds[f] = mVDSession->getSpeed(f);
-				sprintf(buf, "speed##spd%d", f);
+				sprintf_s(buf, "speed##spd%d", f);
 				if (ImGui::SliderFloat(buf, &speeds[f], 0.0f, 1.0f))
 				{
 					mVDSession->setSpeed(f, speeds[f]);
@@ -210,7 +214,7 @@ void VDUIFbos::Run(const char* title) {
 				if (!mIsScrubbing[f]) {
 					playheadPositions[f] = mVDSession->getPosition(f);
 				}
-				sprintf(buf, "scrub##srb%d", f);
+				sprintf_s(buf, "scrub##srb%d", f);
 				if (ImGui::SliderInt(buf, &playheadPositions[f], 0, mVDSession->getMaxFrame(f)))
 				{
 					mVDSession->setPlayheadPosition(f, playheadPositions[f]);
@@ -245,7 +249,7 @@ void VDUIFbos::Run(const char* title) {
 					(getValue(ctrl, f) > 0.0f) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-					sprintf(buf, "%s##booluniform%d", uName.c_str(), f);
+					sprintf_s(buf, "%s##booluniform%d", uName.c_str(), f);
 					if (ImGui::Button(buf)) {
 						toggleValue(ctrl, f);
 					}
@@ -257,7 +261,7 @@ void VDUIFbos::Run(const char* title) {
 					(getValue(ctrl, f)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-					sprintf(buf, "%s##intuniform%d", uName.c_str(), f);
+					sprintf_s(buf, "%s##intuniform%d", uName.c_str(), f);
 					if (ImGui::Button(buf)) {
 						//toggleValue(ctrl, f);
 					}
@@ -274,14 +278,14 @@ void VDUIFbos::Run(const char* title) {
 						channelIndex++;
 						ImGui::SameLine();
 					}
-					//sprintf(buf, "%s", uName.c_str());
+					//sprintf_s(buf, "%s", uName.c_str());
 					//ImGui::TextColored(ImColor(220, 150, 0), buf);
 					break;
 				case GL_FLOAT:
 					// float 5126 GL_FLOAT 0x1406
 					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 					if (ctrl > 0) {
-						sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
+						sprintf_s(buf, "%s##floatuniform%d", uName.c_str(), f);
 
 						float spd = (ctrl == mVDUniforms->IPIXELX || ctrl == mVDUniforms->IPIXELY) ? 1.0f : 0.001f;
 
@@ -298,7 +302,7 @@ void VDUIFbos::Run(const char* title) {
 						else {
 							location = u.getLocation();
 							mUniformValueByLocation[location] = mVDSession->getUniformValueByLocation(f, location);
-							sprintf(buf, "%s##floatuniform%d", uName.c_str(), f);
+							sprintf_s(buf, "%s##floatuniform%d", uName.c_str(), f);
 							if (ImGui::DragFloat(buf, &mUniformValueByLocation[location], 0.001f, 0.0001f, 50.0f))
 							{
 								mVDSession->setUniformValueByLocation(f, location, mUniformValueByLocation[location]);
@@ -312,27 +316,27 @@ void VDUIFbos::Run(const char* title) {
 					// vec2 35664		
 					/*if (uName == "RENDERSIZE" || uName == "resolution") {
 						float fw = mVDSession->buildFboRenderedTexture(f)->getWidth();
-						sprintf(buf, "rw %.0f", fw);						
+						sprintf_s(buf, "rw %.0f", fw);						
 						ImGui::TextColored(ImColor(100, 100, 100), buf);
 						ImGui::SameLine();
 						float fh = mVDSession->buildFboRenderedTexture(f)->getHeight();				
-						sprintf(buf, "rh %.0f", fh);
+						sprintf_s(buf, "rh %.0f", fh);
 						ImGui::TextColored(ImColor(100, 100, 100), buf);					
 					}
 					else {
-						sprintf(buf, "vec2 %s", uName.c_str(), f);
+						sprintf_s(buf, "vec2 %s", uName.c_str(), f);
 						ImGui::TextColored(ImColor(150, 220, 0), buf);
 					}*/
 					break;
 				case GL_FLOAT_VEC3:
 					// vec3 35665
-					//sprintf(buf, "vec3 %s", uName.c_str(), f);
+					//sprintf_s(buf, "vec3 %s", uName.c_str(), f);
 					//ImGui::TextColored(ImColor(100, 100, 0), buf);
 
 					break;
 				case GL_FLOAT_VEC4:
 					// vec4 35666 GL_FLOAT_VEC4
-					/*sprintf(buf, "vec4 %s %d", uName.c_str(), u.getType());
+					/*sprintf_s(buf, "vec4 %s %d", uName.c_str(), u.getType());
 					ImGui::TextColored(ImColor(100, 100, 100), buf);
 					if (ctrl == mVDUniforms->IMOUSE) {
 						mouseX = getValue(mVDUniforms->IMOUSEX, f);
@@ -355,7 +359,7 @@ void VDUIFbos::Run(const char* title) {
 						GL_FLOAT_VEC4                     0x8B52
 					*/
 					if (uName != "ciModelViewProjection") {
-						sprintf(buf, "! %s %d", uName.c_str(), u.getType());
+						sprintf_s(buf, "! %s %d", uName.c_str(), u.getType());
 						ImGui::TextColored(ImColor(255, 0, 0), buf);
 					}
 					break;
@@ -364,11 +368,11 @@ void VDUIFbos::Run(const char* title) {
 			} //for uniforms
 
 			/*float fw = mVDSession->getFboTextureWidth(f);
-			sprintf(buf, "tw %.0f", fw);
+			sprintf_s(buf, "tw %.0f", fw);
 			ImGui::TextColored(ImColor(120, 120, 120), buf);
 			ImGui::SameLine();
 			float fh = mVDSession->getFboTextureHeight(f);
-			sprintf(buf, "th %.0f", fh);
+			sprintf_s(buf, "th %.0f", fh);
 			ImGui::TextColored(ImColor(120, 120, 120), buf);*/
 
 			ImGui::PopItemWidth();

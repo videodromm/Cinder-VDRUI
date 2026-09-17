@@ -1,5 +1,9 @@
 #include "VDUITextures.h"
 
+#if ! defined( CINDER_MSW )
+#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
+#endif
+
 using namespace videodromm;
 
 VDUITextures::VDUITextures(VDUniformsRef aVDUniforms, VDSessionFacadeRef aVDSession) {
@@ -31,7 +35,7 @@ void VDUITextures::Run(const char* title) {
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getPreviewHeight() * kSizeMultiplier * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		std::string texName = mVDSession->getLoadedTextureName(i);
-		sprintf(buf, " %s##s%d", texName.c_str(), i);
+		sprintf_s(buf, " %s##s%d", texName.c_str(), i);
 		ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
 			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale);
@@ -52,7 +56,7 @@ void VDUITextures::Run(const char* title) {
 				if (f > 0 && (f % 6 != 0)) ImGui::SameLine();
 				bool isSelected = (f == selectedFbo);
 				ImGui::PushStyleColor(ImGuiCol_Button, isSelected ? (ImVec4)ImColor(230, 160, 0, 255) : (ImVec4)ImColor::HSV(f / 16.0f, 0.4f, 0.4f));
-				sprintf(buf, "%d##texassign%d_%d", f, i, f);
+				sprintf_s(buf, "%d##texassign%d_%d", f, i, f);
 				if (ImGui::Button(buf)) {
 					mVDSession->setFboInputTexture(f, tex, texName);
 					mVDSession->setSelectedFbo(f);

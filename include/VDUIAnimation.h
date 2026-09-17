@@ -27,7 +27,12 @@ namespace videodromm
 	// stores the pointer to the VDUIAnimation instance
 	typedef std::shared_ptr<class VDUIAnimation> VDUIAnimationRef;
 	typedef std::shared_ptr<class VDUIOsc> VDUIOscRef;
+	// imgui.h (pulled in via cinder/CinderImGui.h above) already defines this - redefining it
+	// unconditionally triggered "warning C4005: redéfinition de macro" on every build; guard it
+	// the same way VDUIFolders.h already does
+#ifndef IM_ARRAYSIZE
 #define IM_ARRAYSIZE(_ARR)			((int)(sizeof(_ARR)/sizeof(*_ARR)))
+#endif
 	class VDUIAnimation
 	{
 	public:

@@ -81,7 +81,7 @@ vec2 gradient(sampler2D tex, vec2 uv, vec2 texelSize)
 vec2 VideoHeightFieldWorldToTex(vec3 p)
 {
 	vec2 uv = p.xz*0.5+0.5;
-	uv.y = 1.0 - uv.y;
+	if (iFlipV == 0.0) uv.y = 1.0 - uv.y;
 	return uv;
 }
 
