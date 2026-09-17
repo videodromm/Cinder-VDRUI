@@ -534,32 +534,30 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Separator();
 					for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
 					{
-						if (mVDSession->getMidiInPortName(i) != "Ableton Push 2 1") {
-							ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+						ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
 
+						if (mVDSession->isMidiInConnected(i))
+						{
+							sprintf_s(buf, "Disconnect %d", i);
+						}
+						else
+						{
+							sprintf_s(buf, "Connect %d", i);
+						}
+
+						if (ImGui::Button(buf))
+						{
 							if (mVDSession->isMidiInConnected(i))
 							{
-								sprintf_s(buf, "Disconnect %d", i);
+								mVDSession->closeMidiInPort(i);
 							}
 							else
 							{
-								sprintf_s(buf, "Connect %d", i);
+								mVDSession->openMidiInPort(i);
 							}
-
-							if (ImGui::Button(buf))
-							{
-								if (mVDSession->isMidiInConnected(i))
-								{
-									mVDSession->closeMidiInPort(i);
-								}
-								else
-								{
-									mVDSession->openMidiInPort(i);
-								}
-							}
-							ImGui::NextColumn();
-							ImGui::Separator();
 						}
+						ImGui::NextColumn();
+						ImGui::Separator();
 					}
 					ImGui::Columns(1);
 				}

@@ -248,16 +248,24 @@ void main() {
 	
 	switch ( iBlendmode )
    {
-   case 0: 
-      c = texture(iChannel0, uv).xyz * iWeight0
-		+ texture(iChannel1, uv).xyz * iWeight1 
-		+ texture(iChannel2, uv).xyz * iWeight2
-		+ texture(iChannel3, uv).xyz * iWeight3 
-		+ texture(iChannel4, uv).xyz * iWeight4 
-		+ texture(iChannel5, uv).xyz * iWeight5 
-		+ texture(iChannel6, uv).xyz * iWeight6 
-		+ texture(iChannel7, uv).xyz * iWeight7
-		+ texture(iChannel8, uv).xyz * iWeight8;
+   case 0:
+      // each fbo's iWeight is its own opacity: 0.0 = not displayed at all, 1.0 = fully
+      // displayed (replaces whatever is stacked below it), values in between blend with
+      // whatever the layers below it produced - iChannel0 is the bottom layer, iChannel8 the
+      // top. This used to be a flat weighted sum of all 9 channels, which only behaved like an
+      // opacity dial when at most one weight was ever nonzero at a time - with two or more
+      // layers active it added their full brightness together instead of one covering the
+      // other, blowing out to white well before either reached 1.0.
+      c = vec3(0.0);
+      c = mix(c, texture(iChannel0, uv).xyz, iWeight0);
+      c = mix(c, texture(iChannel1, uv).xyz, iWeight1);
+      c = mix(c, texture(iChannel2, uv).xyz, iWeight2);
+      c = mix(c, texture(iChannel3, uv).xyz, iWeight3);
+      c = mix(c, texture(iChannel4, uv).xyz, iWeight4);
+      c = mix(c, texture(iChannel5, uv).xyz, iWeight5);
+      c = mix(c, texture(iChannel6, uv).xyz, iWeight6);
+      c = mix(c, texture(iChannel7, uv).xyz, iWeight7);
+      c = mix(c, texture(iChannel8, uv).xyz, iWeight8);
       break;
    case 1: 
       c = multiply( shaderLeft(uv), shaderRight(uv) );

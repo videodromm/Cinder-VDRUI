@@ -113,15 +113,19 @@ void VDUIFbos::Run(const char* title) {
 			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			if (mShowInputTexture) ImGui::Image(mVDSession->getFboInputTextureListItem(f, mVDSession->getFboInputTextureIndex(f)), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			ImGui::SameLine();
-			if (ImGui::VSliderFloat("##v", ImVec2(28 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
+			if (ImGui::VSliderFloat("##v", ImVec2(14 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
 				setValue(ctrl, f, iWeight);
-				// fading a movie's visual weight also fades its audio - lets weight double as a
-				// volume fader instead of the video staying at full volume regardless
-				if (mVDSession->isMovie(f)) {
-					mVDSession->setVideoVolume(f, iWeight);
-				}
 			};
+			// fading a movie's visual weight also fades its audio - lets weight double as a volume
+			// fader instead of the video staying at full volume regardless. Done unconditionally
+			// every frame (not just inside the slider's own onChange above) because the weight
+			// uniform can also be driven by MIDI (VDMidi::midiListener() sets it directly via
+			// VDMediator, bypassing this widget entirely) - keyed only off the slider's own drag
+			// before, a MIDI-driven weight change updated the visual mix but never touched volume
+			if (mVDSession->isMovie(f)) {
+				mVDSession->setVideoVolume(f, iWeight);
+			}
 
 			
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
