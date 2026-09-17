@@ -496,6 +496,52 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			ImGui::PopStyleColor(1);
 		}
+		else {
+			// midi learn - global toggle, only shown once midi is actually enabled (there's
+			// nothing to learn from otherwise). Binds an arbitrary MIDI CC to any uniform index
+			// (1-90) instead of relying on the fixed "CC number == uniform index" convention
+			// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
+			ImGui::SameLine();
+			bool learnMode = mVDSession->isMidiLearnMode();
+			if (ImGui::Checkbox("Midi Learn", &learnMode)) {
+				mVDSession->setMidiLearnMode(learnMode);
+				if (!learnMode) mVDSession->armMidiLearn(-1);
+			}
+			if (learnMode) {
+				ImGui::SameLine();
+				ImGui::PushItemWidth(50 * mVDUniforms->getUniformValue(mVDUniforms->IUISCALE));
+				ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
+				ImGui::PopItemWidth();
+				if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
+				if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
+				ImGui::SameLine();
+				sprintf(buf, "Arm##midilearnarm");
+				if (ImGui::Button(buf)) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
+				ImGui::SameLine();
+				if (mVDSession->getMidiLearnTarget() >= 0) {
+					ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind it to %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+				}
+				else {
+					ImGui::TextColored(ImColor(150, 150, 150), "%d %s - press Arm, then move a control", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+				}
+				// existing bindings, each removable individually
+				int mappingsCount = mVDSession->getMidiLearnMappingsCount();
+				if (mappingsCount > 0) {
+					ImGui::Text("Midi Learn bindings:");
+					int cc = 0, uniformIndex = 0;
+					for (int m = 0; m < mappingsCount; m++) {
+						if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
+							ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
+							ImGui::SameLine();
+							sprintf(buf, "x##midilearnrm%d", cc);
+							if (ImGui::Button(buf)) mVDSession->removeMidiLearnMapping(cc);
+						}
+					}
+					sprintf(buf, "Clear all##midilearnclear");
+					if (ImGui::Button(buf)) mVDSession->clearMidiLearnMap();
+				}
+			}
+		}
 		/*
 		ImGui::SameLine();
 		ctrl = mVDUniforms->IFLIPPOSTH;

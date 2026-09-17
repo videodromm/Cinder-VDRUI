@@ -249,23 +249,31 @@ void main() {
 	switch ( iBlendmode )
    {
    case 0:
-      // each fbo's iWeight is its own opacity: 0.0 = not displayed at all, 1.0 = fully
-      // displayed (replaces whatever is stacked below it), values in between blend with
-      // whatever the layers below it produced - iChannel0 is the bottom layer, iChannel8 the
-      // top. This used to be a flat weighted sum of all 9 channels, which only behaved like an
-      // opacity dial when at most one weight was ever nonzero at a time - with two or more
-      // layers active it added their full brightness together instead of one covering the
-      // other, blowing out to white well before either reached 1.0.
-      c = vec3(0.0);
-      c = mix(c, texture(iChannel0, uv).xyz, iWeight0);
-      c = mix(c, texture(iChannel1, uv).xyz, iWeight1);
-      c = mix(c, texture(iChannel2, uv).xyz, iWeight2);
-      c = mix(c, texture(iChannel3, uv).xyz, iWeight3);
-      c = mix(c, texture(iChannel4, uv).xyz, iWeight4);
-      c = mix(c, texture(iChannel5, uv).xyz, iWeight5);
-      c = mix(c, texture(iChannel6, uv).xyz, iWeight6);
-      c = mix(c, texture(iChannel7, uv).xyz, iWeight7);
-      c = mix(c, texture(iChannel8, uv).xyz, iWeight8);
+      // each fbo's iWeight is its own opacity/level: 0.0 = not displayed at all, 1.0 = fully
+      // displayed - contributing its full, un-dimmed brightness regardless of how many other
+      // layers are also active, since each layer's own weight already says how much of it
+      // should show. Only the combined result is clamped to white, not scaled down globally.
+      //
+      // history: (1) flat, un-normalized weighted sum - blew out fast with 2+ active layers;
+      // (2) sequential "over" compositing, Photoshop-layer style - gave a single layer's weight
+      // the right 0-1 meaning, but any higher-indexed fbo at weight 1.0 fully hid every layer
+      // below it ("rendered only if other fboshaders iweight* are 0.0"); (3) normalized average
+      // (divide by total weight) - fixed the occlusion, but dimmed every layer in proportion to
+      // how many others were also active, reported as "not enough brightness" (and looking like
+      // occlusion was still happening for a weight-1.0 base layer once others came on, since a
+      // shrinking proportional share reads as "gone" once dim enough). This clamped sum keeps
+      // every active layer at its own full, independent brightness - only the total spills over
+      // to white where several bright layers genuinely overlap, same as normal additive mixing.
+      c = texture(iChannel0, uv).xyz * iWeight0
+        + texture(iChannel1, uv).xyz * iWeight1
+        + texture(iChannel2, uv).xyz * iWeight2
+        + texture(iChannel3, uv).xyz * iWeight3
+        + texture(iChannel4, uv).xyz * iWeight4
+        + texture(iChannel5, uv).xyz * iWeight5
+        + texture(iChannel6, uv).xyz * iWeight6
+        + texture(iChannel7, uv).xyz * iWeight7
+        + texture(iChannel8, uv).xyz * iWeight8;
+      c = clamp(c, 0.0, 1.0);
       break;
    case 1: 
       c = multiply( shaderLeft(uv), shaderRight(uv) );

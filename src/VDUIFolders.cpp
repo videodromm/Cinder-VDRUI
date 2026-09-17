@@ -49,6 +49,15 @@ void VDUIFolders::Run(const char* title) {
 				mVDSession->listShaders(mSelectedFolder, mExtension);
 			}
 			if (isSelected) ImGui::PopStyleColor(1);
+			// loads this folder the same way dropping it onto the app window does (VDSession::
+			// fileDrop()'s "folder was dropped" branch) - both just call loadFolder() with the
+			// folder's plain name, resolved against the assets path
+			ImGui::SameLine();
+			sprintf_s(buf, "Load##folderload%s", folder.c_str());
+			if (ImGui::Button(buf)) {
+				mVDSession->loadFolder(folder);
+			}
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Load this folder (same as dropping it onto the app)");
 		}
 
 		if (mSelectedFolder.length() > 0) {
