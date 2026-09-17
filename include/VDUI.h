@@ -29,6 +29,8 @@
 #include "VDUIFolders.h"
 // Params
 #include "VDParams.h"
+// Log
+#include "VDLog.h"
 
 using namespace ci;
 using namespace ci::app;
@@ -98,11 +100,6 @@ namespace videodromm
 		bool						mouseGlobal;
 		int							ctrl;
 		float						contour, iVAmount, iVFallOff, iWeight0, iWeight1, iWeight2, iWeight3, iWeight4, iWeight5, iWeight6, iWeight7;
-		// midi learn - the uniform index currently typed into the "Midi Learn" panel's target
-		// box (VDMidi itself only tracks the actually-armed target, set via armMidiLearn(); this
-		// is just this input widget's own displayed value, distinct so the box can be edited
-		// without re-arming on every keystroke)
-		int							mMidiLearnTargetUniform = 1;
 
 		void toggleValue(unsigned int aCtrl) {
 			mVDSession->toggleValue(aCtrl);

@@ -281,6 +281,17 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, uiScaleCtrl);
 		}
 		ImGui::PopItemWidth();
+		#if defined( _DEBUG )
+		// file logging is opt-in at runtime (see VDLog::setFileLoggingEnabled()) rather than
+		// always-on for the whole debug session - only ever meaningful in a debug build at all,
+		// so the button itself doesn't even exist in release. Toggling it on starts three fresh,
+		// session-timestamped files in <repos>/logs/ (everything, warnings+, errors+) instead of
+		// the previous single file that rotated at midnight and could mix multiple runs together.
+		ImGui::SameLine();
+		bool fileLogging = VDLog::isFileLoggingEnabled();
+		if (ImGui::Checkbox("Log to file", &fileLogging)) {
+			VDLog::setFileLoggingEnabled(fileLogging);
+		}
 		// debug
 		ImGui::SameLine();
 		ctrl = mVDUniforms->IDEBUG;
@@ -291,6 +302,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			toggleValue(ctrl);
 		}
 		ImGui::PopStyleColor(3);
+#endif
 		hue++;
 		ImGui::SameLine();
 
@@ -350,6 +362,60 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(3);
 		hue++;
 		ImGui::SameLine();
+
+		// Audio/Midi/Tempo/OSC/Websocket used to be always-visible CollapsingHeaders inside the
+		// "Animation" window, making it very tall - each is now its own toggleable window (see
+		// VDUIAnimation.cpp), shown/hidden from here the same way Warps/Fbos/Tex/Blend/Folders
+		// already are
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Audio")) {
+			mUIAnimation->toggleShowAudio();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Midi##toggle")) {
+			mUIAnimation->toggleShowMidi();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Tempo")) {
+			mUIAnimation->toggleShowTempo();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("OSC##toggle")) {
+			mUIAnimation->toggleShowOSC();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Websocket##toggle")) {
+			mUIAnimation->toggleShowWebsocket();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		
 		/*
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.9f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.9f, 0.8f, 0.8f));
@@ -385,6 +451,39 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::SameLine();
 */
 
+
+		/*
+		ImGui::SameLine();
+		ctrl = mVDUniforms->IFLIPPOSTH;
+		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("FlipPostH")) {
+			toggleValue(ctrl);
+		}
+		ImGui::PopStyleColor(3);
+
+		ImGui::Text(" Fp %dx%d F %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
+		ImGui::SameLine();*/
+		
+		// line 3
+		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
+			if (m > 0) ImGui::SameLine();
+			sprintf(buf, "%s##mode", mVDSession->getModeName(m).c_str());
+			if (mVDSession->getUniformValue(mVDUniforms->IDISPLAYMODE) == m) {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
+			}
+			else {
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 0.1f, 0.1f));
+			}
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
+			if (ImGui::Button(buf)) mVDSession->setUniformValue(mVDUniforms->IDISPLAYMODE, m);
+			sprintf(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+			ImGui::PopStyleColor(3);
+		}
+		ImGui::SameLine();
 		ctrl = mVDUniforms->IGLITCH;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -488,73 +587,15 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
-		// midi preferred
+		//ImGui::SameLine();
+		// midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
+		// not here; this button only starts up the MIDI subsystem
 		if (!mVDSession->isMidiSetup()) {
-			ImGui::SameLine();
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			sprintf(buf, "Midi");
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			ImGui::PopStyleColor(1);
 		}
-		else {
-			// midi learn - global toggle, only shown once midi is actually enabled (there's
-			// nothing to learn from otherwise). Binds an arbitrary MIDI CC to any uniform index
-			// (1-90) instead of relying on the fixed "CC number == uniform index" convention
-			// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
-			ImGui::SameLine();
-			bool learnMode = mVDSession->isMidiLearnMode();
-			if (ImGui::Checkbox("Midi Learn", &learnMode)) {
-				mVDSession->setMidiLearnMode(learnMode);
-				if (!learnMode) mVDSession->armMidiLearn(-1);
-			}
-			if (learnMode) {
-				ImGui::SameLine();
-				ImGui::PushItemWidth(50 * mVDUniforms->getUniformValue(mVDUniforms->IUISCALE));
-				ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
-				ImGui::PopItemWidth();
-				if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
-				if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
-				ImGui::SameLine();
-				sprintf(buf, "Arm##midilearnarm");
-				if (ImGui::Button(buf)) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
-				ImGui::SameLine();
-				if (mVDSession->getMidiLearnTarget() >= 0) {
-					ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind it to %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
-				}
-				else {
-					ImGui::TextColored(ImColor(150, 150, 150), "%d %s - press Arm, then move a control", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
-				}
-				// existing bindings, each removable individually
-				int mappingsCount = mVDSession->getMidiLearnMappingsCount();
-				if (mappingsCount > 0) {
-					ImGui::Text("Midi Learn bindings:");
-					int cc = 0, uniformIndex = 0;
-					for (int m = 0; m < mappingsCount; m++) {
-						if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
-							ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
-							ImGui::SameLine();
-							sprintf(buf, "x##midilearnrm%d", cc);
-							if (ImGui::Button(buf)) mVDSession->removeMidiLearnMapping(cc);
-						}
-					}
-					sprintf(buf, "Clear all##midilearnclear");
-					if (ImGui::Button(buf)) mVDSession->clearMidiLearnMap();
-				}
-			}
-		}
-		/*
-		ImGui::SameLine();
-		ctrl = mVDUniforms->IFLIPPOSTH;
-		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("FlipPostH")) {
-			toggleValue(ctrl);
-		}
-		ImGui::PopStyleColor(3);
-
-		ImGui::Text(" Fp %dx%d F %dx%d", mVDParams->getPreviewFboWidth(), mVDParams->getPreviewFboHeight(), mVDParams->getFboWidth(), mVDParams->getFboHeight());
-		ImGui::SameLine();*/
 		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows
@@ -601,24 +642,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		//sprintf(buf, "%s", mVDSession->getTrackName().c_str());
 		//ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
 		//ImGui::Text(" ", mVDSession->getTrackName());
-
-		// line 3
-		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
-			if (m > 0) ImGui::SameLine();
-			sprintf(buf, "%s##mode", mVDSession->getModeName(m).c_str());
-			if (mVDSession->getUniformValue(mVDUniforms->IDISPLAYMODE) == m) {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
-			}
-			else {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 0.1f, 0.1f));
-			}
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(m / 16.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
-			if (ImGui::Button(buf)) mVDSession->setUniformValue(mVDUniforms->IDISPLAYMODE, m);
-			sprintf(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-			ImGui::PopStyleColor(3);
-		}
 
 /*
 		const float spacing = 4;

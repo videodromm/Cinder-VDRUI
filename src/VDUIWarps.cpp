@@ -13,6 +13,19 @@ VDUIWarps::VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, V
 void VDUIWarps::Run(const char* title) {
 	//static int currentNode = 0;
 
+	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
+	// moved here from VDUI.cpp's top-level toggle bar - creating a warp belongs with the rest of
+	// the warp controls, not the panel-visibility buttons
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
+	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings);
+	{
+		if (ImGui::Button("Warp++")) {
+			mVDSession->createWarp();
+		}
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Create a new warp");
+	}
+	ImGui::End();
+
 	yPos = mVDParams->getUIYPosRow3();
 	for (int w = 0; w < mVDSession->getWarpCount(); w++) {
 
@@ -23,8 +36,9 @@ void VDUIWarps::Run(const char* title) {
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 
 
-		sprintf(buf, "%s##sh%d", mVDSession->getWarpName(w).c_str(), w);
-		//sprintf(buf, "warp##sh%d", w);
+		// title is the fbo currently feeding this warp, not the warp's own (largely meaningless,
+		// auto-generated) name - makes it obvious at a glance which fboshader each warp shows
+		sprintf(buf, "%s##sh%d", mVDSession->getFboShaderName(mVDSession->getWarpAFboIndex(w)).c_str(), w);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings);
 		{
 
@@ -68,12 +82,12 @@ void VDUIWarps::Run(const char* title) {
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(a / 16.0f, 0.7f, 0.7f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(a / 16.0f, 0.8f, 0.8f));
 
-				/*sprintf(buf, "%d##wia%d%d", a, w, a);
+				sprintf(buf, "%d##wia%d%d", a, w, a);
 				if (ImGui::Button(buf)) {
 					mVDSession->setWarpAFboIndex(w, a);
-				};*/
-				//sprintf(buf, "Set input fbo A to %s", mVDSession->getShaderName(a).c_str());
-				//if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+				};
+				sprintf(buf, "Set input fbo A to %s", mVDSession->getFboShaderName(a).c_str());
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
 				ImGui::PopStyleColor(3);
 			}
 			ImGui::PopID();

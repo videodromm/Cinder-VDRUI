@@ -400,8 +400,15 @@ void VDUIAnimation::Run(const char* title) {
 
 
 		} // Params
-		// Audio
-		if (ImGui::CollapsingHeader("Audio", ImGuiTreeNodeFlags_DefaultOpen))
+	}
+	ImGui::End();
+
+	// Audio/Midi/Tempo/OSC/Websocket: separate, independently-toggled windows (see VDUI.cpp's
+	// buttons) instead of always-visible CollapsingHeaders in the main window above - each keeps
+	// its own state exactly as before, just drawn in its own Begin()/End() when shown
+	if (mShowAudio) {
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+		ImGui::Begin("Audio", &mShowAudio, ImGuiWindowFlags_NoSavedSettings);
 		{
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
 
@@ -518,8 +525,12 @@ void VDUIAnimation::Run(const char* title) {
 			}
 			ImGui::PopItemWidth();
 		} // Audio
+		ImGui::End();
+	}
 
-		if (ImGui::CollapsingHeader("Midi", NULL, true))
+	if (mShowMidi) {
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+		ImGui::Begin("Midi", &mShowMidi, ImGuiWindowFlags_NoSavedSettings);
 		{
 			sprintf_s(buf, "Enable");
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
@@ -597,12 +608,69 @@ void VDUIAnimation::Run(const char* title) {
 					}
 					ImGui::Columns(1);
 				}
+
+				// midi learn - moved here from VDUI.cpp (used to sit next to the "Enable Midi"
+				// button there) since it belongs with the rest of the Midi panel, not the
+				// top-level toggle bar. Binds an arbitrary MIDI CC to any uniform index (1-90)
+				// instead of relying on the fixed "CC number == uniform index" convention
+				// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
+				if (ImGui::CollapsingHeader("Midi Learn", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					bool learnMode = mVDSession->isMidiLearnMode();
+					if (ImGui::Checkbox("Enabled##midilearnenabled", &learnMode)) {
+						mVDSession->setMidiLearnMode(learnMode);
+						if (!learnMode) mVDSession->armMidiLearn(-1);
+					}
+					if (learnMode) {
+						ImGui::SameLine();
+						ImGui::PushItemWidth(50 * uiScale);
+						ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
+						ImGui::PopItemWidth();
+						if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
+						if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
+						ImGui::SameLine();
+						sprintf_s(buf, "Arm##midilearnarm");
+						if (ImGui::Button(buf)) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
+						ImGui::SameLine();
+						if (mVDSession->getMidiLearnTarget() >= 0) {
+							ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind it to %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+						}
+						else {
+							ImGui::TextColored(ImColor(150, 150, 150), "%d %s - press Arm, then move a control", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+						}
+						// existing bindings, each removable individually
+						int mappingsCount = mVDSession->getMidiLearnMappingsCount();
+						if (mappingsCount > 0) {
+							ImGui::Text("Midi Learn bindings:");
+							int cc = 0, uniformIndex = 0;
+							for (int m = 0; m < mappingsCount; m++) {
+								if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
+									ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
+									ImGui::SameLine();
+									sprintf_s(buf, "x##midilearnrm%d", cc);
+									if (ImGui::Button(buf)) mVDSession->removeMidiLearnMapping(cc);
+								}
+							}
+							sprintf_s(buf, "Clear all##midilearnclear");
+							if (ImGui::Button(buf)) mVDSession->clearMidiLearnMap();
+						}
+					}
+				}
 			}
 		}
+		ImGui::End();
+	}
 
-		// Tempo
-		if (ImGui::CollapsingHeader("Tempo", ImGuiTreeNodeFlags_DefaultOpen))
+	if (mShowTempo) {
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+		ImGui::Begin("Tempo", &mShowTempo, ImGuiWindowFlags_NoSavedSettings);
 		{
+			// this block's own PopItemWidth() at the end used to balance the main "Animation"
+			// window's top-level PushItemWidth() (this section was inside that same window) -
+			// now that Tempo is its own separate window, that Pop has nothing to match here,
+			// which crashed with "Calling PopItemWidth() too many times!" the moment this window
+			// was ever shown. Push here instead, so the pair is self-contained again.
+			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
 			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
 			//ImGui::SameLine();
 			//ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
@@ -687,9 +755,12 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::PopItemWidth();
 
 		}
+		ImGui::End();
+	}
 
-		// OSC
-		if (ImGui::CollapsingHeader("OSC", true))
+	if (mShowOSC) {
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+		ImGui::Begin("OSC", &mShowOSC, ImGuiWindowFlags_NoSavedSettings);
 		{
 			static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
 			// validate in loading, not here 
@@ -724,9 +795,13 @@ void VDUIAnimation::Run(const char* title) {
 			ImGui::SameLine();
 			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
 		}
+		ImGui::End();
+	}
 
-		// Websocket TODO CHECK , "8088"
-		if( ImGui::CollapsingHeader( "Websocket", ImGuiTreeNodeFlags_DefaultOpen ) )
+	// Websocket TODO CHECK , "8088"
+	if (mShowWebsocket) {
+		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+		ImGui::Begin("Websocket", &mShowWebsocket, ImGuiWindowFlags_NoSavedSettings);
 		{
 			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
 
@@ -741,7 +816,14 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
 			ImGui::Text(">%s", mVDSession->getWSMsg().c_str());
 		}
+		ImGui::End();
+	}
 
+	// Render stays part of the main, always-visible "Animation" window (not one of the panels
+	// extracted above) - reopening it here by the same title continues that same window rather
+	// than creating a second one, exactly as if this were still the same Begin() from the top
+	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+	{
 		// Render
 		if (ImGui::CollapsingHeader("Render", false))
 		{
