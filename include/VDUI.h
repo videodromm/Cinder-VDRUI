@@ -27,6 +27,10 @@
 #include "VDUIWarps.h"
 // Folders
 #include "VDUIFolders.h"
+#if defined( CINDER_MSW )
+// HtmlPage (WebView2, Windows-only)
+#include "VDUIHtmlPage.h"
+#endif
 // Params
 #include "VDParams.h"
 // Log
@@ -90,6 +94,12 @@ namespace videodromm
 		VDUIFoldersRef				mUIFolders;
 		bool						mShowFolders;
 
+#if defined( CINDER_MSW )
+		// UIHtmlPage (WebView2, Windows-only)
+		VDUIHtmlPageRef				mUIHtmlPage;
+		bool						mShowHtmlPage;
+#endif
+
 		// imgui
 		char						buf[64];
 		bool						mIsResizing;
@@ -119,6 +129,14 @@ namespace videodromm
 		void mToggleShowFolders() {
 			mShowFolders = !mShowFolders;
 		}
+#if defined( CINDER_MSW )
+		void mToggleShowHtmlPage() {
+			mShowHtmlPage = !mShowHtmlPage;
+			// a hidden native child window won't disappear on its own just because
+			// Run() stops being called - unlike every other, pure-ImGui panel here
+			mUIHtmlPage->setVisible(mShowHtmlPage);
+		}
+#endif
 		/*void setFloatValue(unsigned int aCtrl, float aValue) {
 			mVDSession->setUniformValue(aCtrl, aValue);
 		}*/

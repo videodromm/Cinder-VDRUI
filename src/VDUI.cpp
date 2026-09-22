@@ -23,6 +23,11 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIFolders
 	mUIFolders = VDUIFolders::create(mVDUniforms, mVDSession);
+#if defined( CINDER_MSW )
+	// UIHtmlPage (WebView2, Windows-only)
+	mUIHtmlPage = VDUIHtmlPage::create(mVDSession);
+	mShowHtmlPage = false;
+#endif
 	// imgui
 	mouseGlobal = false;
 	//mouseZ = false;
@@ -348,6 +353,18 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(3);
 		hue++;
 		ImGui::SameLine();
+
+#if defined( CINDER_MSW )
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Web")) {
+			mToggleShowHtmlPage();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+#endif
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -731,6 +748,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mShowFolders) {
 		mUIFolders->Run("Folders");
 	}
+#if defined( CINDER_MSW )
+	// HtmlPage (WebView2)
+	if (mShowHtmlPage) {
+		mUIHtmlPage->Run("WebApp");
+	}
+#endif
 	// blendmodes
 	/*if (mShowBlend) {
 		mUIBlend->Run("BlendModes");
