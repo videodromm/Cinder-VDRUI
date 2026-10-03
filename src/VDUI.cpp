@@ -369,6 +369,16 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Code")) {
+			mToggleShowCodeView();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 		if (ImGui::Button("Folders")) {
 			mToggleShowFolders();
 		}
@@ -399,6 +409,23 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PopStyleColor(3);
 		hue++;
 		ImGui::SameLine();
+
+
+		// ImGui::SameLine();
+		//  midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
+		//  not here; this button only starts up the MIDI subsystem
+		/* if( ! mVDSession->isMidiSetup() ) {
+			ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor::HSV( 1.0f, 0.1f, 0.1f ) );
+			sprintf_s( buf, "Midi" );
+			if( ImGui::Button( buf ) )
+				mVDSession->setupMidi();
+			ImGui::PopStyleColor( 1 );
+		}*/
+
+
+
+
+
 
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -600,15 +627,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
-		//ImGui::SameLine();
-		// midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
-		// not here; this button only starts up the MIDI subsystem
-		if (!mVDSession->isMidiSetup()) {
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			sprintf_s(buf, "Midi");
-			if (ImGui::Button(buf)) mVDSession->setupMidi();
-			ImGui::PopStyleColor(1);
-		}
+		
 		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows
@@ -754,6 +773,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		mUIHtmlPage->Run("WebApp");
 	}
 #endif
+	// live code view
+	if (mShowCodeView) {
+		runCodeView();
+	}
 	// blendmodes
 	/*if (mShowBlend) {
 		mUIBlend->Run("BlendModes");
@@ -763,4 +786,31 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	//mUIShaders->Run("Shaders");
 
 
+}
+
+void VDUI::runCodeView() {
+	VDCodeViewRef codeView = mVDSession->getCodeView();
+	if (!codeView) return;
+	if (ImGui::Begin("Code view", &mShowCodeView)) {
+		ImGui::TextWrapped("WebApp shader editor text, sent as the transparent Spout sender \"VDCode\".");
+		ImGui::Text(codeView->isActive() ? "Editor connected, %d lines" : "Waiting for the WebApp editor (%d lines)", codeView->getLineCount());
+		float fontSize = codeView->getFontSize();
+		if (ImGui::SliderFloat("Font size", &fontSize, 12.0f, 96.0f, "%.0f")) codeView->setFontSize(fontSize);
+		float backgroundAlpha = codeView->getBackgroundAlpha();
+		if (ImGui::SliderFloat("Background", &backgroundAlpha, 0.0f, 1.0f)) codeView->setBackgroundAlpha(backgroundAlpha);
+		bool shadow = codeView->getShadow();
+		if (ImGui::Checkbox("Shadow", &shadow)) codeView->setShadow(shadow);
+		ImGui::SameLine();
+		bool lineNumbers = codeView->getLineNumbers();
+		if (ImGui::Checkbox("Line numbers", &lineNumbers)) codeView->setLineNumbers(lineNumbers);
+		ImGui::SameLine();
+		bool premultiplied = codeView->getPremultiplied();
+		if (ImGui::Checkbox("Premultiplied", &premultiplied)) codeView->setPremultiplied(premultiplied);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Toggle if glyph edges show dark or bright fringes in Resolume");
+		if (auto tex = codeView->getTexture()) {
+			float w = ImGui::GetContentRegionAvail().x;
+			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
+		}
+	}
+	ImGui::End();
 }

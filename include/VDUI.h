@@ -100,6 +100,10 @@ namespace videodromm
 		bool						mShowHtmlPage;
 #endif
 
+		// live code view (Spout "VDCode") settings + preview
+		bool						mShowCodeView = false;
+		void						runCodeView();
+
 		// imgui
 		char						buf[64];
 		bool						mIsResizing;
@@ -128,6 +132,9 @@ namespace videodromm
 		}
 		void mToggleShowFolders() {
 			mShowFolders = !mShowFolders;
+		}
+		void mToggleShowCodeView() {
+			mShowCodeView = !mShowCodeView;
 		}
 #if defined( CINDER_MSW )
 		void mToggleShowHtmlPage() {

@@ -90,6 +90,7 @@ private:
 #if defined( CINDER_MSW )
 	SpoutOut 						mSpoutOut;
 	CinderNDISender					mNdiOut;
+	SpoutOut 						mCodeSpoutOut;
 #endif
 	int								mTrack = 0;
 };
@@ -99,8 +100,13 @@ _TBOX_PREFIX_App::_TBOX_PREFIX_App()
 #if defined( CINDER_MSW )
 	: mSpoutOut("VDUI", app::getWindowSize())
 	, mNdiOut("VDUI")
+	, mCodeSpoutOut("VDCode", app::getWindowSize())
 #endif
 {
+#if defined( CINDER_MSW )
+	// explicit name only for this extra sender: the main one keeps Spout's default (exe) name
+	mCodeSpoutOut.setSenderName("VDCode");
+#endif
 
 	// Settings
 	mVDSettings = VDSettings::create("VDUI");
@@ -424,6 +430,11 @@ void _TBOX_PREFIX_App::draw()
 			}
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()	
 	}	
+#if defined( CINDER_MSW )
+	// live code view: the WebApp editor's text on a transparent background, as its own Spout
+	// sender so Resolume can layer it over the visuals (cleared when the editor closes)
+	mCodeSpoutOut.sendTexture(mVDSessionFacade->buildCodeViewTexture(ivec2(mVDParams->getFboWidth(), mVDParams->getFboHeight())));
+#endif
 	// imgui
 	if (mVDSessionFacade->showUI()) {
 		mVDUI->Run("UI", (int)getAverageFps());
