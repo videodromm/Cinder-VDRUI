@@ -23,6 +23,8 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIWarps = VDUIWarps::create(mVDSettings, mVDSession, mVDUniforms);
 	// UIFolders
 	mUIFolders = VDUIFolders::create(mVDUniforms, mVDSession);
+	// projector output window (opened on demand from the "Output" panel)
+	mOutputWindow = VDOutputWindow::create(mVDSession);
 #if defined( CINDER_MSW )
 	// UIHtmlPage (WebView2, Windows-only)
 	mUIHtmlPage = VDUIHtmlPage::create(mVDSession);
@@ -369,6 +371,35 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Code")) {
+			mToggleShowCodeView();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		// projector output window: green while it's open
+		if (mOutputWindow->isOpen()) {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(0, 140, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(0, 180, 0, 255));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0, 210, 0, 255));
+		}
+		else {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		}
+		if (ImGui::Button("Output")) {
+			mShowOutput = !mShowOutput;
+		}
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Projector output window (2nd display or several projectors)");
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 		if (ImGui::Button("Folders")) {
 			mToggleShowFolders();
 		}
@@ -400,16 +431,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		hue++;
 		ImGui::SameLine();
 
-		// ImGui::SameLine();
-		//  midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
-		//  not here; this button only starts up the MIDI subsystem
-		/* if( ! mVDSession->isMidiSetup() ) {
-			ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor::HSV( 1.0f, 0.1f, 0.1f ) );
-			sprintf_s( buf, "Midi" );
-			if( ImGui::Button( buf ) )
-				mVDSession->setupMidi();
-			ImGui::PopStyleColor( 1 );
-		}*/
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
@@ -610,7 +631,15 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
-		
+		//ImGui::SameLine();
+		// midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
+		// not here; this button only starts up the MIDI subsystem
+		if (!mVDSession->isMidiSetup()) {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+			sprintf_s(buf, "Midi");
+			if (ImGui::Button(buf)) mVDSession->setupMidi();
+			ImGui::PopStyleColor(1);
+		}
 		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows
@@ -760,6 +789,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mShowCodeView) {
 		runCodeView();
 	}
+	// projector output window
+	if (mShowOutput) {
+		runOutput();
+	}
 	// blendmodes
 	/*if (mShowBlend) {
 		mUIBlend->Run("BlendModes");
@@ -794,6 +827,56 @@ void VDUI::runCodeView() {
 			float w = ImGui::GetContentRegionAvail().x;
 			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
 		}
+	}
+	ImGui::End();
+}
+
+void VDUI::runOutput() {
+	if (ImGui::Begin("Output", &mShowOutput)) {
+		bool open = mOutputWindow->isOpen();
+		if (ImGui::Button(open ? "Close output window" : "Open output window")) {
+			if (open) mOutputWindow->requestClose();
+			else mOutputWindow->requestOpen();
+		}
+		ImGui::SameLine();
+		ImGui::TextUnformatted(mOutputWindow->getStatus().c_str());
+
+		ImGui::Separator();
+		ImGui::TextUnformatted("Displays (several projectors: select them all, the window spans them)");
+		for (size_t i = 0; i < mOutputWindow->getDisplayCount(); i++) {
+			bool selected = mOutputWindow->isDisplaySelected(i);
+			if (ImGui::Checkbox(mOutputWindow->getDisplayLabel(i).c_str(), &selected)) mOutputWindow->setDisplaySelected(i, selected);
+		}
+		ci::Area span = mOutputWindow->getSpanBounds();
+		ImGui::Text("Output size: %dx%d", span.getWidth(), span.getHeight());
+		if (mOutputWindow->hasSpanGaps()) {
+			ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.0f, 1.0f), "Selected displays don't form one rectangle: the window also covers the gaps");
+		}
+
+		ImGui::Separator();
+		int content = mOutputWindow->getContent();
+		if (ImGui::RadioButton("Main view", content == VDOutputWindow::MAIN_VIEW)) mOutputWindow->setContent(VDOutputWindow::MAIN_VIEW);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Same image as the main window (Post/Fx/Warp/fbo display mode), stretched");
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Warps (projection mapping)", content == VDOutputWindow::WARPS)) mOutputWindow->setContent(VDOutputWindow::WARPS);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Cinder-Warping meshes rendered at the output's own resolution.\nOne warp per projector for a multi-projector span; 'W' toggles edit mode,\ncontrol points can be dragged directly on the output window.");
+		if (content == VDOutputWindow::WARPS) {
+			int composite = mOutputWindow->getComposite();
+			const char* composites[] = { "Mix", "Post", "Fx" };
+			if (ImGui::Combo("Warps without a specific fbo show", &composite, composites, IM_ARRAYSIZE(composites))) mOutputWindow->setComposite(composite);
+			if (composite == VDOutputWindow::COMPOSITE_FX) {
+				ImGui::TextWrapped("Fx is only re-rendered every frame while the display mode is Fx.");
+			}
+		}
+
+		ImGui::Separator();
+		bool pace = mOutputWindow->getPaceByVsync();
+		if (ImGui::Checkbox("Pace by projector vsync", &pace)) mOutputWindow->setPaceByVsync(pace);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Recommended: vsync on the output only, off on this window,\nframe-rate timer disabled while the output is open");
+		ImGui::SameLine();
+		bool onTop = mOutputWindow->getAlwaysOnTop();
+		if (ImGui::Checkbox("Always on top", &onTop)) mOutputWindow->setAlwaysOnTop(onTop);
+		ImGui::TextWrapped("Spout to Resolume keeps running either way. Esc on the output window closes it.");
 	}
 	ImGui::End();
 }
