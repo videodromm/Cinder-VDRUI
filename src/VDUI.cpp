@@ -369,16 +369,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Code")) {
-			mToggleShowCodeView();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 		if (ImGui::Button("Folders")) {
 			mToggleShowFolders();
 		}
@@ -410,7 +400,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		hue++;
 		ImGui::SameLine();
 
-
 		// ImGui::SameLine();
 		//  midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
 		//  not here; this button only starts up the MIDI subsystem
@@ -421,12 +410,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 				mVDSession->setupMidi();
 			ImGui::PopStyleColor( 1 );
 		}*/
-
-
-
-
-
-
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
