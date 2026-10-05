@@ -172,6 +172,14 @@ void _TBOX_PREFIX_App::fileDrop(FileDropEvent event)
 
 void _TBOX_PREFIX_App::mouseMove(MouseEvent event)
 {
+	if (mVDUI->getOutputWindow()->isOutputWindow(event.getWindow())) {
+		// only the warp editor listens on the projector output (drag control points on the wall)
+		if (mVDUI->getOutputWindow()->getContent() == VDOutputWindow::WARPS) {
+			MouseEvent warpEvent = mVDUI->getOutputWindow()->toWarpSpace(event);
+			mVDSessionFacade->handleMouseMove(warpEvent);
+		}
+		return;
+	}
 	if (!mVDSessionFacade->handleMouseMove(event)) {
 
 	}
@@ -179,6 +187,14 @@ void _TBOX_PREFIX_App::mouseMove(MouseEvent event)
 
 void _TBOX_PREFIX_App::mouseDown(MouseEvent event)
 {
+	if (mVDUI->getOutputWindow()->isOutputWindow(event.getWindow())) {
+		// only the warp editor listens on the projector output (drag control points on the wall)
+		if (mVDUI->getOutputWindow()->getContent() == VDOutputWindow::WARPS) {
+			MouseEvent warpEvent = mVDUI->getOutputWindow()->toWarpSpace(event);
+			mVDSessionFacade->handleMouseDown(warpEvent);
+		}
+		return;
+	}
 
 	if (!mVDSessionFacade->handleMouseDown(event)) {
 
@@ -187,6 +203,14 @@ void _TBOX_PREFIX_App::mouseDown(MouseEvent event)
 
 void _TBOX_PREFIX_App::mouseDrag(MouseEvent event)
 {
+	if (mVDUI->getOutputWindow()->isOutputWindow(event.getWindow())) {
+		// only the warp editor listens on the projector output (drag control points on the wall)
+		if (mVDUI->getOutputWindow()->getContent() == VDOutputWindow::WARPS) {
+			MouseEvent warpEvent = mVDUI->getOutputWindow()->toWarpSpace(event);
+			mVDSessionFacade->handleMouseDrag(warpEvent);
+		}
+		return;
+	}
 
 	if (!mVDSessionFacade->handleMouseDrag(event)) {
 
@@ -195,6 +219,14 @@ void _TBOX_PREFIX_App::mouseDrag(MouseEvent event)
 
 void _TBOX_PREFIX_App::mouseUp(MouseEvent event)
 {
+	if (mVDUI->getOutputWindow()->isOutputWindow(event.getWindow())) {
+		// only the warp editor listens on the projector output (drag control points on the wall)
+		if (mVDUI->getOutputWindow()->getContent() == VDOutputWindow::WARPS) {
+			MouseEvent warpEvent = mVDUI->getOutputWindow()->toWarpSpace(event);
+			mVDSessionFacade->handleMouseUp(warpEvent);
+		}
+		return;
+	}
 
 	if (!mVDSessionFacade->handleMouseUp(event)) {
 
@@ -203,6 +235,14 @@ void _TBOX_PREFIX_App::mouseUp(MouseEvent event)
 
 void _TBOX_PREFIX_App::keyDown(KeyEvent event)
 {
+	if (mVDUI->getOutputWindow()->isOutputWindow(event.getWindow())) {
+		// Esc closes the projector output; 'f' would toggle the output window's own fullscreen
+		if (event.getCode() == KeyEvent::KEY_ESCAPE) {
+			mVDUI->getOutputWindow()->requestClose();
+			return;
+		}
+		if (event.getCode() == KeyEvent::KEY_f) return;
+	}
 
 	// warp editor did not handle the key, so handle it here
 	if (!mVDSessionFacade->handleKeyDown(event)) {
@@ -364,15 +404,24 @@ void _TBOX_PREFIX_App::update()
 	}
 	mVDSessionFacade->setUniformValue(mVDUniforms->IFPS, getAverageFps());
 	mVDSessionFacade->update();
+	// open/close requests + warps rendered at the output's resolution (main GL context)
+	mVDUI->getOutputWindow()->update();
 }
 
 
 void _TBOX_PREFIX_App::resize()
 {
-	mVDUI->resize();
+	// resize() fires for every window: only the main one hosts ImGui
+	if (getWindow() == getWindowIndex(0)) mVDUI->resize();
 }
 void _TBOX_PREFIX_App::draw()
 {
+	// the optional projector output window (VDUI "Output" panel) goes through here too
+	if (mVDUI->getOutputWindow()->isCurrent()) {
+		mVDUI->getOutputWindow()->draw();
+		return;
+	}
+	mVDUI->getOutputWindow()->applyMainWindowPacing();
 	// clear the window and set the drawing color to white
 	gl::clear();
 	gl::color(Color::white());
@@ -387,23 +436,12 @@ void _TBOX_PREFIX_App::draw()
 		gl::setMatricesWindow(getWindowSize());
 
 		int m = mVDSessionFacade->getUniformValue(mVDUniforms->IDISPLAYMODE);
+		ci::gl::TextureRef tex;
 		if (m == VDDisplayMode::POST) {
-			auto tex = mVDSessionFacade->buildPostFboTexture();
-			gl::draw(tex, getWindowBounds());
-#if defined( CINDER_MSW )
-			mSpoutOut.sendTexture(tex);
-			// building the ci::Surface is a GPU->CPU readback, so skip it entirely when nobody's
-			// receiving rather than relying on sendSurface()'s own (later) connection check
-			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
-#endif
+			tex = mVDSessionFacade->buildPostFboTexture();
 		}
 		else if (m == VDDisplayMode::FX) {
-			auto tex = mVDSessionFacade->buildFxFboTexture();
-			gl::draw(tex, getWindowBounds());
-#if defined( CINDER_MSW )
-			mSpoutOut.sendTexture(tex);
-			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
-#endif
+			tex = mVDSessionFacade->buildFxFboTexture();
 		}
 		else if (m == VDDisplayMode::WARP) {
 			// was missing entirely - VDDisplayMode::WARP (2) fell through to the "show fbo
@@ -413,21 +451,22 @@ void _TBOX_PREFIX_App::draw()
 			// resize handles when warp edit mode - the 'W' key - is also on); Post/Fx
 			// deliberately show the flat, un-warped composite instead (see renderPostToFbo()/
 			// renderFxToFbo()).
-			auto tex = mVDSessionFacade->buildRenderedWarpFboTexture();
+			tex = mVDSessionFacade->buildRenderedWarpFboTexture();
+		}
+		else if (m < mVDSessionFacade->getFboShaderListSize()) {
+			tex = mVDSessionFacade->getFboShaderTexture(m);
+		}
+		if (tex) {
 			gl::draw(tex, getWindowBounds());
+			// the output window's "Main view" shows this same texture, drawn after this window
+			mVDUI->getOutputWindow()->setMainViewTexture(tex);
 #if defined( CINDER_MSW )
 			mSpoutOut.sendTexture(tex);
+			// building the ci::Surface is a GPU->CPU readback, so skip it entirely when nobody's
+			// receiving rather than relying on sendSurface()'s own (later) connection check
 			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
 #endif
 		}
-		else if (m < mVDSessionFacade->getFboShaderListSize()) {
-				auto tex = mVDSessionFacade->getFboShaderTexture(m);
-				gl::draw(tex, getWindowBounds());
-#if defined( CINDER_MSW )
-				mSpoutOut.sendTexture(tex);
-				if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
-#endif
-			}
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()	
 	}	
 #if defined( CINDER_MSW )

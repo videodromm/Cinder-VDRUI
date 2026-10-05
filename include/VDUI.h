@@ -31,6 +31,8 @@
 // HtmlPage (WebView2, Windows-only)
 #include "VDUIHtmlPage.h"
 #endif
+// projector output window
+#include "VDOutputWindow.h"
 // Params
 #include "VDParams.h"
 // Log
@@ -61,6 +63,8 @@ namespace videodromm
 			//ImGui::disconnectWindow(getWindow());
 		}
 		bool	isReady() { return !mIsResizing; };
+		// optional projector output window, driven by the app (see VDOutputWindow.h)
+		VDOutputWindowRef	getOutputWindow() { return mOutputWindow; }
 	private:
 		// Params
 		VDParamsRef					mVDParams;
@@ -103,6 +107,11 @@ namespace videodromm
 		// live code view (Spout "VDCode") settings + preview
 		bool						mShowCodeView = false;
 		void						runCodeView();
+
+		// projector output window settings
+		VDOutputWindowRef			mOutputWindow;
+		bool						mShowOutput = false;
+		void						runOutput();
 
 		// imgui
 		char						buf[64];

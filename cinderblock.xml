@@ -27,6 +27,8 @@
 		<requires>fr.batchass.spout</requires>
 		<requires>org.libcinder.wmfvideo</requires>
 		<requires>org.libcinder.ndi</requires>
+		<!-- VDUIHtmlPage docks the WebApp in an ImGui panel via WebView2 -->
+		<requires>com.videodromm.webview2</requires>
 	</platform>
 	<platform os="macosx">
 		<requires>info.v002.syphon</requires>
