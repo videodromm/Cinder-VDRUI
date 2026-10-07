@@ -85,6 +85,8 @@ namespace videodromm
 		float							mouseX, mouseY;
 		bool							mouseZ;
 		bool							mShowRenderedTexture = true;
-		bool							mShowInputTexture = false;
+		// per fbo pane: "tex" shows its input texture (and type/name) instead of its render
+		static const unsigned int		MAX_FBO_PANES = 64;
+		bool							mShowInputTexture[MAX_FBO_PANES] = {};
 	};
 }

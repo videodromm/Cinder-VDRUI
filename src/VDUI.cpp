@@ -793,6 +793,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mShowOutput) {
 		runOutput();
 	}
+	// an image/video drop no fbo pane claimed (Fbos panel hidden, or dropped elsewhere):
+	// image -> shared texture pool, video -> new fbo, paused
+	mVDSession->flushPendingTextureDrop();
 	// blendmodes
 	/*if (mShowBlend) {
 		mUIBlend->Run("BlendModes");
@@ -829,6 +832,33 @@ void VDUI::runCodeView() {
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Border and Line number use at least 50%% opacity of the colour below.\nLine number falls back to Line fill when line numbers are hidden.");
 		ci::ColorA lineColor = codeView->getCurrentLineColor();
 		if (ImGui::ColorEdit4("Current line", &lineColor.r, ImGuiColorEditFlags_AlphaBar)) codeView->setCurrentLineColor(lineColor);
+
+		// placement on the projector output window (its on/off and opacity are in the Output panel)
+		ImGui::Separator();
+		ImGui::TextUnformatted("Output window overlay");
+		bool codeOverlay = mOutputWindow->getCodeOverlay();
+		if (ImGui::Checkbox("Show on output", &codeOverlay)) mOutputWindow->setCodeOverlay(codeOverlay);
+		ImGui::SameLine();
+		ci::vec2 overlayPos = mOutputWindow->getCodeOverlayPosition();
+		if (ImGui::Button("Left")) { overlayPos.x = 0.0f; mOutputWindow->setCodeOverlayPosition(overlayPos); mOutputWindow->saveSettings(); }
+		ImGui::SameLine();
+		if (ImGui::Button("Center")) { overlayPos.x = 0.5f; mOutputWindow->setCodeOverlayPosition(overlayPos); mOutputWindow->saveSettings(); }
+		ImGui::SameLine();
+		if (ImGui::Button("Right")) { overlayPos.x = 1.0f; mOutputWindow->setCodeOverlayPosition(overlayPos); mOutputWindow->saveSettings(); }
+		if (ImGui::SliderFloat("Horizontal##codeoverlay", &overlayPos.x, 0.0f, 1.0f)) mOutputWindow->setCodeOverlayPosition(overlayPos);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("0 = left edge, 0.5 = centred, 1 = right edge");
+		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
+		if (ImGui::SliderFloat("Vertical##codeoverlay", &overlayPos.y, 0.0f, 1.0f)) mOutputWindow->setCodeOverlayPosition(overlayPos);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("0 = top edge, 0.5 = centred, 1 = bottom edge");
+		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
+		float overlaySize = mOutputWindow->getCodeOverlaySize();
+		if (ImGui::SliderFloat("Size##codeoverlay", &overlaySize, 0.1f, 1.0f)) mOutputWindow->setCodeOverlaySize(overlaySize);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("1 = the output window's full height (aspect ratio kept)");
+		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
+		float overlayOpacity = mOutputWindow->getCodeOverlayOpacity();
+		if (ImGui::SliderFloat("Opacity##codeviewoverlay", &overlayOpacity, 0.0f, 1.0f)) mOutputWindow->setCodeOverlayOpacity(overlayOpacity);
+		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
+
 		if (auto tex = codeView->getTexture()) {
 			float w = ImGui::GetContentRegionAvail().x;
 			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
@@ -878,7 +908,7 @@ void VDUI::runOutput() {
 		ImGui::Separator();
 		bool codeOverlay = mOutputWindow->getCodeOverlay();
 		if (ImGui::Checkbox("Code overlay", &codeOverlay)) mOutputWindow->setCodeOverlay(codeOverlay);
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("The WebApp editor's code (same image as the \"VDCode\" Spout sender) over the output,\naspect ratio kept. Style it in the \"Code\" panel.");
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("The WebApp editor's code (same image as the \"VDCode\" Spout sender) over the output,\nposition, size and style it in the \"Code\" panel.");
 		ImGui::SameLine();
 		float codeOpacity = mOutputWindow->getCodeOverlayOpacity();
 		if (ImGui::SliderFloat("Opacity##codeoverlay", &codeOpacity, 0.0f, 1.0f)) mOutputWindow->setCodeOverlayOpacity(codeOpacity);

@@ -243,15 +243,19 @@ void VDOutputWindow::draw() {
 }
 
 // same texture as the "VDCode" Spout sender, already rendered by the main window's draw()
-// (textures are shared between the two contexts). Fitted with its aspect ratio kept, so the
-// code isn't stretched on a multi-projector span
+// (textures are shared between the two contexts). Aspect ratio kept, so the code isn't
+// stretched on a multi-projector span; placed by the Code view panel's position/size
 void VDOutputWindow::drawCodeOverlay() {
 	if (!mCodeOverlay || mCodeOverlayOpacity <= 0.0f) return;
 	VDCodeViewRef codeView = mVDSession->getCodeView();
 	if (!codeView || !codeView->isActive()) return;
 	ci::gl::Texture2dRef tex = codeView->getTexture();
 	if (!tex) return;
-	Rectf dest = Rectf(tex->getBounds()).getCenteredFit(Rectf(getWindowBounds()), true);
+	vec2 window = vec2(getWindowSize());
+	float h = window.y * mCodeOverlaySize;
+	float w = h * tex->getAspectRatio();
+	vec2 ul = mCodeOverlayPosition * (window - vec2(w, h));
+	Rectf dest(ul, ul + vec2(w, h));
 	gl::ScopedColor scopedColor;
 	if (codeView->getPremultiplied()) {
 		// premultiplied: scale every channel by the opacity
@@ -285,6 +289,9 @@ void VDOutputWindow::load() {
 		if (json.hasChild("alwaysOnTop")) mAlwaysOnTop = json.getValueForKey<bool>("alwaysOnTop");
 		if (json.hasChild("codeOverlay")) mCodeOverlay = json.getValueForKey<bool>("codeOverlay");
 		if (json.hasChild("codeOverlayOpacity")) mCodeOverlayOpacity = json.getValueForKey<float>("codeOverlayOpacity");
+		if (json.hasChild("codeOverlayX")) mCodeOverlayPosition.x = json.getValueForKey<float>("codeOverlayX");
+		if (json.hasChild("codeOverlayY")) mCodeOverlayPosition.y = json.getValueForKey<float>("codeOverlayY");
+		if (json.hasChild("codeOverlaySize")) mCodeOverlaySize = json.getValueForKey<float>("codeOverlaySize");
 		if (json.hasChild("displays")) {
 			for (const auto& d : json.getChild("displays")) {
 				mSelectedDisplays.push_back(Area(d.getValueForKey<int>("x1"), d.getValueForKey<int>("y1"), d.getValueForKey<int>("x2"), d.getValueForKey<int>("y2")));
@@ -305,6 +312,9 @@ void VDOutputWindow::save() {
 		json.addChild(JsonTree("alwaysOnTop", mAlwaysOnTop));
 		json.addChild(JsonTree("codeOverlay", mCodeOverlay));
 		json.addChild(JsonTree("codeOverlayOpacity", mCodeOverlayOpacity));
+		json.addChild(JsonTree("codeOverlayX", mCodeOverlayPosition.x));
+		json.addChild(JsonTree("codeOverlayY", mCodeOverlayPosition.y));
+		json.addChild(JsonTree("codeOverlaySize", mCodeOverlaySize));
 		JsonTree displays = JsonTree::makeArray("displays");
 		for (const auto& b : mSelectedDisplays) {
 			JsonTree d;

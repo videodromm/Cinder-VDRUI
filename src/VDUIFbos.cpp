@@ -1,3 +1,7 @@
+// FindHoveredWindowEx(): which window is on top at the drop position. Included first: after
+// VDUIFbos.h's using-directives, its use of log() is ambiguous with ci::log
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "VDUIFbos.h"
 
 #if ! defined( CINDER_MSW )
@@ -37,6 +41,16 @@ void VDUIFbos::Run(const char* title) {
 	** fbos
 	*/
 
+	// drag-and-drop: the topmost window under the drop (last frame's z-order), so a drop on a
+	// panel lying over an fbo pane doesn't land in the hidden fbo. Only an fbo pane claims it below;
+	// anything else (another panel, or no window: the render itself) goes to VDUI's flush
+	ImGuiWindow* dropWindow = nullptr;
+	if (mVDSession->hasPendingTextureDrop()) {
+		vec2 dropPos = mVDSession->getPendingTextureDropPos();
+		ImGuiWindow* hoveredUnderMoving = nullptr;
+		ImGui::FindHoveredWindowEx(ImVec2(dropPos.x, dropPos.y), false, &dropWindow, &hoveredUnderMoving);
+	}
+
 	for (unsigned int f = 0; f < mVDSession->getFboShaderListSize(); f++) {
 		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (f));
 		yPos = mVDParams->getUIYPosRow2();
@@ -52,13 +66,19 @@ void VDUIFbos::Run(const char* title) {
 		sprintf_s(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
-			// drag-and-drop: this fbo's real, current window rect - the only place that knows it,
-			// since these windows can be dragged/resized independently of the initial grid layout
-			ImVec2 winMin = ImGui::GetWindowPos();
-			ImVec2 winMax = ImVec2(winMin.x + ImGui::GetWindowSize().x, winMin.y + ImGui::GetWindowSize().y);
-			mVDSession->consumePendingTextureDropIfInRect(f, vec2(winMin.x, winMin.y), vec2(winMax.x, winMax.y));
-			// whichever fbo window last had focus is the target for a drop that lands outside
-			// every fbo window (see flushPendingTextureDrop() after this loop)
+			// drag-and-drop: claimed when this pane (or a child window inside it) is the topmost
+			// window under the drop position
+			if (dropWindow) {
+				ImGuiWindow* thisWindow = ImGui::GetCurrentWindow();
+				for (ImGuiWindow* w = dropWindow; w; w = w->ParentWindow) {
+					if (w == thisWindow) {
+						mVDSession->consumePendingTextureDrop(f);
+						mVDSession->setSelectedFbo(f);
+						dropWindow = nullptr;
+						break;
+					}
+				}
+			}
 			if (ImGui::IsWindowFocused()) {
 				mVDSession->setSelectedFbo(f);
 			}
@@ -90,12 +110,14 @@ void VDUIFbos::Run(const char* title) {
 			ImGui::SameLine();
 
 			int hue = 0;
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+			const bool showInputTexture = f < MAX_FBO_PANES && mShowInputTexture[f];
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, showInputTexture ? 0.9f : 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
 			sprintf_s(buf, "tex##rdrtexuniform%d", f);
-			mShowInputTexture ^= ImGui::Button(buf);
+			if (ImGui::Button(buf) && f < MAX_FBO_PANES) mShowInputTexture[f] = !mShowInputTexture[f];
 			ImGui::PopStyleColor(3);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Show this fbo's input texture and its type instead of its render");
 
 			hue++;
 			ImGui::SameLine();
@@ -114,8 +136,21 @@ void VDUIFbos::Run(const char* title) {
 			//mVDSession->buildFboRenderedTexture(f) && 
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save thumbnail");
 
-			if (mShowRenderedTexture) ImGui::Image(mVDSession->buildFboRenderedTexture(f), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
-			if (mShowInputTexture) ImGui::Image(mVDSession->getFboInputTextureListItem(f, mVDSession->getFboInputTextureIndex(f)), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
+			const ivec2 previewSize(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale);
+			if (showInputTexture) {
+				// in place of the render: stacked below it, it fell outside the pane's initial height
+				static const char* textureModeNames[] = { "unknown", "image", "sequence", "video", "camera", "shared", "audio", "stream", "parts", "text", "ndi" };
+				int textureMode = mVDSession->getInputTextureMode(f);
+				const char* modeName = (textureMode >= 0 && textureMode < IM_ARRAYSIZE(textureModeNames)) ? textureModeNames[textureMode] : "unknown";
+				unsigned int texIndex = mVDSession->getFboInputTextureIndex(f);
+				ImGui::TextColored(ImColor(255, 200, 0), "%s: %s", modeName, mVDSession->getInputTextureName(f, texIndex).c_str());
+				ci::gl::Texture2dRef inputTexture = mVDSession->getFboInputTextureListItem(f, texIndex);
+				if (inputTexture) ImGui::Image(inputTexture, previewSize);
+				else ImGui::Dummy(ImVec2((float)previewSize.x, (float)previewSize.y));
+			}
+			else if (mShowRenderedTexture) {
+				ImGui::Image(mVDSession->buildFboRenderedTexture(f), previewSize);
+			}
 			ImGui::SameLine();
 			if (ImGui::VSliderFloat("##v", ImVec2(14 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
 			{
@@ -394,9 +429,8 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::PopStyleColor(5);
 	} // for getFboList
 
-	// nobody claimed it above (dropped outside every fbo window) - add it to the selected fbo's
-	// texture list instead
-	mVDSession->flushPendingTextureDrop();
+	// a drop no fbo pane claimed is handled by VDUI::Run() (flushPendingTextureDrop), which runs
+	// even while this panel is hidden
 
 #pragma endregion fbos
 

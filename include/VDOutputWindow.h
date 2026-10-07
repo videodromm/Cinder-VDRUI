@@ -75,6 +75,12 @@ namespace videodromm
 		float					getCodeOverlayOpacity() const { return mCodeOverlayOpacity; }
 		// not saved on every slider step: call saveSettings() when the drag ends
 		void					setCodeOverlayOpacity(float aOpacity) { mCodeOverlayOpacity = ci::math<float>::clamp(aOpacity, 0.0f, 1.0f); }
+		// placement: size 1 = the window's height (aspect kept, so on a two-projector span it fills
+		// one projector); position 0..1 within the free space (0 = left/top, 0.5 = centre, 1 = right/bottom)
+		ci::vec2				getCodeOverlayPosition() const { return mCodeOverlayPosition; }
+		void					setCodeOverlayPosition(const ci::vec2& aPosition) { mCodeOverlayPosition = glm::clamp(aPosition, ci::vec2(0.0f), ci::vec2(1.0f)); }
+		float					getCodeOverlaySize() const { return mCodeOverlaySize; }
+		void					setCodeOverlaySize(float aSize) { mCodeOverlaySize = ci::math<float>::clamp(aSize, 0.1f, 1.0f); }
 		void					saveSettings() { save(); }
 		bool					getAlwaysOnTop() const { return mAlwaysOnTop; }
 		void					setAlwaysOnTop(bool aOnTop);
@@ -102,6 +108,8 @@ namespace videodromm
 		bool					mAlwaysOnTop = true;
 		bool					mCodeOverlay = false;
 		float					mCodeOverlayOpacity = 1.0f;
+		ci::vec2				mCodeOverlayPosition = ci::vec2(0.0f);	// left, top
+		float					mCodeOverlaySize = 1.0f;
 
 		// pacing state: what was applied, and what to restore on close
 		int						mSavedMainVsync = -1;

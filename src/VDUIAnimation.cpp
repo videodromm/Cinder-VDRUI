@@ -422,7 +422,14 @@ void VDUIAnimation::Run(const char* title) {
 				mVDSession->refreshAudioDevices();
 			}
 
+			// "Default" next to each device: this PC's startup device, saved in audio.json under
+			// this machine's id (other PCs sharing the assets folder keep their own)
+			ImGui::Text("This PC: %s", mVDSession->getMachineName().c_str());
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Machine id %s", mVDSession->getMachineId().c_str());
+			const ImVec4 defaultColor = (ImVec4)ImColor(0, 150, 60, 230);
+
 			std::string preferredInput = mVDSession->getPreferredAudioInputDevice();
+			std::string defaultInput = mVDSession->getDefaultAudioInputDevice();
 			ImGui::TextColored(ImColor(155, 255, 0), "Inputs");
 			for (auto& inputName : mVDSession->getAudioInputDeviceNames()) {
 				bool isSelected = (inputName == preferredInput);
@@ -433,9 +440,20 @@ void VDUIAnimation::Run(const char* title) {
 					preferredInput = inputName;
 				}
 				if (isSelected) ImGui::PopStyleColor(1);
+				ImGui::SameLine();
+				bool isDefault = (inputName == defaultInput);
+				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
+				sprintf_s(audioBuf, "%s##defaultaudioinput%s", isDefault ? "Default" : "Set default", inputName.c_str());
+				if (ImGui::SmallButton(audioBuf)) {
+					// clicking the current default clears it
+					mVDSession->setDefaultAudioInputDevice(isDefault ? "" : inputName);
+					if (!isDefault) preferredInput = inputName;
+				}
+				if (isDefault) ImGui::PopStyleColor(1);
 			}
 
 			std::string preferredOutput = mVDSession->getPreferredAudioOutputDevice();
+			std::string defaultOutput = mVDSession->getDefaultAudioOutputDevice();
 			ImGui::TextColored(ImColor(155, 255, 0), "Outputs");
 			for (auto& outputName : mVDSession->getAudioOutputDeviceNames()) {
 				bool isSelected = (outputName == preferredOutput);
@@ -445,6 +463,14 @@ void VDUIAnimation::Run(const char* title) {
 					mVDSession->selectAudioOutputDevice(outputName);
 				}
 				if (isSelected) ImGui::PopStyleColor(1);
+				ImGui::SameLine();
+				bool isDefault = (outputName == defaultOutput);
+				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
+				sprintf_s(audioBuf, "%s##defaultaudiooutput%s", isDefault ? "Default" : "Set default", outputName.c_str());
+				if (ImGui::SmallButton(audioBuf)) {
+					mVDSession->setDefaultAudioOutputDevice(isDefault ? "" : outputName);
+				}
+				if (isDefault) ImGui::PopStyleColor(1);
 			}
 			ImGui::Separator();
 
