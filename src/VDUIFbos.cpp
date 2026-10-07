@@ -156,14 +156,23 @@ void VDUIFbos::Run(const char* title) {
 			{
 				setValue(ctrl, f, iWeight);
 			};
-			// fading a movie's visual weight also fades its audio - lets weight double as a volume
-			// fader instead of the video staying at full volume regardless. Done unconditionally
-			// every frame (not just inside the slider's own onChange above) because the weight
-			// uniform can also be driven by MIDI (VDMidi::midiListener() sets it directly via
-			// VDMediator, bypassing this widget entirely) - keyed only off the slider's own drag
-			// before, a MIDI-driven weight change updated the visual mix but never touched volume
-			if (mVDSession->isMovie(f)) {
-				mVDSession->setVideoVolume(f, iWeight);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Weight %.2f", iWeight);
+			// video/audio-file fbos: volume level slider right of the weight slider. The output
+			// volume is level x weight, so fading the weight (also from MIDI, which sets the uniform
+			// directly) still fades the sound. Applied every frame for that reason; 0 while scrubbing
+			const bool hasSound = mVDSession->isMovie(f) || mVDSession->isAudioFile(f);
+			if (hasSound) {
+				ImGui::SameLine();
+				float volumeLevel = mVDSession->getVolumeLevel(f);
+				sprintf_s(buf, "##vol%d", f);
+				ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor(0, 200, 120, 255));
+				if (ImGui::VSliderFloat(buf, ImVec2(14 * uiScale, 80 * uiScale), &volumeLevel, 0.0f, 1.0f, "")) {
+					mVDSession->setVolumeLevel(f, volumeLevel);
+				}
+				ImGui::PopStyleColor(1);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Volume %.2f (output = volume x weight)", volumeLevel);
+				const bool scrubbing = f < 12 && mIsScrubbing[f];
+				mVDSession->setVideoVolume(f, scrubbing ? 0.0f : volumeLevel * iWeight);
 			}
 
 			
@@ -266,18 +275,9 @@ void VDUIFbos::Run(const char* title) {
 				{
 					mVDSession->setPlayheadPosition(f, playheadPositions[f]);
 				}
-				if (ImGui::IsItemActivated()) {
-					// drag just started - mute for its duration (setVideoVolume/getVideoVolume are
-					// no-ops outside MOVIE mode, safe to call unconditionally for sequences too)
-					mPreScrubVolume[f] = mVDSession->getVideoVolume(f);
-					mVDSession->setVideoVolume(f, 0.0f);
-					mIsScrubbing[f] = true;
-				}
-				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) {
-					// drag just ended (regardless of whether the value actually changed) - restore
-					mVDSession->setVideoVolume(f, mPreScrubVolume[f]);
-					mIsScrubbing[f] = false;
-				}
+				// muted while dragging: the per-frame volume above applies 0 while mIsScrubbing
+				if (ImGui::IsItemActivated()) mIsScrubbing[f] = true;
+				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) mIsScrubbing[f] = false;
 			}
 
 #pragma endregion tex

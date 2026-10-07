@@ -35,13 +35,13 @@ VDUIAnimation::~VDUIAnimation() {
 
 void VDUIAnimation::Run(const char* title) {
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 8.3f * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 7.3f * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 	int hue = 0;
-	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings);// | ImGuiWindowFlags_NoCollapse
 	{
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		if( ImGui::CollapsingHeader( "Color", ImGuiTreeNodeFlags_DefaultOpen ) )
+		if( ImGui::CollapsingHeader( "Color" ) )
 		{
 			ImGui::PushItemWidth(200.0f);
 			// foreground color
@@ -276,7 +276,7 @@ void VDUIAnimation::Run(const char* title) {
 		} 
 		
 		// FX boolean
-		if( ImGui::CollapsingHeader( "Fx", ImGuiTreeNodeFlags_DefaultOpen ) )
+		if( ImGui::CollapsingHeader( "Fx" ) )
 		{
 			for (size_t iUniform = 86; iUniform < 90; iUniform++)
 			{
@@ -366,7 +366,7 @@ void VDUIAnimation::Run(const char* title) {
 			}
 		}
 		// Uniforms
-		if (ImGui::CollapsingHeader("Params", ImGuiTreeNodeFlags_DefaultOpen))
+		if( ImGui::CollapsingHeader( "Params" ) )
 		{
 
 			for (size_t iUniform = 54; iUniform < 60; iUniform++)
@@ -432,24 +432,28 @@ void VDUIAnimation::Run(const char* title) {
 			std::string defaultInput = mVDSession->getDefaultAudioInputDevice();
 			ImGui::TextColored(ImColor(155, 255, 0), "Inputs");
 			for (auto& inputName : mVDSession->getAudioInputDeviceNames()) {
-				bool isSelected = (inputName == preferredInput);
-				if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
-				sprintf_s(audioBuf, "%s##audioinput", inputName.c_str());
-				if (ImGui::Button(audioBuf)) {
-					mVDSession->selectAudioInputDevice(inputName);
-					preferredInput = inputName;
-				}
-				if (isSelected) ImGui::PopStyleColor(1);
-				ImGui::SameLine();
+				
 				bool isDefault = (inputName == defaultInput);
 				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
-				sprintf_s(audioBuf, "%s##defaultaudioinput%s", isDefault ? "Default" : "Set default", inputName.c_str());
+				sprintf_s(audioBuf, "%s##defaultaudioinput%s", isDefault ? "D" : "S", inputName.c_str());
 				if (ImGui::SmallButton(audioBuf)) {
 					// clicking the current default clears it
 					mVDSession->setDefaultAudioInputDevice(isDefault ? "" : inputName);
 					if (!isDefault) preferredInput = inputName;
 				}
 				if (isDefault) ImGui::PopStyleColor(1);
+				ImGui::SameLine();
+				bool isSelected = ( inputName == preferredInput );
+				if( isSelected )
+					ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor( 200, 150, 0, 220 ) );
+				sprintf_s( audioBuf, "%s##audioinput", inputName.c_str() );
+				if( ImGui::Button( audioBuf ) ) {
+					mVDSession->selectAudioInputDevice( inputName );
+					preferredInput = inputName;
+				}
+				if( isSelected )
+					ImGui::PopStyleColor( 1 );
+				
 			}
 
 			std::string preferredOutput = mVDSession->getPreferredAudioOutputDevice();
