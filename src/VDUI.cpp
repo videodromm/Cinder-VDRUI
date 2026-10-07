@@ -663,7 +663,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		//ImGui::SameLine();
 		//ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
 		ImGui::SameLine();
-		ImGui::Text(" Delta Time %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
+		ImGui::Text(" Delta %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
 		// LiveOSC Obsolete ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
 		//ImGui::SameLine();
 		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);

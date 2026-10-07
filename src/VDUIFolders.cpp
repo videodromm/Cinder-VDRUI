@@ -16,7 +16,8 @@ VDUIFolders::VDUIFolders(VDUniformsRef aVDUniforms, VDSessionFacadeRef aVDSessio
 void VDUIFolders::Run(const char* title) {
 
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
+	// folders on the left, the selected folder's files on the right
+	ImGui::SetNextWindowSize(ImVec2(600.0f * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
 
 	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
@@ -38,9 +39,23 @@ void VDUIFolders::Run(const char* title) {
 		ImGui::PopItemWidth();
 
 		ImGui::Separator();
+		// two columns, each scrolling on its own
+		ImGui::BeginChild("##folderlist", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.0f), ImGuiChildFlags_Borders);
 		ImGui::TextColored(ImColor(155, 255, 0), "Folders");
 		auto folders = mVDSession->getFolderList();
 		for (auto& folder : folders) {
+			// loads this folder the same way dropping it onto the app window does (VDSession::
+			// fileDrop()'s "folder was dropped" branch) - both just call loadFolder() with the
+			// folder's plain name, resolved against the assets path
+			
+			sprintf_s( buf, "L##folderload%s", folder.c_str() );
+			if( ImGui::Button( buf ) ) {
+				mVDSession->loadFolder( folder );
+			}
+			if( ImGui::IsItemHovered() )
+				ImGui::SetTooltip( "Load this folder (same as dropping it onto the app)" );
+			ImGui::SameLine();
+
 			bool isSelected = (folder == mSelectedFolder);
 			if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
 			sprintf_s(buf, "%s##folder", folder.c_str());
@@ -49,30 +64,26 @@ void VDUIFolders::Run(const char* title) {
 				mVDSession->listShaders(mSelectedFolder, mExtension);
 			}
 			if (isSelected) ImGui::PopStyleColor(1);
-			// loads this folder the same way dropping it onto the app window does (VDSession::
-			// fileDrop()'s "folder was dropped" branch) - both just call loadFolder() with the
-			// folder's plain name, resolved against the assets path
-			ImGui::SameLine();
-			sprintf_s(buf, "Load##folderload%s", folder.c_str());
-			if (ImGui::Button(buf)) {
-				mVDSession->loadFolder(folder);
-			}
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Load this folder (same as dropping it onto the app)");
 		}
-
-		if (mSelectedFolder.length() > 0) {
-			ImGui::Separator();
+		ImGui::EndChild();
+		ImGui::SameLine();
+		ImGui::BeginChild("##folderfiles", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders);
+		if (mSelectedFolder.empty()) {
+			ImGui::TextColored(ImColor(150, 150, 150), "Select a folder to list its files");
+		}
+		else {
 			ImGui::TextColored(ImColor(155, 255, 0), "%s/*.%s", mSelectedFolder.c_str(), mExtension.c_str());
 			auto shaders = mVDSession->getShaderList();
 			for (auto& shaderName : shaders) {
 				sprintf_s(buf, "%s##shader", shaderName.c_str());
 				if (ImGui::Button(buf)) {
-					// lands on the first fbo shader slot (0-7) whose iWeight uniform is 0.0f,
-					// so the swap doesn't cause a sudden change in the rendering
+					// into the selected fbo (the last fbo pane clicked, highlighted in purple)
 					mVDSession->loadShaderFromFolder(mSelectedFolder, mExtension, shaderName);
 				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Load into the selected fbo (%d, purple)", mVDSession->getSelectedFbo());
 			}
 		}
+		ImGui::EndChild();
 	}
 	ImGui::End();
 }

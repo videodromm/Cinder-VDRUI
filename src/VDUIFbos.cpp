@@ -72,6 +72,16 @@ void VDUIFbos::Run(const char* title) {
 		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, (ImVec4)ImColor::HSV(f / 16.0f, 0.6f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_FrameBgActive, (ImVec4)ImColor::HSV(f / 16.0f, 0.7f, 0.5f));
 		ImGui::PushStyleColor(ImGuiCol_SliderGrab, (ImVec4)ImColor::HSV(f / 16.0f, 0.9f, 0.9f));
+		// the selected fbo (a click anywhere in its pane): purple title bar and border. A click
+		// on a texture pane's image assigns that texture to it
+		const bool isSelectedFbo = (f == mVDSession->getSelectedFbo());
+		if (isSelectedFbo) {
+			const ImVec4 purple = (ImVec4)ImColor(150, 60, 220, 255);
+			ImGui::PushStyleColor(ImGuiCol_TitleBg, purple);
+			ImGui::PushStyleColor(ImGuiCol_TitleBgActive, purple);
+			ImGui::PushStyleColor(ImGuiCol_Border, purple);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 3.0f);
+		}
 
 		sprintf_s(buf, " %s##fbolbl%d", mVDSession->getFboName(f).c_str(), f);
 		ImGui::Begin(buf, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
@@ -210,28 +220,32 @@ void VDUIFbos::Run(const char* title) {
 				}
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Input texture (iChannel0)");
 			}
-
+			// movies and audio files play once unless looping is enabled
+			if( mVDSession->isMovie( f ) || mVDSession->isAudioFile( f ) ) {
+				ImGui::SameLine();
+				bool looping = mVDSession->isLooping( f );
+				// green when looping, black when not
+				ImGui::PushStyleColor( ImGuiCol_Button, looping ? (ImVec4)ImColor( 0, 170, 60, 255 ) : (ImVec4)ImColor( 0, 0, 0, 255 ) );
+				sprintf_s( buf, "Loop##lp%d", f );
+				if( ImGui::Button( buf ) ) {
+					mVDSession->toggleLoop( f );
+				}
+				ImGui::PopStyleColor( 1 );
+			}
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
 			if (mVDSession->isSequence(f) || mVDSession->isMovie(f) || mVDSession->isAudioFile(f)) {
 				// the label shows the action the button performs
-				sprintf_s(buf, "%s##s%d", mVDSession->isPlaying(f) ? "Pause" : "Play", f);
+				// green while playing, black while paused
+				const bool playing = mVDSession->isPlaying(f);
+				ImGui::PushStyleColor(ImGuiCol_Button, playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
+				sprintf_s(buf, "%s##s%d", playing ? "Pause" : "Play", f);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->togglePlayPause(f);
 				}
+				ImGui::PopStyleColor(1);
 			}
-			// movies and audio files play once unless looping is enabled
-			if (mVDSession->isMovie(f) || mVDSession->isAudioFile(f)) {
-				ImGui::SameLine();
-				bool looping = mVDSession->isLooping(f);
-				if (looping) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(230, 160, 0, 255));
-				sprintf_s(buf, "%s##lp%d", looping ? "Loop on" : "Loop off", f);
-				if (ImGui::Button(buf))
-				{
-					mVDSession->toggleLoop(f);
-				}
-				if (looping) ImGui::PopStyleColor(1);
-			}
+			
 			if (mVDSession->isSequence(f)) {
 				ImGui::SameLine();
 				sprintf_s(buf, "b##sqs%d", f);
@@ -459,6 +473,10 @@ void VDUIFbos::Run(const char* title) {
 			}
 		}
 		ImGui::End();
+		if (isSelectedFbo) {
+			ImGui::PopStyleVar(1);
+			ImGui::PopStyleColor(3);
+		}
 		ImGui::PopStyleColor(5);
 	} // for getFboList
 

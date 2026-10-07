@@ -61,19 +61,20 @@ void VDUITextures::Run(const char* title) {
 	for (unsigned int i = 0; i < poolCount; i++) {
 		ci::gl::Texture2dRef tex = mVDSession->getLoadedTexture(i);
 		if (!tex) continue;
-		// twice the size of the underlying VDParams preview dimensions, scoped to this panel only
-		const float kSizeMultiplier = 2.0f;
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getPreviewHeight() * kSizeMultiplier * uiScale), ImGuiCond_Once);
+		// same width and preview size as the fbo panes (VDUIFbos.cpp). The width is a constraint:
+		// these windows keep their size in imgui.ini, which would win over a size set once
+		const float paneWidth = mVDParams->getUILargePreviewW() * uiScale;
+		ImGui::SetNextWindowSize(ImVec2(paneWidth, mVDParams->getUILargePreviewH() * 1.4f * uiScale), ImGuiCond_Once);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(paneWidth, 0.0f), ImVec2(paneWidth, FLT_MAX));
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		std::string texName = mVDSession->getLoadedTextureName(i);
 		sprintf_s(buf, " %s##s%d", texName.c_str(), i);
 		ImGui::Begin( buf ); //, NULL, ImVec2(0, 0), ImGui::GetStyle().Alpha, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 		{
-			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale);
+			const ivec2 previewSize(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale);
+			ImGui::PushItemWidth((float)previewSize.x);
 			ImGui::PushID(i);
-			const ivec2 previewSize(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale);
 			if (texName == "audio") {
-				// the audio texture (64x2 spectrum/wave) means nothing as an image
 				// the audio texture (64x2 spectrum/wave) means nothing as an image: a button (click =
 				// assign, drag = onto an fbo pane), the spectrum and the analysed source below
 				ImGui::Button("audio##audiosource", ImVec2((float)previewSize.x, ImGui::GetFrameHeight()));
@@ -92,7 +93,8 @@ void VDUITextures::Run(const char* title) {
 			if (ImGui::IsItemClicked()) {
 				mVDSession->setFboInputTexture(selectedFbo, tex, texName);
 			}
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Assign to selected fbo (%d)", selectedFbo);
+			// the selected fbo: the last fbo pane clicked (highlighted in purple there)
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Click: assign to the selected fbo (%d, purple)\nDrag: onto any fbo pane", selectedFbo);
 			if (texName == "audio") {
 				// what the audio texture analyses (mic or the playing audio file), and any playing
 				// video, whose sound Media Foundation plays without it being analysed
@@ -130,37 +132,25 @@ void VDUITextures::Run(const char* title) {
 			// a video's own player lives here, in the pool: play/pause (pauses every other playing
 			// video/audio file), loop, volume level
 			if (VDVideoSourceRef video = mVDSession->getVideoSource(texName)) {
-				sprintf_s(buf, "%s##vplay%d", video->isPlaying() ? "Pause" : "Play", i);
+				// green while playing, black while paused
+				const bool playing = video->isPlaying();
+				ImGui::PushStyleColor(ImGuiCol_Button, playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
+				sprintf_s(buf, "%s##vplay%d", playing ? "Pause" : "Play", i);
 				if (ImGui::Button(buf)) mVDSession->togglePlayPauseSource(texName);
+				ImGui::PopStyleColor(1);
 				ImGui::SameLine();
 				bool looping = video->isLooping();
-				if (looping) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(230, 160, 0, 255));
-				sprintf_s(buf, "%s##vloop%d", looping ? "Loop on" : "Loop off", i);
+				// green when looping, black when not
+				ImGui::PushStyleColor(ImGuiCol_Button, looping ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
+				sprintf_s(buf, "Loop##vloop%d", i);
 				if (ImGui::Button(buf)) video->toggleLoop();
-				if (looping) ImGui::PopStyleColor(1);
+				ImGui::PopStyleColor(1);
 				ImGui::SameLine();
 				float volumeLevel = video->getVolumeLevel();
 				sprintf_s(buf, "##vvol%d", i);
 				ImGui::SetNextItemWidth(60.0f * uiScale);
 				if (ImGui::SliderFloat(buf, &volumeLevel, 0.0f, 1.0f, "vol %.2f")) video->setVolumeLevel(volumeLevel);
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Volume (x the highest weight of the fbos showing it)");
-			}
-			// one button per fbo to assign this texture directly to that fbo, instead of only
-			// ever the currently-selected one - clicking one also makes that fbo the selected
-			// one (highlighted here in orange), so the image click above then targets it too;
-			// selection otherwise still also follows whichever fbo's own window last had focus
-			// (VDUIFbos.cpp)
-			for (unsigned int f = 0; f < fboCount; f++) {
-				if (f > 0 && (f % 6 != 0)) ImGui::SameLine();
-				bool isSelected = (f == selectedFbo);
-				ImGui::PushStyleColor(ImGuiCol_Button, isSelected ? (ImVec4)ImColor(230, 160, 0, 255) : (ImVec4)ImColor::HSV(f / 16.0f, 0.4f, 0.4f));
-				sprintf_s(buf, "%d##texassign%d_%d", f, i, f);
-				if (ImGui::Button(buf)) {
-					mVDSession->setFboInputTexture(f, tex, texName);
-					mVDSession->setSelectedFbo(f);
-				}
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Assign to fbo %d", f);
-				ImGui::PopStyleColor(1);
 			}
 			ImGui::PopID();
 			ImGui::PopItemWidth();
@@ -173,13 +163,13 @@ void VDUITextures::Run(const char* title) {
 			}
 		}
 		ImGui::End();
-		xPos += mVDParams->getUISmallPreviewW() * kSizeMultiplier + mVDParams->getUIMargin();
+		xPos += mVDParams->getUILargePreviewW() + mVDParams->getUIMargin();
 
-		// windows are twice as wide/tall as the base preview size, so half as many fit per row
-		if (i % 11 == 10)
+		// fbo-pane-sized windows: a new row every 6 (initial placement only)
+		if (i % 6 == 5)
 		{
 			xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol1();
-			yPos -= mVDParams->getPreviewHeight() * kSizeMultiplier + mVDParams->getUIMargin();
+			yPos -= mVDParams->getUILargePreviewH() * 1.4f + mVDParams->getUIMargin();
 			if (yPos < mVDParams->getUIYPosRow2() + 200) yPos = mVDParams->getUIYPosRow3();
 		}
 	}
