@@ -41,9 +41,41 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mShowFolders = true;
 }
 
+void VDUI::registerPoolSources() {
+	// the 2 Spout outputs: main output (what the main window shows) and the live code view
+	if (auto mainTex = mOutputWindow->getMainViewTexture()) mVDSession->registerPoolTexture("Spout: main output", mainTex);
+	if (auto codeView = mVDSession->getCodeView()) {
+		if (auto codeTex = codeView->getTexture()) mVDSession->registerPoolTexture("Spout: VDCode", codeTex);
+	}
+	// fixed name: the audio texture's own name follows its source (line in, a file...); assigning
+	// "audio" puts the fbo in audio mode (VDFboShader::assignInputTexture)
+	if (auto audioTex = mVDSession->getAudioTexture()) mVDSession->registerPoolTexture("audio", audioTex);
+#if defined( CINDER_MSW )
+	// Spout senders from other apps: "Spout in: <sender>"
+	mSpoutSources.update(mVDSession);
+#endif
+}
+
 void VDUI::Run(const char* title, unsigned int fps) {
 	static int currentWindowRow1 = 1;
 	static int currentWindowRow2 = 0;
+
+#if defined( CINDER_MSW )
+	if (!mFileDropTargetTried) {
+		mFileDropTargetTried = true;
+		auto target = std::make_unique<VDFileDropTarget>();
+		ci::app::WindowRef mainWindow = ci::app::getWindowIndex(0);
+		target->onDrop = [this, mainWindow](const std::vector<ci::fs::path>& aFiles, const ci::ivec2& aPixels) {
+			// same path as Cinder's fileDrop: VDSession::fileDrop() expects points
+			float scale = mainWindow->getContentScale();
+			mVDSession->fileDrop(ci::app::FileDropEvent(mainWindow, (int)(aPixels.x / scale), (int)(aPixels.y / scale), aFiles));
+		};
+		if (target->registerWindow((HWND)mainWindow->getNative())) mFileDropTarget = std::move(target);
+		else CI_LOG_W("OLE drop target not registered: files still drop through Cinder, without hover highlight");
+	}
+	mVDSession->setExternalDrag(mFileDropTarget && mFileDropTarget->isDragging(), mFileDropTarget ? ci::vec2(mFileDropTarget->getPos()) : ci::vec2(0.0f));
+#endif
+	registerPoolSources();
 
 	
 	//ImGuiStyle& style = ImGui::GetStyle();

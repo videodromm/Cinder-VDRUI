@@ -30,6 +30,10 @@
 #if defined( CINDER_MSW )
 // HtmlPage (WebView2, Windows-only)
 #include "VDUIHtmlPage.h"
+// files dragged from Explorer: hover position for highlighting, then the drop
+#include "VDFileDropTarget.h"
+// Spout senders from other apps, offered in the texture pool
+#include "VDSpoutSources.h"
 #endif
 // projector output window
 #include "VDOutputWindow.h"
@@ -107,6 +111,15 @@ namespace videodromm
 		// live code view (Spout "VDCode") settings + preview
 		bool						mShowCodeView = false;
 		void						runCodeView();
+
+		// files dragged from Explorer (Windows): registered on the first Run(), see VDFileDropTarget.h
+#if defined( CINDER_MSW )
+		std::unique_ptr<VDFileDropTarget>	mFileDropTarget;
+		bool						mFileDropTargetTried = false;
+		VDSpoutSources				mSpoutSources;
+#endif
+		// Spout outputs + audio texture offered in the shared texture pool, every frame
+		void						registerPoolSources();
 
 		// projector output window settings
 		VDOutputWindowRef			mOutputWindow;

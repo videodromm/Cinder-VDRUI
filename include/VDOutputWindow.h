@@ -55,6 +55,8 @@ namespace videodromm
 		void					draw();
 		void					applyMainWindowPacing();
 		void					setMainViewTexture(const ci::gl::TextureRef& aTexture) { mMainViewTexture = aTexture; }
+		// what the main window shows and Spout sends (also offered in the texture pool)
+		ci::gl::TextureRef		getMainViewTexture() const { return mMainViewTexture; }
 		// output window mouse position -> the fbo-sized space the warps' editor works in
 		ci::app::MouseEvent		toWarpSpace(const ci::app::MouseEvent& aEvent) const;
 

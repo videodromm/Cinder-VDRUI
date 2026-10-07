@@ -1,3 +1,7 @@
+// FindHoveredWindowEx(): is a file dragged from Explorer over an fbo pane? Included first: after
+// the using-directives, its log() is ambiguous with ci::log
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
 #include "VDUITextures.h"
 
 #if ! defined( CINDER_MSW )
@@ -34,6 +38,16 @@ void VDUITextures::Run(const char* title) {
 			mVDSession->registerFboActiveTextureInGlobalPool(f);
 		}
 	}
+	// files dragged from Explorer: highlighted here unless they hover an fbo pane (which then takes
+	// them as its input texture); dropped anywhere else they go to this pool
+	bool highlightPool = false;
+	if (mVDSession->isExternalDragActive()) {
+		vec2 dragPos = mVDSession->getExternalDragPos();
+		ImGuiWindow* hovered = nullptr;
+		ImGuiWindow* hoveredUnderMoving = nullptr;
+		ImGui::FindHoveredWindowEx(ImVec2(dragPos.x, dragPos.y), false, &hovered, &hoveredUnderMoving);
+		highlightPool = !(hovered && std::string(hovered->RootWindow->Name).find("##fbolbl") != std::string::npos);
+	}
 	unsigned int poolCount = mVDSession->getLoadedTextureCount();
 	if (poolCount == 0) {
 		// one window per texture means "nothing at all" when the pool is empty: say so instead
@@ -57,13 +71,54 @@ void VDUITextures::Run(const char* title) {
 		{
 			ImGui::PushItemWidth(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale);
 			ImGui::PushID(i);
-			ImGui::Image(tex, ivec2(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale));
+			const ivec2 previewSize(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale);
+			if (texName == "audio") {
+				// the audio texture (64x2 spectrum/wave) means nothing as an image
+				// what the audio texture analyses (mic or the playing audio file), and any playing
+				// video, whose sound Media Foundation plays without it being analysed
+				std::string label = mVDSession->getAudioSourceLabel();
+				for (unsigned int f = 0; f < fboCount; f++) {
+					if (mVDSession->isMovie(f) && mVDSession->isPlaying(f)) {
+						label += "\nvideo playing: " + mVDSession->getInputTextureName(f, 0);
+					}
+				}
+				// fixed ID: the label changes with the source
+				label += "##audiosource";
+				ImGui::Button(label.c_str(), ImVec2((float)previewSize.x, (float)previewSize.y));
+			}
+			else {
+				ImGui::Image(tex, previewSize);
+			}
+			// drag onto an fbo pane to make it that fbo's input texture (VDUIFbos.cpp)
+			if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+				ImGui::SetDragDropPayload("VD_POOL_TEXTURE", &i, sizeof(unsigned int));
+				ImGui::Text("Input texture: %s", texName.c_str());
+				ImGui::EndDragDropSource();
+			}
 			// click a texture to assign it (by reference, no reload) to whichever fbo is
 			// currently selected - this doesn't change which fbo is selected itself
 			if (ImGui::IsItemClicked()) {
 				mVDSession->setFboInputTexture(selectedFbo, tex, texName);
 			}
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Assign to selected fbo (%d)", selectedFbo);
+			// a video's own player lives here, in the pool: play/pause (pauses every other playing
+			// video/audio file), loop, volume level
+			if (VDVideoSourceRef video = mVDSession->getVideoSource(texName)) {
+				sprintf_s(buf, "%s##vplay%d", video->isPlaying() ? "Pause" : "Play", i);
+				if (ImGui::Button(buf)) mVDSession->togglePlayPauseSource(texName);
+				ImGui::SameLine();
+				bool looping = video->isLooping();
+				if (looping) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(230, 160, 0, 255));
+				sprintf_s(buf, "%s##vloop%d", looping ? "Loop on" : "Loop off", i);
+				if (ImGui::Button(buf)) video->toggleLoop();
+				if (looping) ImGui::PopStyleColor(1);
+				ImGui::SameLine();
+				float volumeLevel = video->getVolumeLevel();
+				sprintf_s(buf, "##vvol%d", i);
+				ImGui::SetNextItemWidth(60.0f * uiScale);
+				if (ImGui::SliderFloat(buf, &volumeLevel, 0.0f, 1.0f, "vol %.2f")) video->setVolumeLevel(volumeLevel);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Volume (x the highest weight of the fbos showing it)");
+			}
 			// one button per fbo to assign this texture directly to that fbo, instead of only
 			// ever the currently-selected one - clicking one also makes that fbo the selected
 			// one (highlighted here in orange), so the image click above then targets it too;
@@ -83,6 +138,13 @@ void VDUITextures::Run(const char* title) {
 			}
 			ImGui::PopID();
 			ImGui::PopItemWidth();
+			if (highlightPool) {
+				ImVec2 winMin = ImGui::GetWindowPos();
+				ImVec2 winMax(winMin.x + ImGui::GetWindowSize().x, winMin.y + ImGui::GetWindowSize().y);
+				ImDrawList* drawList = ImGui::GetForegroundDrawList();
+				drawList->AddRect(winMin, winMax, IM_COL32(0, 200, 255, 255), 0.0f, 0, 3.0f);
+				drawList->AddText(ImVec2(winMin.x + 6, winMin.y + 24), IM_COL32(0, 200, 255, 255), "Drop: add to texture pool");
+			}
 		}
 		ImGui::End();
 		xPos += mVDParams->getUISmallPreviewW() * kSizeMultiplier + mVDParams->getUIMargin();

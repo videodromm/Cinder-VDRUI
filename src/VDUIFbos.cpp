@@ -44,6 +44,14 @@ void VDUIFbos::Run(const char* title) {
 	// drag-and-drop: the topmost window under the drop (last frame's z-order), so a drop on a
 	// panel lying over an fbo pane doesn't land in the hidden fbo. Only an fbo pane claims it below;
 	// anything else (another panel, or no window: the render itself) goes to VDUI's flush
+	// files dragged from Explorer and hovering: the topmost window under them, highlighted below
+	// when it's an fbo pane (VDUITextures highlights the pool otherwise)
+	ImGuiWindow* dragWindow = nullptr;
+	if (mVDSession->isExternalDragActive()) {
+		vec2 dragPos = mVDSession->getExternalDragPos();
+		ImGuiWindow* hoveredUnderMoving = nullptr;
+		ImGui::FindHoveredWindowEx(ImVec2(dragPos.x, dragPos.y), false, &dragWindow, &hoveredUnderMoving);
+	}
 	ImGuiWindow* dropWindow = nullptr;
 	if (mVDSession->hasPendingTextureDrop()) {
 		vec2 dropPos = mVDSession->getPendingTextureDropPos();
@@ -172,37 +180,33 @@ void VDUIFbos::Run(const char* title) {
 				ImGui::PopStyleColor(1);
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Volume %.2f (output = volume x weight)", volumeLevel);
 				const bool scrubbing = f < 12 && mIsScrubbing[f];
-				mVDSession->setVideoVolume(f, scrubbing ? 0.0f : volumeLevel * iWeight);
+				// a video's volume is applied by VDMix::updateVideoSources() (level x the highest
+				// weight of the fbos showing it); an audio file's here
+				if (mVDSession->isMovie(f)) mVDSession->setScrubbing(f, scrubbing);
+				else mVDSession->setVideoVolume(f, scrubbing ? 0.0f : volumeLevel * iWeight);
 			}
 
 			
 			ImGui::TextColored(ImColor(155, 50, 255), "%s", mVDSession->getFboStatus(f).c_str());
 
 #pragma region tex
-			// pick this fbo's active input texture from the shared pool (see VDUITextures.cpp) -
-			// this used to loop over getInputTexturesCount(f) (this fbo's own internal texture-slot
-			// count, a leftover from the pre-shared-pool design - almost always 1, hence "only shows
-			// 0"), which has nothing to do with what's actually available to pick from; mirrors
-			// VDUITextures.cpp's click-to-assign inline, highlighting whichever pool entry is active
+			// this fbo's input texture (iChannel0), picked from the shared pool (VDUITextures.cpp)
 			{
 				unsigned int poolCount = mVDSession->getLoadedTextureCount();
 				std::string activeName = mVDSession->getInputTextureName(f, 0);
-				for (unsigned int t = 0; t < poolCount; t++) {
-					if (t > 0 && (t % 6 != 0)) ImGui::SameLine();
-					std::string poolName = mVDSession->getLoadedTextureName(t);
-					if (poolName == activeName) {
-						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 1.0f, 1.0f));
+				sprintf_s(buf, "##fboinput%d", f);
+				ImGui::SetNextItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
+				if (ImGui::BeginCombo(buf, activeName.c_str())) {
+					for (unsigned int t = 0; t < poolCount; t++) {
+						std::string poolName = mVDSession->getLoadedTextureName(t);
+						bool isActive = (poolName == activeName);
+						sprintf_s(buf, "%s##fboit%d_%d", poolName.c_str(), f, t);
+						if (ImGui::Selectable(buf, isActive)) mVDSession->setFboInputTexture(f, mVDSession->getLoadedTexture(t), poolName);
+						if (isActive) ImGui::SetItemDefaultFocus();
 					}
-					else {
-						ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(t / 7.0f, 0.1f, 0.1f));
-					}
-					sprintf_s(buf, "%d##fboit%d%d", t, f, t);
-					if (ImGui::Button(buf)) mVDSession->setFboInputTexture(f, mVDSession->getLoadedTexture(t), poolName);
-
-					sprintf_s(buf, "Set input texture to %s", poolName.c_str());
-					if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
-					ImGui::PopStyleColor(1);
+					ImGui::EndCombo();
 				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Input texture (iChannel0)");
 			}
 
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
@@ -424,6 +428,33 @@ void VDUIFbos::Run(const char* title) {
 
 			ImGui::PopItemWidth();
 			ImGui::PopID();
+		}
+		{
+			ImGuiWindow* thisWindow = ImGui::GetCurrentWindow();
+			// a texture pane dragged here (VDUITextures.cpp): becomes this fbo's input texture.
+			// ImGui highlights the pane while it's hovered
+			if (ImGui::BeginDragDropTargetCustom(thisWindow->Rect(), thisWindow->ID)) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("VD_POOL_TEXTURE")) {
+					unsigned int poolIndex = *(const unsigned int*)payload->Data;
+					if (poolIndex < mVDSession->getLoadedTextureCount()) {
+						mVDSession->setFboInputTexture(f, mVDSession->getLoadedTexture(poolIndex), mVDSession->getLoadedTextureName(poolIndex));
+						mVDSession->setSelectedFbo(f);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+			// files from Explorer hovering this pane: they'd become its input texture
+			bool dragTarget = false;
+			for (ImGuiWindow* w = dragWindow; w; w = w->ParentWindow) {
+				if (w == thisWindow) { dragTarget = true; break; }
+			}
+			if (dragTarget) {
+				ImVec2 winMin = ImGui::GetWindowPos();
+				ImVec2 winMax(winMin.x + ImGui::GetWindowSize().x, winMin.y + ImGui::GetWindowSize().y);
+				ImDrawList* drawList = ImGui::GetForegroundDrawList();
+				drawList->AddRect(winMin, winMax, IM_COL32(0, 255, 120, 255), 0.0f, 0, 4.0f);
+				drawList->AddText(ImVec2(winMin.x + 6, winMin.y + 24), IM_COL32(0, 255, 120, 255), "Drop: input texture of this fbo");
+			}
 		}
 		ImGui::End();
 		ImGui::PopStyleColor(5);

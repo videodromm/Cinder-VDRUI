@@ -470,7 +470,7 @@ void VDUIAnimation::Run(const char* title) {
 				ImGui::SameLine();
 				bool isDefault = (outputName == defaultOutput);
 				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
-				sprintf_s(audioBuf, "%s##defaultaudiooutput%s", isDefault ? "Default" : "Set default", outputName.c_str());
+				sprintf_s(audioBuf, "%s##defaultaudiooutput%s", isDefault ? "D" : "S", outputName.c_str());
 				if (ImGui::SmallButton(audioBuf)) {
 					mVDSession->setDefaultAudioOutputDevice(isDefault ? "" : outputName);
 				}
