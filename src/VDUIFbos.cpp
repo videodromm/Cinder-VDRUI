@@ -3,6 +3,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
 #include "VDUIFbos.h"
+// MIDI learn on uniform widgets
+#include "VDUILearn.h"
 
 #if ! defined( CINDER_MSW )
 #define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
@@ -160,7 +162,7 @@ void VDUIFbos::Run(const char* title) {
 				ImGui::Image(mVDSession->buildFboRenderedTexture(f), previewSize);
 			}
 			ImGui::SameLine();
-			if (ImGui::VSliderFloat("##v", ImVec2(14 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""))
+			if (learnable(mVDSession, ImGui::VSliderFloat("##v", ImVec2(14 * uiScale, 80 * uiScale), &iWeight, 0.0f, 1.0f, ""), ctrl))
 			{
 				setValue(ctrl, f, iWeight);
 			};
@@ -340,7 +342,7 @@ void VDUIFbos::Run(const char* title) {
 
 						float spd = (ctrl == mVDUniforms->IPIXELX || ctrl == mVDUniforms->IPIXELY) ? 1.0f : 0.001f;
 
-						if (ImGui::DragFloat(buf, &localValues[ctrl], spd, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+						if (learnable(mVDSession, ImGui::DragFloat(buf, &localValues[ctrl], spd, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
 						{
 							setValue(ctrl, f, localValues[ctrl]);
 						}

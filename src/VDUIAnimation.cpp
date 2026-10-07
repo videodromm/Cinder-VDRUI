@@ -1,4 +1,6 @@
 #include "VDUIAnimation.h"
+// MIDI learn on uniform widgets
+#include "VDUILearn.h"
 
 #if ! defined( CINDER_MSW )
 #define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
@@ -171,7 +173,7 @@ void VDUIAnimation::Run(const char* title) {
 				if (iUniform > 22 || iUniform == 14 || iUniform == 8 ) {
 					if (iUniform == 8) {
 						// iZoom
-						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f))
+						if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f), iUniform))
 						{
 							setFloatValue(iUniform, localValues[iUniform]);
 						}
@@ -179,14 +181,14 @@ void VDUIAnimation::Run(const char* title) {
 					else {
 						if (iUniform == 23 || iUniform == 24) {
 							// iRenderXY
-							if (ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f))
+							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f), iUniform))
 							{
 								setFloatValue(iUniform, localValues[iUniform]);
 							}
 						}
 						else {
 
-							if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 							{
 								setFloatValue(iUniform, localValues[iUniform]);
 							}
@@ -194,7 +196,7 @@ void VDUIAnimation::Run(const char* title) {
 					}
 				}
 				else {
-					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+					if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 					{
 						setFloatValue(iUniform, localValues[iUniform]);
 					}
@@ -222,7 +224,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##iPixelX")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("iPixelX/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+			if (learnable(mVDSession, ImGui::SliderFloat("iPixelX/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}
@@ -231,7 +233,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##iPixelY")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("iPixelY/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+			if (learnable(mVDSession, ImGui::SliderFloat("iPixelY/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
@@ -251,7 +253,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##steps")) { localValues[ctrl] = 16.0f; setFloatValue(ctrl, localValues[ctrl]); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("steps", &localValues[ctrl], 1.0f, 128.0f))
+			if (learnable(mVDSession, ImGui::SliderFloat("steps", &localValues[ctrl], 1.0f, 128.0f), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}
@@ -260,7 +262,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##pixelate")) { localValues[ctrl] = 1.0f; setFloatValue(ctrl, localValues[ctrl]); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("pixelate", &localValues[ctrl], 0.01f, 1.0f))
+			if (learnable(mVDSession, ImGui::SliderFloat("pixelate", &localValues[ctrl], 0.01f, 1.0f), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}
@@ -269,7 +271,7 @@ void VDUIAnimation::Run(const char* title) {
 			if (ImGui::Button("x##trixels")) { localValues[ctrl] = 0.0f; setFloatValue(ctrl, localValues[ctrl]); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("trixels", &localValues[ctrl], 0.00f, 1.0f))
+			if (learnable(mVDSession, ImGui::SliderFloat("trixels", &localValues[ctrl], 0.00f, 1.0f), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
@@ -332,7 +334,7 @@ void VDUIAnimation::Run(const char* title) {
 				if (iUniform > 22 || iUniform == 14 || iUniform == 8) {
 					if (iUniform == 25) {
 						// iZoom
-						if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f))
+						if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f), iUniform))
 						{
 							setFloatValue(iUniform, localValues[iUniform]);
 						}
@@ -340,14 +342,14 @@ void VDUIAnimation::Run(const char* title) {
 					else {
 						if (iUniform == 23 || iUniform == 24) {
 							// iRenderXY
-							if (ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f))
+							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f), iUniform))
 							{
 								setFloatValue(iUniform, localValues[iUniform]);
 							}
 						}
 						else {
 
-							if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 							{
 								setFloatValue(iUniform, localValues[iUniform]);
 							}
@@ -355,7 +357,7 @@ void VDUIAnimation::Run(const char* title) {
 					}
 				}
 				else {
-					if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+					if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
 					{
 						setFloatValue(iUniform, localValues[iUniform]);
 					}
@@ -382,7 +384,7 @@ void VDUIAnimation::Run(const char* title) {
 				}
 				ImGui::SameLine();
 				sprintf_s(buf, "%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 10.0f))
+				if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 10.0f), iUniform))
 				{
 					setFloatValue(iUniform, localValues[iUniform]);
 				}
@@ -646,44 +648,67 @@ void VDUIAnimation::Run(const char* title) {
 				// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
 				if (ImGui::CollapsingHeader("Midi Learn", ImGuiTreeNodeFlags_DefaultOpen))
 				{
+					// bindings shared with TSWebsocketServer (assets/actions/*.json, its ids/actions)
 					bool learnMode = mVDSession->isMidiLearnMode();
-					if (ImGui::Checkbox("Enabled##midilearnenabled", &learnMode)) {
+					if (ImGui::Checkbox("Learn mode##midilearnenabled", &learnMode)) {
 						mVDSession->setMidiLearnMode(learnMode);
 						if (!learnMode) mVDSession->armMidiLearn(-1);
 					}
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Outlines every uniform slider: click one, then move a control\n(note: on=1/off=0, CC/aftertouch: value)");
+					ImGui::SameLine();
+					if (ImGui::Button("Reload##midibindingsreload")) mVDSession->reloadMidiBindings();
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Re-read assets/actions and assets/hardware");
+					if (mVDSession->isWSClientConnected()) {
+						ImGui::TextColored(ImColor(0, 200, 255), "Connected to TSWebsocketServer: it handles MIDI and saves bindings");
+					}
+					else {
+						ImGui::TextColored(ImColor(150, 150, 150), "Standalone: this app's MIDI ports, bindings saved to assets/actions");
+					}
 					if (learnMode) {
-						ImGui::SameLine();
+						// a uniform without a slider: by index
 						ImGui::PushItemWidth(50 * uiScale);
 						ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
 						ImGui::PopItemWidth();
 						if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
 						if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
 						ImGui::SameLine();
-						sprintf_s(buf, "Arm##midilearnarm");
-						if (ImGui::Button(buf)) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
+						if (ImGui::Button("Arm##midilearnarm")) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
 						ImGui::SameLine();
-						if (mVDSession->getMidiLearnTarget() >= 0) {
-							ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind it to %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+						int target = mVDSession->getMidiLearnTarget();
+						if (target >= 0) {
+							ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind %d %s", target, mVDUniforms->getUniformName(target).c_str());
 						}
 						else {
-							ImGui::TextColored(ImColor(150, 150, 150), "%d %s - press Arm, then move a control", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
+							ImGui::TextColored(ImColor(150, 150, 150), "Click a slider, or Arm %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
 						}
-						// existing bindings, each removable individually
-						int mappingsCount = mVDSession->getMidiLearnMappingsCount();
-						if (mappingsCount > 0) {
-							ImGui::Text("Midi Learn bindings:");
-							int cc = 0, uniformIndex = 0;
-							for (int m = 0; m < mappingsCount; m++) {
-								if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
-									ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
-									ImGui::SameLine();
-									sprintf_s(buf, "x##midilearnrm%d", cc);
-									if (ImGui::Button(buf)) mVDSession->removeMidiLearnMapping(cc);
-								}
+						std::string status = mVDSession->getMidiLearnStatus();
+						if (!status.empty()) ImGui::Text("Last: %s", status.c_str());
+					}
+					// uniform bindings (from every device), each removable
+					auto bindings = mVDSession->getMidiUniformBindings();
+					if (!bindings.empty() && ImGui::TreeNode("##midibindings", "Uniform bindings (%d)", (int)bindings.size())) {
+						for (size_t b = 0; b < bindings.size(); b++) {
+							sprintf_s(buf, "x##midibindrm%d", (int)b);
+							if (ImGui::SmallButton(buf)) mVDSession->removeMidiBinding(bindings[b].id);
+							ImGui::SameLine();
+							ImGui::Text("%s -> %s", bindings[b].id.c_str(), bindings[b].action.c_str());
+						}
+						ImGui::TreePop();
+					}
+					// legacy midilearn.json (CC number -> uniform, any device): still applied, not written any more
+					int mappingsCount = mVDSession->getMidiLearnMappingsCount();
+					if (mappingsCount > 0 && ImGui::TreeNode("##midilegacy", "Legacy CC bindings (%d)", mappingsCount)) {
+						int cc = 0, uniformIndex = 0;
+						for (int m = 0; m < mappingsCount; m++) {
+							if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
+								sprintf_s(buf, "x##midilearnrm%d", cc);
+								if (ImGui::SmallButton(buf)) mVDSession->removeMidiLearnMapping(cc);
+								ImGui::SameLine();
+								ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
 							}
-							sprintf_s(buf, "Clear all##midilearnclear");
-							if (ImGui::Button(buf)) mVDSession->clearMidiLearnMap();
 						}
+						if (ImGui::Button("Clear all##midilearnclear")) mVDSession->clearMidiLearnMap();
+						ImGui::TreePop();
 					}
 				}
 			}
@@ -747,7 +772,7 @@ void VDUIAnimation::Run(const char* title) {
 			// iTimeFactor KO 0.0 on 1st touch
 			ctrl = mVDUniforms->ITIMEFACTOR;
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
+			if (learnable(mVDSession, ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}*/
