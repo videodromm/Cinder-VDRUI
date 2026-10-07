@@ -823,6 +823,12 @@ void VDUI::runCodeView() {
 		bool premultiplied = codeView->getPremultiplied();
 		if (ImGui::Checkbox("Premultiplied", &premultiplied)) codeView->setPremultiplied(premultiplied);
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Toggle if glyph edges show dark or bright fringes in Resolume");
+		int lineStyle = codeView->getCurrentLineStyle();
+		const char* lineStyles[] = { "Line fill", "Line border", "Cursor only", "Line number" };
+		if (ImGui::Combo("Current line style", &lineStyle, lineStyles, IM_ARRAYSIZE(lineStyles))) codeView->setCurrentLineStyle(lineStyle);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Border and Line number use at least 50%% opacity of the colour below.\nLine number falls back to Line fill when line numbers are hidden.");
+		ci::ColorA lineColor = codeView->getCurrentLineColor();
+		if (ImGui::ColorEdit4("Current line", &lineColor.r, ImGuiColorEditFlags_AlphaBar)) codeView->setCurrentLineColor(lineColor);
 		if (auto tex = codeView->getTexture()) {
 			float w = ImGui::GetContentRegionAvail().x;
 			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
@@ -868,6 +874,15 @@ void VDUI::runOutput() {
 				ImGui::TextWrapped("Fx is only re-rendered every frame while the display mode is Fx.");
 			}
 		}
+
+		ImGui::Separator();
+		bool codeOverlay = mOutputWindow->getCodeOverlay();
+		if (ImGui::Checkbox("Code overlay", &codeOverlay)) mOutputWindow->setCodeOverlay(codeOverlay);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("The WebApp editor's code (same image as the \"VDCode\" Spout sender) over the output,\naspect ratio kept. Style it in the \"Code\" panel.");
+		ImGui::SameLine();
+		float codeOpacity = mOutputWindow->getCodeOverlayOpacity();
+		if (ImGui::SliderFloat("Opacity##codeoverlay", &codeOpacity, 0.0f, 1.0f)) mOutputWindow->setCodeOverlayOpacity(codeOpacity);
+		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
 
 		ImGui::Separator();
 		bool pace = mOutputWindow->getPaceByVsync();

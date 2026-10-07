@@ -25,8 +25,25 @@ void VDUITextures::Run(const char* title) {
 	// one entry per uniquely-named loaded texture, deduplicated - not one per (fbo, slot); several
 	// fbos can (and often do) load the same file, and any fbo can pick any texture here, not just
 	// the ones it loaded itself. See VDMix::registerLoadedTexture()/VDUIFbos.cpp's per-frame sync.
-	unsigned int poolCount = mVDSession->getLoadedTextureCount();
 	unsigned int fboCount = mVDSession->getFboShaderListSize();
+	// the pool used to be fed only by VDUIFbos::Run(), so with the Fbos panel hidden this panel
+	// stayed empty; registering is a dedup'd name lookup, cheap enough to do here as well
+	for (unsigned int f = 0; f < fboCount; f++) {
+		int textureMode = mVDSession->getInputTextureMode(f);
+		if (textureMode == VDTextureMode::IMAGE || textureMode == VDTextureMode::MOVIE) {
+			mVDSession->registerFboActiveTextureInGlobalPool(f);
+		}
+	}
+	unsigned int poolCount = mVDSession->getLoadedTextureCount();
+	if (poolCount == 0) {
+		// one window per texture means "nothing at all" when the pool is empty: say so instead
+		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
+		ImGui::Begin("Textures##empty", NULL, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings);
+		ImGui::TextUnformatted("No texture loaded yet: image or movie fbos are listed here,");
+		ImGui::TextUnformatted("so are files dropped outside the fbo windows.");
+		ImGui::End();
+		return;
+	}
 	for (unsigned int i = 0; i < poolCount; i++) {
 		ci::gl::Texture2dRef tex = mVDSession->getLoadedTexture(i);
 		if (!tex) continue;

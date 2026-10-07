@@ -69,6 +69,13 @@ namespace videodromm
 		void					setComposite(int aComposite) { mComposite = aComposite; save(); }
 		bool					getPaceByVsync() const { return mPaceByVsync; }
 		void					setPaceByVsync(bool aPace) { mPaceByVsync = aPace; save(); }
+		// the live-coding view (same texture as the "VDCode" Spout sender) drawn over the output
+		bool					getCodeOverlay() const { return mCodeOverlay; }
+		void					setCodeOverlay(bool aOverlay) { mCodeOverlay = aOverlay; save(); }
+		float					getCodeOverlayOpacity() const { return mCodeOverlayOpacity; }
+		// not saved on every slider step: call saveSettings() when the drag ends
+		void					setCodeOverlayOpacity(float aOpacity) { mCodeOverlayOpacity = ci::math<float>::clamp(aOpacity, 0.0f, 1.0f); }
+		void					saveSettings() { save(); }
 		bool					getAlwaysOnTop() const { return mAlwaysOnTop; }
 		void					setAlwaysOnTop(bool aOnTop);
 		// union of the selected displays, in desktop pixels (empty if none selected)
@@ -93,6 +100,8 @@ namespace videodromm
 		int						mComposite = COMPOSITE_POST;
 		bool					mPaceByVsync = true;
 		bool					mAlwaysOnTop = true;
+		bool					mCodeOverlay = false;
+		float					mCodeOverlayOpacity = 1.0f;
 
 		// pacing state: what was applied, and what to restore on close
 		int						mSavedMainVsync = -1;
@@ -107,6 +116,7 @@ namespace videodromm
 		void					onWindowClosed();
 		void					updateFrameRate();
 		void					renderWarps();
+		void					drawCodeOverlay();
 		void					restoreMainContext();
 		void					load();
 		void					save();

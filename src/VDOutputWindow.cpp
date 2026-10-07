@@ -239,6 +239,31 @@ void VDOutputWindow::draw() {
 	gl::setMatricesWindow(getWindowSize());
 	ci::gl::TextureRef tex = (mContent == WARPS && mWarpFbo) ? mWarpFbo->getColorTexture() : mMainViewTexture;
 	if (tex) gl::draw(tex, getWindowBounds());
+	drawCodeOverlay();
+}
+
+// same texture as the "VDCode" Spout sender, already rendered by the main window's draw()
+// (textures are shared between the two contexts). Fitted with its aspect ratio kept, so the
+// code isn't stretched on a multi-projector span
+void VDOutputWindow::drawCodeOverlay() {
+	if (!mCodeOverlay || mCodeOverlayOpacity <= 0.0f) return;
+	VDCodeViewRef codeView = mVDSession->getCodeView();
+	if (!codeView || !codeView->isActive()) return;
+	ci::gl::Texture2dRef tex = codeView->getTexture();
+	if (!tex) return;
+	Rectf dest = Rectf(tex->getBounds()).getCenteredFit(Rectf(getWindowBounds()), true);
+	gl::ScopedColor scopedColor;
+	if (codeView->getPremultiplied()) {
+		// premultiplied: scale every channel by the opacity
+		gl::ScopedBlendPremult scopedBlend;
+		gl::color(ColorA(mCodeOverlayOpacity, mCodeOverlayOpacity, mCodeOverlayOpacity, mCodeOverlayOpacity));
+		gl::draw(tex, dest);
+	}
+	else {
+		gl::ScopedBlendAlpha scopedBlend;
+		gl::color(ColorA(1.0f, 1.0f, 1.0f, mCodeOverlayOpacity));
+		gl::draw(tex, dest);
+	}
 }
 
 MouseEvent VDOutputWindow::toWarpSpace(const MouseEvent& aEvent) const {
@@ -258,6 +283,8 @@ void VDOutputWindow::load() {
 		if (json.hasChild("composite")) mComposite = json.getValueForKey<int>("composite");
 		if (json.hasChild("paceByVsync")) mPaceByVsync = json.getValueForKey<bool>("paceByVsync");
 		if (json.hasChild("alwaysOnTop")) mAlwaysOnTop = json.getValueForKey<bool>("alwaysOnTop");
+		if (json.hasChild("codeOverlay")) mCodeOverlay = json.getValueForKey<bool>("codeOverlay");
+		if (json.hasChild("codeOverlayOpacity")) mCodeOverlayOpacity = json.getValueForKey<float>("codeOverlayOpacity");
 		if (json.hasChild("displays")) {
 			for (const auto& d : json.getChild("displays")) {
 				mSelectedDisplays.push_back(Area(d.getValueForKey<int>("x1"), d.getValueForKey<int>("y1"), d.getValueForKey<int>("x2"), d.getValueForKey<int>("y2")));
@@ -276,6 +303,8 @@ void VDOutputWindow::save() {
 		json.addChild(JsonTree("composite", mComposite));
 		json.addChild(JsonTree("paceByVsync", mPaceByVsync));
 		json.addChild(JsonTree("alwaysOnTop", mAlwaysOnTop));
+		json.addChild(JsonTree("codeOverlay", mCodeOverlay));
+		json.addChild(JsonTree("codeOverlayOpacity", mCodeOverlayOpacity));
 		JsonTree displays = JsonTree::makeArray("displays");
 		for (const auto& b : mSelectedDisplays) {
 			JsonTree d;

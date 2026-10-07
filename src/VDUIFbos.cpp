@@ -162,13 +162,25 @@ void VDUIFbos::Run(const char* title) {
 			}
 
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
-			if (mVDSession->isSequence(f) || mVDSession->isMovie(f)) {
-				sprintf_s(buf, "p##s%d", f);
+			if (mVDSession->isSequence(f) || mVDSession->isMovie(f) || mVDSession->isAudioFile(f)) {
+				// the label shows the action the button performs
+				sprintf_s(buf, "%s##s%d", mVDSession->isPlaying(f) ? "Pause" : "Play", f);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->togglePlayPause(f);
 				}
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Play/Pause");
+			}
+			// movies and audio files play once unless looping is enabled
+			if (mVDSession->isMovie(f) || mVDSession->isAudioFile(f)) {
+				ImGui::SameLine();
+				bool looping = mVDSession->isLooping(f);
+				if (looping) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(230, 160, 0, 255));
+				sprintf_s(buf, "%s##lp%d", looping ? "Loop on" : "Loop off", f);
+				if (ImGui::Button(buf))
+				{
+					mVDSession->toggleLoop(f);
+				}
+				if (looping) ImGui::PopStyleColor(1);
 			}
 			if (mVDSession->isSequence(f)) {
 				ImGui::SameLine();
