@@ -266,40 +266,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		sprintf_s(buf, "%d", fps);
 		ImGui::PlotLines("F", &fpsValues.front(), (int)fpsValues.size(), fpsValues_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
 		if (fps < 24.0) ImGui::PopStyleColor();
-		// audio
-		ImGui::SameLine();
-		static ImVector<float> timeValues; if (timeValues.empty()) { timeValues.resize(40); memset(&timeValues.front(), 0, timeValues.size() * sizeof(float)); }
-		static int timeValues_offset = 0;
-		// audio maxVolume
-
-		if (ImGui::GetTime() > tRefresh_time)
-		{
-			tRefresh_time = ImGui::GetTime();
-			timeValues[timeValues_offset] = mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME);
-			timeValues_offset = (timeValues_offset + 1) % timeValues.size();
-		}
-
-		ImGui::PlotHistogram("H", mVDSession->getFreqs(), mVDSession->getFFTWindowSize(), 0, NULL, 0.0f, 255.0f, ImVec2(0, 30));
-		ImGui::SameLine();
-		if (mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME) > 240.0) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
-		ImGui::PlotLines("V", &timeValues.front(), (int)timeValues.size(), timeValues_offset, toString(int(mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME))).c_str(), 0.0f, 255.0f, ImVec2(0, 30));
-		if (mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME) > 240.0) ImGui::PopStyleColor();
-
-		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
-		ImGui::SameLine();
-		// reset ax
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-		sprintf_s(buf, "x");
-		if (ImGui::Button(buf)) {
-			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0);
-		}
-		ImGui::PopStyleColor(1);
-		ImGui::SameLine();
-
-		multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
-		if (ImGui::SliderFloat("AX", &multx, 0.01f, 7.0f)) {
-			mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
-		}
+		// audio spectrum, max volume and gain (AX): in the "audio" texture pane (VDUITextures)
 
 		int hue = 0;
 		// Done in UIAnimation
@@ -321,27 +288,27 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopItemWidth();
 		#if defined( _DEBUG )
-		// file logging is opt-in at runtime (see VDLog::setFileLoggingEnabled()) rather than
-		// always-on for the whole debug session - only ever meaningful in a debug build at all,
-		// so the button itself doesn't even exist in release. Toggling it on starts three fresh,
-		// session-timestamped files in <repos>/logs/ (everything, warnings+, errors+) instead of
-		// the previous single file that rotated at midnight and could mix multiple runs together.
-		ImGui::SameLine();
-		bool fileLogging = VDLog::isFileLoggingEnabled();
-		if (ImGui::Checkbox("FileLog", &fileLogging)) {
-			VDLog::setFileLoggingEnabled(fileLogging);
-		}
-		// debug
-		ImGui::SameLine();
-		ctrl = mVDUniforms->IDEBUG;
-		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Dbg")) {
-			toggleValue(ctrl);
-		}
-		ImGui::PopStyleColor(3);
-#endif
+			// file logging is opt-in at runtime (see VDLog::setFileLoggingEnabled()) rather than
+			// always-on for the whole debug session - only ever meaningful in a debug build at all,
+			// so the button itself doesn't even exist in release. Toggling it on starts three fresh,
+			// session-timestamped files in <repos>/logs/ (everything, warnings+, errors+) instead of
+			// the previous single file that rotated at midnight and could mix multiple runs together.
+			ImGui::SameLine();
+			bool fileLogging = VDLog::isFileLoggingEnabled();
+			if (ImGui::Checkbox("FileLog", &fileLogging)) {
+				VDLog::setFileLoggingEnabled(fileLogging);
+			}
+			// debug
+			ImGui::SameLine();
+			ctrl = mVDUniforms->IDEBUG;
+			(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+			if (ImGui::Button("Dbg")) {
+				toggleValue(ctrl);
+			}
+			ImGui::PopStyleColor(3);
+		#endif
 		hue++;
 		ImGui::SameLine();
 
@@ -666,12 +633,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		//ImGui::SameLine();
 		// midi preferred - Midi Learn now lives in the "Midi" panel itself (VDUIAnimation.cpp),
 		// not here; this button only starts up the MIDI subsystem
-		if (!mVDSession->isMidiSetup()) {
+		/*  if( ! mVDSession->isMidiSetup() ) {
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 			sprintf_s(buf, "Midi");
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			ImGui::PopStyleColor(1);
-		}
+		} */
 		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
 		ImGui::SameLine();
 		// windows
@@ -929,12 +896,7 @@ void VDUI::runOutput() {
 		if (ImGui::RadioButton("Warps (projection mapping)", content == VDOutputWindow::WARPS)) mOutputWindow->setContent(VDOutputWindow::WARPS);
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Cinder-Warping meshes rendered at the output's own resolution.\nOne warp per projector for a multi-projector span; 'W' toggles edit mode,\ncontrol points can be dragged directly on the output window.");
 		if (content == VDOutputWindow::WARPS) {
-			int composite = mOutputWindow->getComposite();
-			const char* composites[] = { "Mix", "Post", "Fx" };
-			if (ImGui::Combo("Warps without a specific fbo show", &composite, composites, IM_ARRAYSIZE(composites))) mOutputWindow->setComposite(composite);
-			if (composite == VDOutputWindow::COMPOSITE_FX) {
-				ImGui::TextWrapped("Fx is only re-rendered every frame while the display mode is Fx.");
-			}
+			ImGui::TextWrapped("Each warp shows its own input (Mix, Post, Fx or an fbo): set it in the Warps panel.");
 		}
 
 		ImGui::Separator();

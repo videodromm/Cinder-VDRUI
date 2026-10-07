@@ -74,17 +74,9 @@ void VDUITextures::Run(const char* title) {
 			const ivec2 previewSize(mVDParams->getUISmallPreviewW() * kSizeMultiplier * uiScale, mVDParams->getUISmallPreviewH() * kSizeMultiplier * uiScale);
 			if (texName == "audio") {
 				// the audio texture (64x2 spectrum/wave) means nothing as an image
-				// what the audio texture analyses (mic or the playing audio file), and any playing
-				// video, whose sound Media Foundation plays without it being analysed
-				std::string label = mVDSession->getAudioSourceLabel();
-				for (unsigned int f = 0; f < fboCount; f++) {
-					if (mVDSession->isMovie(f) && mVDSession->isPlaying(f)) {
-						label += "\nvideo playing: " + mVDSession->getInputTextureName(f, 0);
-					}
-				}
-				// fixed ID: the label changes with the source
-				label += "##audiosource";
-				ImGui::Button(label.c_str(), ImVec2((float)previewSize.x, (float)previewSize.y));
+				// the audio texture (64x2 spectrum/wave) means nothing as an image: a button (click =
+				// assign, drag = onto an fbo pane), the spectrum and the analysed source below
+				ImGui::Button("audio##audiosource", ImVec2((float)previewSize.x, ImGui::GetFrameHeight()));
 			}
 			else {
 				ImGui::Image(tex, previewSize);
@@ -101,6 +93,40 @@ void VDUITextures::Run(const char* title) {
 				mVDSession->setFboInputTexture(selectedFbo, tex, texName);
 			}
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Assign to selected fbo (%d)", selectedFbo);
+			if (texName == "audio") {
+				// what the audio texture analyses (mic or the playing audio file), and any playing
+				// video, whose sound Media Foundation plays without it being analysed
+				ImGui::TextUnformatted(mVDSession->getAudioSourceLabel().c_str());
+				for (unsigned int f = 0; f < fboCount; f++) {
+					if (mVDSession->isMovie(f) && mVDSession->isPlaying(f)) {
+						ImGui::Text("video playing: %s", mVDSession->getInputTextureName(f, 0).c_str());
+					}
+				}
+				// spectrum, max volume history (red above 240), gain (AX) with reset
+				static ImVector<float> timeValues;
+				if (timeValues.empty()) { timeValues.resize(40); memset(&timeValues.front(), 0, timeValues.size() * sizeof(float)); }
+				static int timeValues_offset = 0;
+				static double tRefresh_time = 0.0;
+				const float maxVolume = mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME);
+				if (ImGui::GetTime() > tRefresh_time) {
+					tRefresh_time = ImGui::GetTime() + 1.0 / 20.0;
+					timeValues[timeValues_offset] = maxVolume;
+					timeValues_offset = (timeValues_offset + 1) % timeValues.size();
+				}
+				ImGui::PlotHistogram("##fftH", mVDSession->getFreqs(), mVDSession->getFFTWindowSize(), 0, NULL, 0.0f, 255.0f, ImVec2((float)previewSize.x * 0.5f, 30));
+				ImGui::SameLine();
+				if (maxVolume > 240.0f) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+				ImGui::PlotLines("##fftV", &timeValues.front(), (int)timeValues.size(), timeValues_offset, toString(int(maxVolume)).c_str(), 0.0f, 255.0f, ImVec2((float)previewSize.x * 0.5f - ImGui::GetStyle().ItemSpacing.x, 30));
+				if (maxVolume > 240.0f) ImGui::PopStyleColor();
+				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
+				if (ImGui::Button("x##audioxreset")) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0f);
+				ImGui::PopStyleColor(1);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reset gain to 1");
+				ImGui::SameLine();
+				float multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
+				ImGui::SetNextItemWidth((float)previewSize.x - ImGui::GetItemRectSize().x - ImGui::GetStyle().ItemSpacing.x * 2.0f - 20.0f);
+				if (ImGui::SliderFloat("AX##audiox", &multx, 0.01f, 7.0f)) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
+			}
 			// a video's own player lives here, in the pool: play/pause (pauses every other playing
 			// video/audio file), loop, volume level
 			if (VDVideoSourceRef video = mVDSession->getVideoSource(texName)) {

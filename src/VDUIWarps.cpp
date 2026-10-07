@@ -6,6 +6,16 @@
 
 using namespace videodromm;
 
+namespace {
+	// a warp's input as shown in the panel: Mix / Post / Fx, or the fbo's shader name
+	std::string warpInputLabelFor(VDSessionFacadeRef aSession, unsigned int aIndex) {
+		if (aIndex == VDSession::WARP_INPUT_POST) return "Post";
+		if (aIndex == VDSession::WARP_INPUT_FX) return "Fx";
+		if (aIndex >= aSession->getFboShaderListSize()) return "Mix";
+		return aSession->getFboShaderName(aIndex);
+	}
+}
+
 VDUIWarps::VDUIWarps(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;
 	mVDSession = aVDSession;
@@ -39,7 +49,7 @@ void VDUIWarps::Run(const char* title) {
 			if (!previewTex) continue;
 			if (w > 0 && (w % 4 != 0)) ImGui::SameLine();
 			unsigned int fboIndex = mVDSession->getWarpAFboIndex(w);
-			std::string label = (fboIndex >= mVDSession->getFboShaderListSize()) ? "Post/Fx" : mVDSession->getFboShaderName(fboIndex);
+			std::string label = warpInputLabelFor(mVDSession, fboIndex);
 			ImGui::PushID(w);
 			ImGui::BeginGroup();
 			ImGui::Image(previewTex, ivec2(mVDParams->getUISmallPreviewW() * uiScale, mVDParams->getUISmallPreviewH() * uiScale));
@@ -62,11 +72,11 @@ void VDUIWarps::Run(const char* title) {
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 
 
-		// title is the fbo currently feeding this warp (or "Post/Fx" if it's showing the full
-		// composite instead), not the warp's own (largely meaningless, auto-generated) name -
+		// title is the fbo currently feeding this warp (or Mix / Post / Fx when it shows one of those
+		// instead), not the warp's own (largely meaningless, auto-generated) name -
 		// makes it obvious at a glance what each warp shows
 		unsigned int titleFboIndex = mVDSession->getWarpAFboIndex(w);
-		std::string warpInputName = (titleFboIndex >= mVDSession->getFboShaderListSize()) ? "Post/Fx" : mVDSession->getFboShaderName(titleFboIndex);
+		std::string warpInputName = warpInputLabelFor(mVDSession, titleFboIndex);
 		sprintf_s(buf, "%s##sh%d", warpInputName.c_str(), w);
 		bool warpOpen = true;
 		ImGui::Begin(buf, &warpOpen, ImGuiWindowFlags_NoSavedSettings);
@@ -109,26 +119,24 @@ void VDUIWarps::Run(const char* title) {
 			if (previewTex) ImGui::Image(previewTex, ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
 			//if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->getWarpName(w).c_str());
 
-			// "Post/Fx" - the full weighted composite of every active fboshader, instead of one
-			// specific fbo's raw output. This is also the default for a fresh warp (or one saved
-			// before per-warp fbo selection existed), so mixing weighted fboshaders together
-			// still looks right by default - only override it when a single fbo is deliberately
-			// wanted, isolated from the mix.
-			if (showingComposite) {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
+			// Mix (the weighted mix of the fbos, the default), Post or Fx, else one fbo below
+			{
+				const unsigned int inputs[3] = { VDSession::WARP_INPUT_MIX, VDSession::WARP_INPUT_POST, VDSession::WARP_INPUT_FX };
+				const char* names[3] = { "Mix", "Post", "Fx" };
+				const char* tips[3] = { "The weighted mix of the active fbos", "The Post render", "The Fx render" };
+				for (int k = 0; k < 3; k++) {
+					// an fbo index that no longer exists shows the mix too
+					bool active = (k == 0) ? (fboa >= mVDSession->getFboShaderListSize() && fboa != VDSession::WARP_INPUT_POST && fboa != VDSession::WARP_INPUT_FX) : (fboa == inputs[k]);
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, active ? 1.0f : 0.1f, active ? 1.0f : 0.1f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.8f, 0.8f));
+					sprintf_s(buf, "%s##wiacomp%d_%d", names[k], w, k);
+					if (ImGui::Button(buf)) mVDSession->setWarpAFboIndex(w, inputs[k]);
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip(tips[k]);
+					ImGui::PopStyleColor(3);
+					ImGui::SameLine();
+				}
 			}
-			else {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.1f, 0.1f));
-			}
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.8f, 0.8f));
-			sprintf_s(buf, "Post/Fx##wiapfx%d", w);
-			if (ImGui::Button(buf)) {
-				mVDSession->setWarpAFboIndex(w, (unsigned int)-1);
-			}
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Show the full weighted composite instead of one fbo");
-			ImGui::PopStyleColor(3);
-			ImGui::SameLine();
 
 			// loop on the fbos A
 			for (unsigned int a = 0; a < mVDSession->getFboShaderListSize(); a++) {

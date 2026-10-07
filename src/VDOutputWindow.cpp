@@ -220,13 +220,11 @@ void VDOutputWindow::renderWarps() {
 	if (!mWarpFbo || mWarpFbo->getSize() != size) {
 		mWarpFbo = gl::Fbo::create(size.x, size.y, gl::Fbo::Format().disableDepth());
 	}
-	ci::gl::TextureRef composite;
-	if (mComposite == COMPOSITE_POST) composite = mVDSession->buildPostFboTexture();
-	else if (mComposite == COMPOSITE_FX) composite = mVDSession->buildFxFboTexture();
 	gl::ScopedFramebuffer fbScp(mWarpFbo);
 	gl::ScopedViewport scpVp(ivec2(0), size);
 	gl::clear(Color::black());
-	mVDSession->drawWarpsToCurrentTarget(composite);
+	// each warp's own input (Mix / Post / Fx / an fbo, set in the Warps panel)
+	mVDSession->drawWarpsToCurrentTarget(nullptr);
 }
 
 void VDOutputWindow::draw() {
