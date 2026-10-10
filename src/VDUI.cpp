@@ -810,8 +810,13 @@ void VDUI::runCodeView() {
 	VDCodeViewRef codeView = mVDSession->getCodeView();
 	if (!codeView) return;
 	if (ImGui::Begin("Code view", &mShowCodeView)) {
-		ImGui::TextWrapped("WebApp shader editor text, sent as the transparent Spout sender \"VDCode\".");
-		ImGui::Text(codeView->isActive() ? "Editor connected, %d lines" : "Waiting for the WebApp editor (%d lines)", codeView->getLineCount());
+		ImGui::TextWrapped("WebApp GLSL and Strudel editor text, sent as the transparent Spout sender \"VDCode\".");
+		ImGui::Text("GLSL: %s, %d lines", codeView->isActive(VDCodeView::LANG_GLSL) ? "editor open" : "waiting", codeView->getLineCount(VDCodeView::LANG_GLSL));
+		ImGui::Text("Strudel: %s, %d lines", codeView->isActive(VDCodeView::LANG_STRUDEL) ? "editor open" : "waiting", codeView->getLineCount(VDCodeView::LANG_STRUDEL));
+		int layout = codeView->getLayout();
+		const char* layouts[] = { "Side by side", "Stacked" };
+		if (ImGui::Combo("Both shown", &layout, layouts, IM_ARRAYSIZE(layouts))) codeView->setLayout(layout);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("When both editors are open: GLSL left / Strudel right, or GLSL top / Strudel bottom");
 		float fontSize = codeView->getFontSize();
 		if (ImGui::SliderFloat("Font size", &fontSize, 12.0f, 96.0f, "%.0f")) codeView->setFontSize(fontSize);
 		float backgroundAlpha = codeView->getBackgroundAlpha();
