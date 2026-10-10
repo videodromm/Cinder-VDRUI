@@ -222,7 +222,7 @@ void VDUIFbos::Run(const char* title) {
 			}
 			// movies and audio files play once unless looping is enabled
 			if( mVDSession->isMovie( f ) || mVDSession->isAudioFile( f ) ) {
-				ImGui::SameLine();
+				
 				bool looping = mVDSession->isLooping( f );
 				// green when looping, black when not
 				ImGui::PushStyleColor( ImGuiCol_Button, looping ? (ImVec4)ImColor( 0, 170, 60, 255 ) : (ImVec4)ImColor( 0, 0, 0, 255 ) );
@@ -234,6 +234,7 @@ void VDUIFbos::Run(const char* title) {
 			}
 			// playback controls - one panel per fbo (not per texture slot), hence "f" here
 			if (mVDSession->isSequence(f) || mVDSession->isMovie(f) || mVDSession->isAudioFile(f)) {
+				if (!mVDSession->isSequence(f)) ImGui::SameLine();
 				// the label shows the action the button performs
 				// green while playing, black while paused
 				const bool playing = mVDSession->isPlaying(f);
@@ -298,6 +299,30 @@ void VDUIFbos::Run(const char* title) {
 				// muted while dragging: the per-frame volume above applies 0 while mIsScrubbing
 				if (ImGui::IsItemActivated()) mIsScrubbing[f] = true;
 				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) mIsScrubbing[f] = false;
+			}
+			// audio file: scrub in seconds. Seeking makes the file the ITIME clock, so the shaders
+			// follow the sound (also while paused); muted while dragging, like a video
+			if (mVDSession->isAudioFile(f) && f < 12) {
+				if (!mIsScrubbing[f]) mAudioScrubPos[f] = (float)mVDSession->getAudioFilePosition();
+				sprintf_s(buf, "scrub##asrb%d", f);
+				ImGui::SetNextItemWidth(mVDParams->getPreviewFboWidth() * uiScale * 0.75f);
+				if (ImGui::SliderFloat(buf, &mAudioScrubPos[f], 0.0f, (float)mVDSession->getAudioFileDuration(), "%.1f s"))
+				{
+					mVDSession->seekAudioFile(mAudioScrubPos[f]);
+				}
+				if (ImGui::IsItemActivated()) mIsScrubbing[f] = true;
+				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) mIsScrubbing[f] = false;
+				// song position: minutes:seconds, and bar/beat when the fbo json gives the "bpm"
+				const float t = mAudioScrubPos[f];
+				const float bpm = mVDSession->getAudioBpm(f);
+				if (bpm > 0.0f) {
+					const int beats = (int)(t * bpm / 60.0f);
+					ImGui::Text("%d:%04.1f  bar %d beat %d", (int)(t / 60.0f), fmodf(t, 60.0f), beats / 4 + 1, beats % 4 + 1);
+				}
+				else {
+					ImGui::Text("%d:%04.1f", (int)(t / 60.0f), fmodf(t, 60.0f));
+				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip(mVDSession->isAudioFileClock() ? "iTime follows this file" : "iTime runs freely until Play or a scrub");
 			}
 
 #pragma endregion tex

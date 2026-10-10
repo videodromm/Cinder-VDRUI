@@ -57,6 +57,7 @@ namespace videodromm
 		// live playback position (that fight is what caused the reported jitter), and mute the
 		// video for the duration (restored on release) so scrubbing doesn't play garbled audio
 		bool							mIsScrubbing[12] = { false };
+		float							mAudioScrubPos[12] = { 0.0f };
 		float							mPreScrubVolume[12] = { 0.0f };
 		// uniforms
 		unsigned int					ctrl;

@@ -55,6 +55,8 @@ uniform int         iSteps;             // steps for iterations
 uniform float       iRatio;
 uniform float       iEffect;
 uniform vec2        iRenderXY;          // move x y
+uniform float       iRenderXYX;         // move x
+uniform float       iRenderXYY;         // move y
 uniform float       iZoom;              // zoom
 uniform float       iCrossfade;         // CrossFade 2 shaders
 uniform float       iAlpha;          	// alpha
@@ -78,6 +80,12 @@ uniform float     	iRotationSpeed;
 uniform float     	iPixelX;
 uniform float     	iPixelY;
 uniform float     	iFactor;
+uniform float       iPar0;
+uniform float       iPar1;
+uniform float       iPar2;
+uniform float       iPar3;
+uniform float       iPar4;
+uniform float       iPar5;
 uniform bool		iDebug;
 uniform sampler2D 	inputImage;
 out vec4 fragColor;
