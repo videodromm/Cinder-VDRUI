@@ -1036,6 +1036,11 @@ void VDUI::runSetlist() {
 		mSetlistPicked = i;
 		if (mSetlistTracks[i].folder != loaded) mVDSession->loadFolder(mSetlistTracks[i].folder);
 	};
+	// the link to the WebApp (folder sync through TSWebsocketServer)
+	if (mVDSession->isWSClientConnected()) ImGui::TextColored(ImColor(0, 200, 0), "Server connected");
+	else ImGui::TextColored(ImColor(230, 80, 80), "Server not connected: the WebApp won't follow");
+	if (!mVDSession->getFolderSyncIn().empty()) ImGui::TextDisabled("%s", mVDSession->getFolderSyncIn().c_str());
+	if (!mVDSession->getFolderSyncOut().empty()) ImGui::TextDisabled("%s", mVDSession->getFolderSyncOut().c_str());
 	if (ImGui::Button("< Previous")) go(current - 1);
 	ImGui::SameLine();
 	if (ImGui::Button("Next >")) go(current + 1);
