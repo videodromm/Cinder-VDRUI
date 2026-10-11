@@ -10,6 +10,7 @@
 #include <shellapi.h>
 #include "cinder/Filesystem.h"
 #include "cinder/Vector.h"
+#include "cinder/Log.h"
 #include <atomic>
 #include <functional>
 #include <vector>
@@ -106,7 +107,17 @@ namespace videodromm
 			}
 			::ReleaseStgMedium(&medium);
 			if (!files.empty() && onDrop) {
-				onDrop(files, mPos);
+				// a COM callback: an exception escaping it (a file name the ANSI code page can't
+				// convert, a load error) ends the app
+				try {
+					onDrop(files, mPos);
+				}
+				catch (const std::exception& e) {
+					CI_LOG_W("file drop: " << e.what());
+				}
+				catch (...) {
+					CI_LOG_W("file drop failed");
+				}
 				*aEffect = DROPEFFECT_COPY;
 			}
 			return S_OK;

@@ -1,6 +1,7 @@
 // Windows only (WebView2): TinderBox adds every src/*.cpp of the block to Mac projects too,
 // so the file compiles to nothing there. VDUI only uses it under CINDER_MSW.
 #include "cinder/Cinder.h"
+#include "VDAccessToken.h"
 #if defined( CINDER_MSW )
 #include "VDUIHtmlPage.h"
 
@@ -43,7 +44,8 @@ void VDUIHtmlPage::Run(const char* title) {
 			if (hash != std::string::npos) url = url.substr(0, hash);
 			url += (url.find('?') == std::string::npos ? "?" : "&") + std::string("host=cinder") + fragment;
 		}
-		mWebViewPanel->initialize(parentHwnd, widen(url));
+		// the server's access token, when set: the WebApp stores it and removes it from its address
+		mWebViewPanel->initialize(parentHwnd, widen(access::withToken(url)));
 		mInitialized = true;
 	}
 
