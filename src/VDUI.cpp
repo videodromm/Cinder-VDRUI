@@ -1,8 +1,11 @@
 #include "VDUI.h"
 
-#if ! defined( CINDER_MSW )
-#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
+// snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
+// the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
+#ifdef sprintf_s
+#undef sprintf_s
 #endif
+#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
 
 using namespace videodromm;
 
@@ -523,7 +526,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(m / 16.0f, 0.8f, 0.8f));
 			if (ImGui::Button(buf)) mVDSession->setUniformValue(mVDUniforms->IDISPLAYMODE, m);
 			sprintf_s(buf, "Set mode to %s", mVDSession->getModeName(m).c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", buf);
 			ImGui::PopStyleColor(3);
 		}
 		ImGui::SameLine();

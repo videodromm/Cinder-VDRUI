@@ -1,3 +1,7 @@
+// Windows only (WebView2): TinderBox adds every src/*.cpp of the block to Mac projects too,
+// so the file compiles to nothing there. VDUI only uses it under CINDER_MSW.
+#include "cinder/Cinder.h"
+#if defined( CINDER_MSW )
 #include "VDUIHtmlPage.h"
 
 using namespace videodromm;
@@ -30,7 +34,16 @@ void VDUIHtmlPage::Run(const char* title) {
 		// lazy: only actually spins up the WebView2 environment/controller once the
 		// panel is first shown, not at app startup
 		HWND parentHwnd = (HWND)ci::app::getWindow()->getNative();
-		mWebViewPanel->initialize(parentHwnd, widen(mVDSession->getWebAppUrl()));
+		// "host=cinder": the WebApp then draws its shader previews once a second, the GPU is Cinder's
+		// (WebApp/src/lib/host.ts); before any #fragment
+		std::string url = mVDSession->getWebAppUrl();
+		if (url.find("host=cinder") == std::string::npos) {
+			const size_t hash = url.find('#');
+			std::string fragment = hash == std::string::npos ? "" : url.substr(hash);
+			if (hash != std::string::npos) url = url.substr(0, hash);
+			url += (url.find('?') == std::string::npos ? "?" : "&") + std::string("host=cinder") + fragment;
+		}
+		mWebViewPanel->initialize(parentHwnd, widen(url));
 		mInitialized = true;
 	}
 
@@ -72,3 +85,5 @@ void VDUIHtmlPage::Run(const char* title) {
 	}
 	ImGui::End();
 }
+
+#endif // CINDER_MSW

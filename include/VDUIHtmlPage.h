@@ -1,4 +1,7 @@
 #pragma once
+// Windows only (WebView2), see VDUIHtmlPage.cpp
+#include "cinder/Cinder.h"
+#if defined( CINDER_MSW )
 
 #if defined( _WIN32 ) && ! defined( WIN32_LEAN_AND_MEAN )
 // must be defined before the first Windows header (pulled in by cinder/app/App.h) is seen,
@@ -54,3 +57,5 @@ namespace videodromm
 		bool						mInitialized;
 	};
 }
+
+#endif // CINDER_MSW

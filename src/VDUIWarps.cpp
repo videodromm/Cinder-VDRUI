@@ -1,8 +1,11 @@
 #include "VDUIWarps.h"
 
-#if ! defined( CINDER_MSW )
-#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
+// snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
+// the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
+#ifdef sprintf_s
+#undef sprintf_s
 #endif
+#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
 
 using namespace videodromm;
 
@@ -155,7 +158,7 @@ void VDUIWarps::Run(const char* title) {
 					mVDSession->setWarpAFboIndex(w, a);
 				};
 				sprintf_s(buf, "Set input fbo A to %s", mVDSession->getFboShaderName(a).c_str());
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip(buf);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", buf);
 				ImGui::PopStyleColor(3);
 			}
 			ImGui::PopID();

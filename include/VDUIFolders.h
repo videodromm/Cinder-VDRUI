@@ -52,6 +52,7 @@ namespace videodromm
 		char						buf[256];
 		bool						mFoldersRequested = false;
 		std::string					mSelectedFolder = "";
+		unsigned int					mFolderLoadCount = 0; // follows VDSession::loadFolder() (WebApp picks included)
 		std::string					mExtension = "glsl";
 	};
 }

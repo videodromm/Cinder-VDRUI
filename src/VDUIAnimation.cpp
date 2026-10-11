@@ -2,9 +2,12 @@
 // MIDI learn on uniform widgets
 #include "VDUILearn.h"
 
-#if ! defined( CINDER_MSW )
-#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
+// snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
+// the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
+#ifdef sprintf_s
+#undef sprintf_s
 #endif
+#define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
 
 using namespace videodromm;
 
@@ -577,7 +580,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Separator();
 					for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
 					{
-						ImGui::Text(mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+						ImGui::Text("%s", mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
 
 						if (mVDSession->isMidiInConnected(i))
 						{
@@ -613,7 +616,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Separator();
 					for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
 					{
-						ImGui::Text(mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
+						ImGui::Text("%s", mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
 
 						if (mVDSession->isMidiOutConnected(i))
 						{
@@ -983,6 +986,8 @@ void VDUIAnimation::Run(const char* title) {
 
 			ctrl = mVDUniforms->IBLENDMODE;
 			iBlendmode = (int)mVDSession->getUniformValue(ctrl);
+			// the value can come from the network (an "anim" uniform skips the range check)
+			iBlendmode = std::max(0, std::min(iBlendmode, (int)IM_ARRAYSIZE(blendModes) - 1));
 			sprintf_s(buf, "Blendmode %s##ibl", blendModes[iBlendmode]);
 			if (ImGui::SliderInt(buf, &iBlendmode, 0, 25))
 			{

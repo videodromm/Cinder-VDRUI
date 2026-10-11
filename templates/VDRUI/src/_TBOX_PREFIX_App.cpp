@@ -46,6 +46,8 @@
 // UI
 #define IMGUI_DISABLE_OBSOLETE_FUNCTIONS 1
 #include "VDUI.h"
+// once per exe: dedicated GPU exports, process priority, 1 ms timer
+#include "VDLivePriority.h"
 // imgui.h already defines this (pulled in transitively) - redefining it unconditionally
 // triggers "warning C4005: redéfinition de macro" on every build
 #ifndef IM_ARRAYSIZE
@@ -484,6 +486,8 @@ void _TBOX_PREFIX_App::draw()
 }
 void prepareSettings(App::Settings *settings)
 {
+	// live performance: this app first, the others are helpers (VDLivePriority.h)
+	videodromm::applyLivePriority();
 	settings->setWindowSize(1280, 720);
 	settings->setHighDensityDisplayEnabled(true);
 }

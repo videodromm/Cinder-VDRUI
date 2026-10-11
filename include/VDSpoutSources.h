@@ -15,7 +15,8 @@ namespace videodromm
 {
 	// Spout senders from other apps, received and offered in the shared texture pool as
 	// "Spout in: <sender>" (any fbo can then pick one as its input texture). The sender list is
-	// refreshed about once a second; each sender has its own receiver, received every frame.
+	// refreshed about once a second; each sender has its own receiver. A sender an fbo uses as its
+	// input is received every frame; the others only once a second (their pool previews).
 	// This app's own senders (main output = the exe name, and "VDCode") are skipped: they're
 	// already in the pool directly (VDUI::registerPoolSources).
 	class VDSpoutSources {
@@ -23,9 +24,15 @@ namespace videodromm
 		static const size_t		MAX_SOURCES = 8;
 
 		void update(VDSessionFacadeRef aVDSession) {
-			if (ci::app::getElapsedFrames() % 60 == 1) refreshSenders(aVDSession);
+			const uint64_t frame = ci::app::getElapsedFrames();
+			if (frame % 60 == 1) refreshSenders(aVDSession);
+			// pool names used as an fbo input: live
+			std::set<std::string> used;
+			for (unsigned int f = 0; f < aVDSession->getFboShaderListSize(); f++) used.insert(aVDSession->getInputTextureName(f, 0));
+			const bool previewTick = frame % 60 == 0;
 			for (auto& entry : mSources) {
 				Source& source = entry.second;
+				if (source.received && !previewTick && used.count(poolName(entry.first)) == 0) continue;
 				if (!source.texture) source.texture = ci::gl::Texture2d::create(16, 16);
 				// same calls as CiSpoutIn: a size change is reported by IsUpdated(), the texture is
 				// then reallocated and filled from the next frame
@@ -35,6 +42,7 @@ namespace videodromm
 					}
 					else {
 						aVDSession->registerPoolTexture(poolName(entry.first), source.texture);
+						source.received = true;
 					}
 				}
 			}
@@ -45,6 +53,7 @@ namespace videodromm
 		struct Source {
 			std::unique_ptr<SpoutReceiver>	receiver;
 			ci::gl::Texture2dRef			texture;
+			bool							received = false;
 		};
 		std::map<std::string, Source>	mSources;
 		SpoutReceiver					mLister;
