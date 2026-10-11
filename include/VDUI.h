@@ -69,6 +69,10 @@ namespace videodromm
 		bool	isReady() { return !mIsResizing; };
 		// optional projector output window, driven by the app (see VDOutputWindow.h)
 		VDOutputWindowRef	getOutputWindow() { return mOutputWindow; }
+		// Spout (main output + "VDCode") and NDI senders: off at startup, toggled in the top bar;
+		// the app creates its senders only while these are on
+		bool				isSpoutOutEnabled() const { return mSpoutOutEnabled; }
+		bool				isNdiOutEnabled() const { return mNdiOutEnabled; }
 	private:
 		// Params
 		VDParamsRef					mVDParams;
@@ -125,6 +129,22 @@ namespace videodromm
 		VDOutputWindowRef			mOutputWindow;
 		bool						mShowOutput = false;
 		void						runOutput();
+
+		bool						mSpoutOutEnabled = false;
+		bool						mNdiOutEnabled = false;
+
+		// setlist: assets/<name>.json (tracks in show order), the current one is "settings.setlist"
+		// in assets/mix.json; a track loads its folder (the WebApp follows, folder sync)
+		struct SetlistTrack { std::string title; std::string folder; };
+		bool						mShowSetlist = false;
+		bool						mSetlistsLoaded = false;
+		std::vector<std::string>	mSetlistNames;
+		std::string					mSetlistName;
+		std::vector<SetlistTrack>	mSetlistTracks;
+		int							mSetlistPicked = -1;
+		void						runSetlist();
+		void						loadSetlists();
+		void						selectSetlist(const std::string& aName, bool aSave);
 
 		// imgui
 		char						buf[64];

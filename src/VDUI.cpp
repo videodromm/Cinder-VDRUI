@@ -1,4 +1,5 @@
 #include "VDUI.h"
+#include "cinder/Json.h"
 
 // snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
 // the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
@@ -367,6 +368,28 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		}
 		ImGui::PopStyleColor(3);
 		hue++;
+		ImGui::SameLine();
+#endif
+		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Setlist")) {
+			mShowSetlist = !mShowSetlist;
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+#if defined( CINDER_MSW )
+		// Spout / NDI senders: green while on (off at startup: each costs per frame)
+		auto senderButton = [](const char* aLabel, bool& aOn, const char* aTip) {
+			if (aOn) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(0, 140, 0, 255));
+			if (ImGui::Button(aLabel)) aOn = !aOn;
+			if (aOn) ImGui::PopStyleColor(1);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", aTip);
+		};
+		senderButton(mSpoutOutEnabled ? "Spout on" : "Spout off", mSpoutOutEnabled, "Spout senders: main output and VDCode (for Resolume)");
+		ImGui::SameLine();
+		senderButton(mNdiOutEnabled ? "NDI on" : "NDI off", mNdiOutEnabled, "NDI sender \"VDUI\" (frames only go out while a receiver is connected)");
 		ImGui::SameLine();
 #endif
 
@@ -791,6 +814,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mShowCodeView) {
 		runCodeView();
 	}
+	// setlist
+	if (mShowSetlist) {
+		runSetlist();
+	}
 	// projector output window
 	if (mShowOutput) {
 		runOutput();
@@ -924,6 +951,103 @@ void VDUI::runOutput() {
 		bool onTop = mOutputWindow->getAlwaysOnTop();
 		if (ImGui::Checkbox("Always on top", &onTop)) mOutputWindow->setAlwaysOnTop(onTop);
 		ImGui::TextWrapped("Spout to Resolume keeps running either way. Esc on the output window closes it.");
+	}
+	ImGui::End();
+}
+
+// ---- setlist (assets/<name>.json; the WebApp has the same list in its Setlist pane)
+void VDUI::loadSetlists() {
+	mSetlistsLoaded = true;
+	mSetlistNames.clear();
+	const fs::path assets = getAssetPath("");
+	try {
+		for (const auto& entry : fs::directory_iterator(assets)) {
+			if (!entry.is_regular_file() || entry.path().extension() != ".json") continue;
+			try {
+				ci::Json j = ci::loadJson(entry.path());
+				if (j.is_object() && j.contains("tracks") && j["tracks"].is_array()) mSetlistNames.push_back(entry.path().stem().string());
+			}
+			catch (...) {
+				// not JSON, or not a setlist
+			}
+		}
+		std::sort(mSetlistNames.begin(), mSetlistNames.end());
+		std::string current;
+		ci::Json mix = ci::loadJson(assets / "mix.json");
+		if (mix.contains("settings") && mix["settings"].contains("setlist") && mix["settings"]["setlist"].is_string()) current = mix["settings"]["setlist"].get<std::string>();
+		if (current.empty() && !mSetlistNames.empty()) current = mSetlistNames.front();
+		if (!current.empty()) selectSetlist(current, false);
+	}
+	catch (const std::exception& e) {
+		CI_LOG_W("setlists: " << e.what());
+	}
+}
+
+void VDUI::selectSetlist(const std::string& aName, bool aSave) {
+	mSetlistName = aName;
+	mSetlistTracks.clear();
+	mSetlistPicked = -1;
+	const fs::path assets = getAssetPath("");
+	try {
+		ci::Json j = ci::loadJson(assets / (aName + ".json"));
+		for (const auto& t : j["tracks"]) {
+			if (!t.is_object() || !t.contains("folder") || !t["folder"].is_string()) continue;
+			SetlistTrack track;
+			track.folder = t["folder"].get<std::string>();
+			track.title = t.contains("title") && t["title"].is_string() ? t["title"].get<std::string>() : track.folder;
+			mSetlistTracks.push_back(track);
+		}
+		if (aSave) {
+			// assets/mix.json: only settings.setlist changes, the rest is kept
+			ci::Json mix = ci::loadJson(assets / "mix.json");
+			mix["settings"]["setlist"] = aName;
+			ci::writeJson(assets / "mix.json", mix, 2);
+		}
+	}
+	catch (const std::exception& e) {
+		CI_LOG_W("setlist " << aName << ": " << e.what());
+	}
+}
+
+void VDUI::runSetlist() {
+	if (!mSetlistsLoaded) loadSetlists();
+	float uiScale = mVDSession->getUniformValue(mVDUniforms->IUISCALE);
+	ImGui::SetNextWindowSize(ImVec2(320.0f * uiScale, 360.0f * uiScale), ImGuiCond_Once);
+	ImGui::Begin("Setlist", &mShowSetlist, ImGuiWindowFlags_NoSavedSettings);
+	ImGui::PushItemWidth(170.0f * uiScale);
+	if (ImGui::BeginCombo("##setlist", mSetlistName.c_str())) {
+		for (const auto& name : mSetlistNames) {
+			if (ImGui::Selectable(name.c_str(), name == mSetlistName)) selectSetlist(name, true);
+		}
+		ImGui::EndCombo();
+	}
+	ImGui::PopItemWidth();
+	if (ImGui::IsItemHovered()) ImGui::SetTooltip("assets/<name>.json; the choice is saved in assets/mix.json");
+	ImGui::SameLine();
+	if (ImGui::Button("Reload")) loadSetlists();
+
+	// the entry playing: the one picked here, else the first one on the loaded folder
+	const std::string loaded = mVDSession->getLoadedFolder();
+	int current = -1;
+	if (mSetlistPicked >= 0 && mSetlistPicked < (int)mSetlistTracks.size() && mSetlistTracks[mSetlistPicked].folder == loaded) current = mSetlistPicked;
+	for (int i = 0; current < 0 && i < (int)mSetlistTracks.size(); i++) if (mSetlistTracks[i].folder == loaded) current = i;
+	auto go = [&](int i) {
+		if (i < 0 || i >= (int)mSetlistTracks.size()) return;
+		mSetlistPicked = i;
+		if (mSetlistTracks[i].folder != loaded) mVDSession->loadFolder(mSetlistTracks[i].folder);
+	};
+	if (ImGui::Button("< Previous")) go(current - 1);
+	ImGui::SameLine();
+	if (ImGui::Button("Next >")) go(current + 1);
+	ImGui::Separator();
+	for (int i = 0; i < (int)mSetlistTracks.size(); i++) {
+		const auto& t = mSetlistTracks[i];
+		const bool playing = (i == current);
+		if (playing) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(0, 140, 0, 255));
+		snprintf(buf, sizeof(buf), "%d  %s##setlist%d", i + 1, t.title.c_str(), i);
+		if (ImGui::Button(buf, ImVec2(-1.0f, 0.0f))) go(i);
+		if (playing) ImGui::PopStyleColor(1);
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("assets/glsl/%s", t.folder.c_str());
 	}
 	ImGui::End();
 }

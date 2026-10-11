@@ -90,25 +90,33 @@ private:
 	bool							mFadeInDelay = true;
 	void							toggleCursorVisibility(bool visible);
 #if defined( CINDER_MSW )
-	SpoutOut 						mSpoutOut;
-	CinderNDISender					mNdiOut;
-	SpoutOut 						mCodeSpoutOut;
+	std::unique_ptr<SpoutOut>		mSpoutOut;
+	std::unique_ptr<CinderNDISender>	mNdiOut;
+	std::unique_ptr<SpoutOut>		mCodeSpoutOut;
+	// Spout (main output + "VDCode") and NDI senders exist only while switched on in VDUI's top
+	// bar (off at startup: each sender costs a copy per frame, NDI a GPU->CPU readback)
+	void							syncSenders() {
+		if (mVDUI->isSpoutOutEnabled() && !mSpoutOut) {
+			mSpoutOut = std::make_unique<SpoutOut>("VDUI", getWindowSize());
+			mCodeSpoutOut = std::make_unique<SpoutOut>("VDCode", getWindowSize());
+			// explicit name only for this extra sender: the main one keeps Spout's default (exe) name
+			mCodeSpoutOut->setSenderName("VDCode");
+		}
+		else if (!mVDUI->isSpoutOutEnabled() && mSpoutOut) {
+			mSpoutOut.reset();
+			mCodeSpoutOut.reset();
+		}
+		if (mVDUI->isNdiOutEnabled() && !mNdiOut) mNdiOut = std::make_unique<CinderNDISender>("VDUI");
+		else if (!mVDUI->isNdiOutEnabled() && mNdiOut) mNdiOut.reset();
+	}
+
 #endif
 	int								mTrack = 0;
 };
 
 
 _TBOX_PREFIX_App::_TBOX_PREFIX_App()
-#if defined( CINDER_MSW )
-	: mSpoutOut("VDUI", app::getWindowSize())
-	, mNdiOut("VDUI")
-	, mCodeSpoutOut("VDCode", app::getWindowSize())
-#endif
 {
-#if defined( CINDER_MSW )
-	// explicit name only for this extra sender: the main one keeps Spout's default (exe) name
-	mCodeSpoutOut.setSenderName("VDCode");
-#endif
 
 	// Settings
 	mVDSettings = VDSettings::create("VDUI");
@@ -418,6 +426,9 @@ void _TBOX_PREFIX_App::resize()
 }
 void _TBOX_PREFIX_App::draw()
 {
+#if defined( CINDER_MSW )
+	syncSenders();
+#endif
 	// the optional projector output window (VDUI "Output" panel) goes through here too
 	if (mVDUI->getOutputWindow()->isCurrent()) {
 		mVDUI->getOutputWindow()->draw();
@@ -463,18 +474,22 @@ void _TBOX_PREFIX_App::draw()
 			// the output window's "Main view" shows this same texture, drawn after this window
 			mVDUI->getOutputWindow()->setMainViewTexture(tex);
 #if defined( CINDER_MSW )
-			mSpoutOut.sendTexture(tex);
+			if (mSpoutOut) mSpoutOut->sendTexture(tex);
 			// building the ci::Surface is a GPU->CPU readback, so skip it entirely when nobody's
 			// receiving rather than relying on sendSurface()'s own (later) connection check
-			if (mNdiOut.hasConnections()) mNdiOut.sendSurface(ci::Surface(tex->createSource()));
+			if (mNdiOut && mNdiOut->hasConnections()) mNdiOut->sendSurface(ci::Surface(tex->createSource()));
 #endif
 		}
 			// ok gl::draw(mVDSession->getWarpFboTexture(), Area(0, 0, mVDSettings->mFboWidth, mVDSettings->mFboHeight));//getWindowBounds()	
 	}	
 #if defined( CINDER_MSW )
 	// live code view: the WebApp editor's text on a transparent background, as its own Spout
-	// sender so Resolume can layer it over the visuals (cleared when the editor closes)
-	mCodeSpoutOut.sendTexture(mVDSessionFacade->buildCodeViewTexture(ivec2(mVDParams->getFboWidth(), mVDParams->getFboHeight())));
+	// sender so Resolume can layer it over the visuals (cleared when the editor closes); rendered
+	// only when something shows it (that sender, or the output window's code overlay)
+	if (mCodeSpoutOut || mVDUI->getOutputWindow()->getCodeOverlay()) {
+		auto codeTex = mVDSessionFacade->buildCodeViewTexture(ivec2(mVDParams->getFboWidth(), mVDParams->getFboHeight()));
+		if (mCodeSpoutOut) mCodeSpoutOut->sendTexture(codeTex);
+	}
 #endif
 	// imgui
 	if (mVDSessionFacade->showUI()) {
