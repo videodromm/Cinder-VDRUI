@@ -284,7 +284,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 		// manual UI scale override (see IUISCALE) - lets the panel/font/spacing scale be
 		// fine-tuned independently of the display's auto-detected content scale
-		// ImGui::SameLine();
+		ImGui::SameLine();
 		ImGui::PushItemWidth(80.0f * uiScale);
 		float uiScaleCtrl = uiScale;
 		if (ImGui::SliderFloat("UIX", &uiScaleCtrl, 0.5f, 4.0f)) {
@@ -314,7 +314,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PopStyleColor(3);
 		#endif
 		hue++;
-		ImGui::SameLine();
+		//ImGui::SameLine();
 
 
 		// "Warp++" (create a new warp) moved into the Warps panel itself (VDUIWarps.cpp) - this
