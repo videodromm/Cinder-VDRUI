@@ -1,4 +1,5 @@
 #include "VDUI.h"
+#include "VDVersion.h"
 
 // snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
 // the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
@@ -8,6 +9,9 @@
 #define sprintf_s(buffer, format, ...) snprintf((buffer), sizeof(buffer), (format), ##__VA_ARGS__)
 
 using namespace videodromm;
+
+// this block's build and git commit, in the log files and the websocket hello (VDVersion.h)
+VD_REGISTER_VERSION("Cinder-VDRUI");
 
 VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsRef aVDUniforms) {
 	mVDSettings = aVDSettings;

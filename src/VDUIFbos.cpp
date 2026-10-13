@@ -295,13 +295,24 @@ void VDUIFbos::Run(const char* title) {
 					playheadPositions[f] = mVDSession->getPosition(f);
 				}
 				sprintf_s(buf, "scrub##srb%d", f);
-				if (ImGui::SliderInt(buf, &playheadPositions[f], 0, mVDSession->getMaxFrame(f)))
-				{
+				// a movie seek restarts the player's session (Media Foundation): one per frame while
+				// dragging piled them up, the position ran away and the sound broke (Acer, 2026-10-12).
+				// While dragging, at most 4 seeks a second; the exact one on release
+				static double sLastMovieSeek[12] = { 0.0 };
+				const bool movie = mVDSession->isMovie(f);
+				const bool moved = ImGui::SliderInt(buf, &playheadPositions[f], 0, mVDSession->getMaxFrame(f));
+				const bool released = mIsScrubbing[f] && ImGui::IsItemDeactivated();
+				const double now = ci::app::getElapsedSeconds();
+				if (!movie || f >= 12) {
+					if (moved) mVDSession->setPlayheadPosition(f, playheadPositions[f]);
+				}
+				else if (released || (moved && now - sLastMovieSeek[f] > 0.25)) {
 					mVDSession->setPlayheadPosition(f, playheadPositions[f]);
+					sLastMovieSeek[f] = now;
 				}
 				// muted while dragging: the per-frame volume above applies 0 while mIsScrubbing
 				if (ImGui::IsItemActivated()) mIsScrubbing[f] = true;
-				if (mIsScrubbing[f] && ImGui::IsItemDeactivated()) mIsScrubbing[f] = false;
+				if (released) mIsScrubbing[f] = false;
 			}
 			// audio file: scrub in seconds. Seeking makes the file the ITIME clock, so the shaders
 			// follow the sound (also while paused); muted while dragging, like a video
