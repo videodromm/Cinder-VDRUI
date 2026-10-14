@@ -57,6 +57,10 @@ namespace videodromm
 		void					setMainViewTexture(const ci::gl::TextureRef& aTexture) { mMainViewTexture = aTexture; }
 		// what the main window shows and Spout sends (also offered in the texture pool)
 		ci::gl::TextureRef		getMainViewTexture() const { return mMainViewTexture; }
+		// what the output window shows, for the video export: its warps when it's open on "Warps",
+		// else the main view (without the code overlay)
+		bool					isShowingWarps() const { return mWindow && mContent == WARPS && mWarpFbo; }
+		ci::gl::TextureRef		getExportTexture() const { return isShowingWarps() ? mWarpFbo->getColorTexture() : mMainViewTexture; }
 		// output window mouse position -> the fbo-sized space the warps' editor works in
 		ci::app::MouseEvent		toWarpSpace(const ci::app::MouseEvent& aEvent) const;
 

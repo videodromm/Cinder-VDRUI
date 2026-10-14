@@ -32,6 +32,8 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mUIFolders = VDUIFolders::create(mVDUniforms, mVDSession);
 	// UISetlist
 	mUISetlist = VDUISetlist::create(mVDUniforms, mVDSession);
+	// video export of the output window (VDVideoExport.h)
+	mVideoExport = VDVideoExport::create(mVDUniforms, mVDSession);
 	// projector output window (opened on demand from the "Output" panel)
 	mOutputWindow = VDOutputWindow::create(mVDSession);
 #if defined( CINDER_MSW )
@@ -438,6 +440,20 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		hue++;
 		ImGui::SameLine();
 
+		// red while recording, orange while armed
+		{
+			const VDVideoExport::State exportState = mVideoExport->getState();
+			const float exportHue = exportState == VDVideoExport::RECORDING ? 0.0f : exportState == VDVideoExport::ARMED ? 0.08f : hue / 16.0f;
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(exportHue, 1.0f, exportState == VDVideoExport::RECORDING ? 0.8f : 0.5f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(exportHue, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(exportHue, 0.8f, 0.8f));
+			if (ImGui::Button(exportState == VDVideoExport::RECORDING ? "REC" : "Export")) mShowExport = !mShowExport;
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Export the output window as an mp4 (repos/export), from Play to the song's end");
+			ImGui::PopStyleColor(3);
+		}
+		hue++;
+		ImGui::SameLine();
+
 		// Audio/Midi/Tempo/OSC/Websocket used to be always-visible CollapsingHeaders inside the
 		// "Animation" window, making it very tall - each is now its own toggleable window (see
 		// VDUIAnimation.cpp), shown/hidden from here the same way Warps/Fbos/Tex/Blend/Folders
@@ -813,6 +829,12 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	// Setlist
 	if (mShowSetlist) {
 		mUISetlist->Run("Setlist");
+	}
+	// video export: recording runs whether its panel is shown or not
+	{
+		ci::gl::TextureRef exportTexture = mOutputWindow->getExportTexture();
+		mVideoExport->update(exportTexture);
+		if (mShowExport) mVideoExport->Run("Export", exportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view");
 	}
 #if defined( CINDER_MSW )
 	// HtmlPage (WebView2)

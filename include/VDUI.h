@@ -29,6 +29,7 @@
 #include "VDUIFolders.h"
 // Setlist
 #include "VDUISetlist.h"
+#include "VDVideoExport.h"
 #if defined( CINDER_MSW )
 // HtmlPage (WebView2, Windows-only)
 #include "VDUIHtmlPage.h"
@@ -110,6 +111,8 @@ namespace videodromm
 		// UISetlist
 		VDUISetlistRef				mUISetlist;
 		bool						mShowSetlist;
+		VDVideoExportRef			mVideoExport;
+		bool						mShowExport = false;
 
 #if defined( CINDER_MSW )
 		// UIHtmlPage (WebView2, Windows-only)
