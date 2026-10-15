@@ -580,6 +580,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Separator();
 					for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
 					{
+						if (isHiddenMidiPort(mVDSession->getMidiInPortName(i))) continue;
 						ImGui::Text("%s", mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
 
 						if (mVDSession->isMidiInConnected(i))
@@ -616,6 +617,7 @@ void VDUIAnimation::Run(const char* title) {
 					ImGui::Separator();
 					for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
 					{
+						if (isHiddenMidiPort(mVDSession->getMidiOutPortName(i))) continue;
 						ImGui::Text("%s", mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
 
 						if (mVDSession->isMidiOutConnected(i))
