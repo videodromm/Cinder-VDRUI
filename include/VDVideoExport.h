@@ -74,10 +74,11 @@ namespace videodromm
 			mWasPlaying = playing;
 		}
 
-		void Run(const char* title, const ci::gl::TextureRef& aTexture, const std::string& aSourceLabel) {
+		// aOpen: the panel's close box clears it (the caller may set the next window's pos/focus first)
+		void Run(const char* title, bool* aOpen, const ci::gl::TextureRef& aTexture, const std::string& aSourceLabel) {
 			const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 			ImGui::SetNextWindowSize(ImVec2(420.0f * uiScale, 230.0f * uiScale), ImGuiCond_Once);
-			ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+			ImGui::Begin(title, aOpen, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 			{
 				const State state = mState.load();
 				if (mFfmpeg.empty()) {

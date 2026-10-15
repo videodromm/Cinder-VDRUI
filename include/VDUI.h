@@ -113,6 +113,7 @@ namespace videodromm
 		bool						mShowSetlist;
 		VDVideoExportRef			mVideoExport;
 		bool						mShowExport = false;
+		bool						mFocusExport = false;
 
 #if defined( CINDER_MSW )
 		// UIHtmlPage (WebView2, Windows-only)

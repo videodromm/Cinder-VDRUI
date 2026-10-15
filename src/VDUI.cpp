@@ -447,7 +447,10 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(exportHue, 1.0f, exportState == VDVideoExport::RECORDING ? 0.8f : 0.5f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(exportHue, 0.7f, 0.7f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(exportHue, 0.8f, 0.8f));
-			if (ImGui::Button(exportState == VDVideoExport::RECORDING ? "REC" : "Export")) mShowExport = !mShowExport;
+			if (ImGui::Button(exportState == VDVideoExport::RECORDING ? "REC" : "Export##export")) {
+				mShowExport = !mShowExport;
+				mFocusExport = mShowExport;
+			}
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Export the output window as an mp4 (repos/export), from Play to the song's end");
 			ImGui::PopStyleColor(3);
 		}
@@ -834,7 +837,17 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	{
 		ci::gl::TextureRef exportTexture = mOutputWindow->getExportTexture();
 		mVideoExport->update(exportTexture);
-		if (mShowExport) mVideoExport->Run("Export", exportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view");
+		if (mShowExport) {
+			// it used to open at ImGui's default spot (top left), behind or over the big panels, so a
+			// click on Export sometimes seemed to do nothing: placed under the toolbar, and brought to
+			// the front whenever the button opens it
+			ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol2() * uiScale, mVDParams->getUIYPosRow2() * uiScale), ImGuiCond_Appearing);
+			if (mFocusExport) {
+				ImGui::SetNextWindowFocus();
+				mFocusExport = false;
+			}
+			mVideoExport->Run("Export###exportpanel", &mShowExport, exportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view");
+		}
 	}
 #if defined( CINDER_MSW )
 	// HtmlPage (WebView2)
