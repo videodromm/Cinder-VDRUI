@@ -96,8 +96,14 @@ void VDUITextures::Run(const char* title) {
 			if (ImGui::IsItemClicked()) {
 				mVDSession->setFboInputTexture(selectedFbo, tex, texName);
 			}
+			// right-click: the selected fbo's iChannel1 ("texture1", by convention an image; 2026-10-15)
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+				if (!mVDSession->setFboTexture1(selectedFbo, tex, texName)) {
+					CI_LOG_W("iChannel1 takes a still image, not " << texName);
+				}
+			}
 			// the selected fbo: the last fbo pane clicked (highlighted in purple there)
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Click: assign to the selected fbo (%d, purple)\nDrag: onto any fbo pane", selectedFbo);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Click: iChannel0 of the selected fbo (%d, purple)\nRight-click: its iChannel1 (images only)\nDrag: onto any fbo pane (iChannel0)", selectedFbo);
 			if (texName == "audio") {
 				// what the audio texture analyses (mic or the playing audio file), and any playing
 				// video, whose sound Media Foundation plays without it being analysed

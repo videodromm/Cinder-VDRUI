@@ -118,6 +118,18 @@ void VDUIFbos::Run(const char* title) {
 			float iWeight = mVDSession->getUniformValue(ctrl);
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
+			// iChannel1 ("texture1"): shown when set, x clears it; set it with a right-click on a texture
+			// in the Textures panel (2026-10-15)
+			{
+				const std::string texture1 = mVDSession->getFboTexture1Name(f);
+				if (!texture1.empty()) {
+					ImGui::TextColored(ImColor(255, 200, 0), "iChannel1: %s", texture1.c_str());
+					ImGui::SameLine();
+					sprintf_s(buf, "x##tex1clear%d", f);
+					if (ImGui::SmallButton(buf)) mVDSession->setFboTexture1(f, nullptr, "");
+					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Clear iChannel1");
+				}
+			}
 			ImGui::TextColored(ImColor(155, 255, 0), "%d %dms", f+31, mVDSession->getFboMsTotal(f));
 			if (!mVDSession->isFboValid(f)) {
 				ImGui::TextColored(ImColor(255, 0, 0), "err: %s", mVDSession->getFboError(f).c_str());
