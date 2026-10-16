@@ -129,14 +129,18 @@ void VDUITextures::Run(const char* title) {
 				if (maxVolume > 240.0f) ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
 				ImGui::PlotLines("##fftV", &timeValues.front(), (int)timeValues.size(), timeValues_offset, toString(int(maxVolume)).c_str(), 0.0f, 255.0f, ImVec2((float)previewSize.x * 0.5f - ImGui::GetStyle().ItemSpacing.x, 30));
 				if (maxVolume > 240.0f) ImGui::PopStyleColor();
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				if (ImGui::Button("x##audioxreset")) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0f);
+				// gain slider; its "AX" label is the reset button (was a separate x button)
+				const ImGuiStyle& style = ImGui::GetStyle();
+				const float labelW = ImGui::CalcTextSize("AX").x + style.FramePadding.x * 2.0f;
+				float multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
+				ImGui::SetNextItemWidth((float)previewSize.x - labelW - style.ItemSpacing.x);
+				if (ImGui::SliderFloat("##audiox", &multx, 0.01f, 7.0f)) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
+				ImGui::SameLine();
+				// looks like a label, highlights on hover
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+				if (ImGui::Button("AX##audioxreset")) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, 1.0f);
 				ImGui::PopStyleColor(1);
 				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Reset gain to 1");
-				ImGui::SameLine();
-				float multx = mVDSession->getUniformValue(mVDUniforms->IAUDIOX);
-				ImGui::SetNextItemWidth((float)previewSize.x - ImGui::GetItemRectSize().x - ImGui::GetStyle().ItemSpacing.x * 2.0f - 20.0f);
-				if (ImGui::SliderFloat("AX##audiox", &multx, 0.01f, 7.0f)) mVDSession->setUniformValue(mVDUniforms->IAUDIOX, multx);
 			}
 			// a video's own player lives here, in the pool: play/pause (pauses every other playing
 			// video/audio file), loop, volume level
