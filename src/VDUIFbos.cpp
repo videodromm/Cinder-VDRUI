@@ -448,26 +448,30 @@ void VDUIFbos::Run(const char* title) {
 					break;
 				case GL_FLOAT_VEC3:
 					// vec3 35665
-					//sprintf_s(buf, "vec3 %s", uName.c_str(), f);
-					//ImGui::TextColored(ImColor(100, 100, 0), buf);
-
+					// iColor: the shader reads iColorX/Y/Z (VDUniforms::getVec3UniformValueByName)
+					if (ctrl == mVDUniforms->ICOLOR) {
+						float color[3] = { getValue(mVDUniforms->ICOLORX, f), getValue(mVDUniforms->ICOLORY, f), getValue(mVDUniforms->ICOLORZ, f) };
+						sprintf_s(buf, "%s##coloruniform%d", uName.c_str(), f);
+						if (ImGui::ColorEdit3(buf, color, ImGuiColorEditFlags_NoInputs)) {
+							for (int c = 0; c < 3; c++) setValue(mVDUniforms->ICOLORX + c, f, color[c]);
+						}
+					}
 					break;
 				case GL_FLOAT_VEC4:
 					// vec4 35666 GL_FLOAT_VEC4
-					/*sprintf_s(buf, "vec4 %s %d", uName.c_str(), u.getType());
-					ImGui::TextColored(ImColor(100, 100, 100), buf);
+					// iMouse: the shader reads iMouseX/Y/Z/W (VDFboShader); X and Y in pixels of the fbo
 					if (ctrl == mVDUniforms->IMOUSE) {
 						mouseX = getValue(mVDUniforms->IMOUSEX, f);
-						if (ImGui::SliderFloat("MouseX", &mouseX, 0.0f, mVDParams->getFboWidth(), "%.4f", 3.0f))
-						{
-							setValue(mVDUniforms->IMOUSEX, mouseX, f);
+						sprintf_s(buf, "iMouseX##mousexuniform%d", f);
+						if (learnable(mVDSession, ImGui::DragFloat(buf, &mouseX, 1.0f, 0.0f, (float)mVDParams->getFboWidth()), mVDUniforms->IMOUSEX)) {
+							setValue(mVDUniforms->IMOUSEX, f, mouseX);
 						}
 						mouseY = getValue(mVDUniforms->IMOUSEY, f);
-						if (ImGui::SliderFloat("MouseY", &mouseY, 0.0f, mVDParams->getFboHeight(), "%.4f", 0.3f))
-						{
-							setValue(mVDUniforms->IMOUSEY, mouseY, f);
+						sprintf_s(buf, "iMouseY##mouseyuniform%d", f);
+						if (learnable(mVDSession, ImGui::DragFloat(buf, &mouseY, 1.0f, 0.0f, (float)mVDParams->getFboHeight()), mVDUniforms->IMOUSEY)) {
+							setValue(mVDUniforms->IMOUSEY, f, mouseY);
 						}
-					}*/
+					}
 					break;
 				default:
 					//ciModelViewProjection 35676 GL_FLOAT_MAT4 0x8B5C
