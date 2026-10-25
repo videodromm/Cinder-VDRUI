@@ -67,7 +67,7 @@ void VDUITextures::Run(const char* title) {
 		// same width and preview size as the fbo panes (VDUIFbos.cpp). The width is a constraint:
 		// these windows keep their size in imgui.ini, which would win over a size set once
 		const float paneWidth = mVDParams->getUILargePreviewW() * uiScale;
-		ImGui::SetNextWindowSize(ImVec2(paneWidth, mVDParams->getUILargePreviewH() * 1.4f * uiScale), ImGuiCond_Once);
+		ImGui::SetNextWindowSize( ImVec2( paneWidth, mVDParams->getUILargePreviewH() * 0.6f * uiScale ), ImGuiCond_Once );
 		ImGui::SetNextWindowSizeConstraints(ImVec2(paneWidth, 0.0f), ImVec2(paneWidth, FLT_MAX));
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
 		std::string texName = mVDSession->getLoadedTextureName(i);
