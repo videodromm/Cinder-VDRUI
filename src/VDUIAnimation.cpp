@@ -46,40 +46,6 @@ void VDUIAnimation::Run(const char* title) {
 	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings);// | ImGuiWindowFlags_NoCollapse
 	{
 		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		if( ImGui::CollapsingHeader( "Color" ) )
-		{
-			ImGui::PushItemWidth(200.0f);
-			// foreground color
-			color[0] = getFloatValue(mVDUniforms->ICOLORX);
-			color[1] = getFloatValue(mVDUniforms->ICOLORY);
-			color[2] = getFloatValue(mVDUniforms->ICOLORZ);
-			color[3] = getFloatValue(mVDUniforms->IALPHA);
-			ImGui::ColorEdit4("f", color);
-			for (int i = 0; i < 4; i++)
-			{
-				if (getFloatValue(i + mVDUniforms->ICOLORX) != color[i])
-				{
-					setFloatValue(i + mVDUniforms->ICOLORX, color[i]);
-				}
-			}
-
-			// background color
-			backcolor[0] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORX);
-			backcolor[1] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORY);
-			backcolor[2] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORZ);
-			ImGui::ColorEdit3("g", backcolor);
-			for (int i = 0; i < 3; i++)
-			{
-				if (getFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX) != backcolor[i])
-				{
-					setFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX, backcolor[i]);
-				}
-
-			}
-			ImGui::PopItemWidth();
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
-		}
-
 		if( ImGui::CollapsingHeader( "Animation", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			if (ImGui::Button("Reset")) {
@@ -407,485 +373,499 @@ void VDUIAnimation::Run(const char* title) {
 		} // Params
 	}
 	ImGui::End();
+}
 
-	// Audio/Midi/Tempo/OSC/Websocket: separate, independently-toggled windows (see VDUI.cpp's
-	// buttons) instead of always-visible CollapsingHeaders in the main window above - each keeps
-	// its own state exactly as before, just drawn in its own Begin()/End() when shown
-	if (mShowAudio) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-		ImGui::Begin("Audio", &mShowAudio, ImGuiWindowFlags_NoSavedSettings);
+// Color, Render, Audio, Midi, Tempo, OSC, Websocket: sections of VDUI's tabbed "Panel" (one
+// shown at a time, 2026-10-27), drawn inside its window: no Begin()/End() of their own
+void VDUIAnimation::RunColor() {
+	ImGui::PushItemWidth(200.0f);
+	// foreground color
+	color[0] = getFloatValue(mVDUniforms->ICOLORX);
+	color[1] = getFloatValue(mVDUniforms->ICOLORY);
+	color[2] = getFloatValue(mVDUniforms->ICOLORZ);
+	color[3] = getFloatValue(mVDUniforms->IALPHA);
+	ImGui::ColorEdit4("f", color);
+	for (int i = 0; i < 4; i++)
+	{
+		if (getFloatValue(i + mVDUniforms->ICOLORX) != color[i])
 		{
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
-
-			// audio device list - populated once automatically, then on demand via Refresh,
-			// so the user can pick a device before ever touching "Mic In"
-			if (!mAudioDevicesRequested) {
-				mAudioDevicesRequested = true;
-				mVDSession->refreshAudioDevices();
-			}
-			if (ImGui::Button("Refresh audio devices")) {
-				mVDSession->refreshAudioDevices();
-			}
-
-			// "Default" next to each device: this PC's startup device, saved in audio.json under
-			// this machine's id (other PCs sharing the assets folder keep their own)
-			ImGui::Text("This PC: %s", mVDSession->getMachineName().c_str());
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Machine id %s", mVDSession->getMachineId().c_str());
-			const ImVec4 defaultColor = (ImVec4)ImColor(0, 150, 60, 230);
-
-			std::string preferredInput = mVDSession->getPreferredAudioInputDevice();
-			std::string defaultInput = mVDSession->getDefaultAudioInputDevice();
-			ImGui::TextColored(ImColor(155, 255, 0), "Inputs");
-			for (auto& inputName : mVDSession->getAudioInputDeviceNames()) {
-				
-				bool isDefault = (inputName == defaultInput);
-				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
-				sprintf_s(audioBuf, "%s##defaultaudioinput%s", isDefault ? "D" : "S", inputName.c_str());
-				if (ImGui::SmallButton(audioBuf)) {
-					// clicking the current default clears it
-					mVDSession->setDefaultAudioInputDevice(isDefault ? "" : inputName);
-					if (!isDefault) preferredInput = inputName;
-				}
-				if (isDefault) ImGui::PopStyleColor(1);
-				ImGui::SameLine();
-				bool isSelected = ( inputName == preferredInput );
-				if( isSelected )
-					ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor( 200, 150, 0, 220 ) );
-				sprintf_s( audioBuf, "%s##audioinput", inputName.c_str() );
-				if( ImGui::Button( audioBuf ) ) {
-					mVDSession->selectAudioInputDevice( inputName );
-					preferredInput = inputName;
-				}
-				if( isSelected )
-					ImGui::PopStyleColor( 1 );
-				
-			}
-
-			std::string preferredOutput = mVDSession->getPreferredAudioOutputDevice();
-			std::string defaultOutput = mVDSession->getDefaultAudioOutputDevice();
-			ImGui::TextColored(ImColor(155, 255, 0), "Outputs");
-			for (auto& outputName : mVDSession->getAudioOutputDeviceNames()) {
-				bool isSelected = (outputName == preferredOutput);
-				if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
-				sprintf_s(audioBuf, "%s##audiooutput", outputName.c_str());
-				if (ImGui::Button(audioBuf)) {
-					mVDSession->selectAudioOutputDevice(outputName);
-				}
-				if (isSelected) ImGui::PopStyleColor(1);
-				ImGui::SameLine();
-				bool isDefault = (outputName == defaultOutput);
-				if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
-				sprintf_s(audioBuf, "%s##defaultaudiooutput%s", isDefault ? "D" : "S", outputName.c_str());
-				if (ImGui::SmallButton(audioBuf)) {
-					mVDSession->setDefaultAudioOutputDevice(isDefault ? "" : outputName);
-				}
-				if (isDefault) ImGui::PopStyleColor(1);
-			}
-			ImGui::Separator();
-
-			// mic - disabled while no input device is selected, unless line in is already on
-			// (so it can still be switched back off with no device selected)
-			bool canToggleLineIn = !preferredInput.empty() || mVDSession->getUseLineIn();
-			ImGui::BeginDisabled(!canToggleLineIn);
-			(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Mic In")) {
-				mVDSession->toggleUseLineIn();
-			}
-			ImGui::PopStyleColor(3);
-			ImGui::EndDisabled();
-			hue++;
-			ImGui::SameLine();
-			// monitor
-			(mVDSession->getUseWaveMonitor()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Wave")) {
-				mVDSession->toggleUseWaveMonitor();
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
-			ImGui::SameLine();
-			// wave
-			(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.2f, 0.2f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Buf")) {
-				mVDSession->toggleAudioBuffered();
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
-			ImGui::SameLine();
-
-			// random
-			(mVDSession->getUseRandom()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Rnd")) {
-				mVDSession->toggleUseRandom();
-			}
-			ImGui::PopStyleColor(3);
-			hue++;
-			ImGui::SameLine();
-
-			// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
-			ImGui::TextColored(ImColor(0, 255, 0), "Max %.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
-
-			static int iFreq0 = mVDSession->getFreqIndex(0);
-			sprintf_s(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
-			if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
-			{
-				mVDSession->setFreqIndex(0, iFreq0);
-			}
-			static int iFreq1 = mVDSession->getFreqIndex(1);
-			sprintf_s(buf, "f1 %4.2f##f1", mVDSession->getFreq(1));
-			if (ImGui::SliderInt(buf, &iFreq1, 0, mVDSession->getFFTWindowSize()))
-			{
-				mVDSession->setFreqIndex(1, iFreq1);
-			}
-
-			static int iFreq2 = mVDSession->getFreqIndex(2);
-			sprintf_s(buf, "f2 %4.2f##f2", mVDSession->getFreq(2));
-			if (ImGui::SliderInt(buf, &iFreq2, 0, mVDSession->getFFTWindowSize()))
-			{
-				mVDSession->setFreqIndex(2, iFreq2);
-			}
-
-			static int iFreq3 = mVDSession->getFreqIndex(3);
-			sprintf_s(buf, "f3 %4.2f##f3", mVDSession->getFreq(3));
-			if (ImGui::SliderInt(buf, &iFreq3, 0, mVDSession->getFFTWindowSize()))
-			{
-				mVDSession->setFreqIndex(3, iFreq3);
-			}
-			ImGui::PopItemWidth();
-		} // Audio
-		ImGui::End();
+			setFloatValue(i + mVDUniforms->ICOLORX, color[i]);
+		}
 	}
 
-	if (mShowMidi) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-		ImGui::Begin("Midi", &mShowMidi, ImGuiWindowFlags_NoSavedSettings);
+	// background color
+	backcolor[0] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORX);
+	backcolor[1] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORY);
+	backcolor[2] = getFloatValue(mVDUniforms->IBACKGROUNDCOLORZ);
+	ImGui::ColorEdit3("g", backcolor);
+	for (int i = 0; i < 3; i++)
+	{
+		if (getFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX) != backcolor[i])
 		{
-			sprintf_s(buf, "Enable");
-			if (ImGui::Button(buf)) mVDSession->setupMidi();
-			if (mVDSession->isMidiSetup()) {
-				ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
-				ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
-				if (ImGui::CollapsingHeader("MidiIn", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					ImGui::Columns(2, "datain", true);
-					ImGui::Text("Name"); ImGui::NextColumn();
-					ImGui::Text("Connect"); ImGui::NextColumn();
-					ImGui::Separator();
-					for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
-					{
-						if (isHiddenMidiPort(mVDSession->getMidiInPortName(i))) continue;
-						ImGui::Text("%s", mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+			setFloatValue(i + mVDUniforms->IBACKGROUNDCOLORX, backcolor[i]);
+		}
+	}
+	ImGui::PopItemWidth();
+}
 
+void VDUIAnimation::RunAudio() {
+	int hue = 0;
+	{
+		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * 2);
+
+		// audio device list - populated once automatically, then on demand via Refresh,
+		// so the user can pick a device before ever touching "Mic In"
+		if (!mAudioDevicesRequested) {
+			mAudioDevicesRequested = true;
+			mVDSession->refreshAudioDevices();
+		}
+		if (ImGui::Button("Refresh audio devices")) {
+			mVDSession->refreshAudioDevices();
+		}
+
+		// "Default" next to each device: this PC's startup device, saved in audio.json under
+		// this machine's id (other PCs sharing the assets folder keep their own)
+		ImGui::Text("This PC: %s", mVDSession->getMachineName().c_str());
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Machine id %s", mVDSession->getMachineId().c_str());
+		const ImVec4 defaultColor = (ImVec4)ImColor(0, 150, 60, 230);
+
+		std::string preferredInput = mVDSession->getPreferredAudioInputDevice();
+		std::string defaultInput = mVDSession->getDefaultAudioInputDevice();
+		ImGui::TextColored(ImColor(155, 255, 0), "Inputs");
+		for (auto& inputName : mVDSession->getAudioInputDeviceNames()) {
+			
+			bool isDefault = (inputName == defaultInput);
+			if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
+			sprintf_s(audioBuf, "%s##defaultaudioinput%s", isDefault ? "D" : "S", inputName.c_str());
+			if (ImGui::SmallButton(audioBuf)) {
+				// clicking the current default clears it
+				mVDSession->setDefaultAudioInputDevice(isDefault ? "" : inputName);
+				if (!isDefault) preferredInput = inputName;
+			}
+			if (isDefault) ImGui::PopStyleColor(1);
+			ImGui::SameLine();
+			bool isSelected = ( inputName == preferredInput );
+			if( isSelected )
+				ImGui::PushStyleColor( ImGuiCol_Button, (ImVec4)ImColor( 200, 150, 0, 220 ) );
+			sprintf_s( audioBuf, "%s##audioinput", inputName.c_str() );
+			if( ImGui::Button( audioBuf ) ) {
+				mVDSession->selectAudioInputDevice( inputName );
+				preferredInput = inputName;
+			}
+			if( isSelected )
+				ImGui::PopStyleColor( 1 );
+			
+		}
+
+		std::string preferredOutput = mVDSession->getPreferredAudioOutputDevice();
+		std::string defaultOutput = mVDSession->getDefaultAudioOutputDevice();
+		ImGui::TextColored(ImColor(155, 255, 0), "Outputs");
+		for (auto& outputName : mVDSession->getAudioOutputDeviceNames()) {
+			bool isSelected = (outputName == preferredOutput);
+			if (isSelected) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(200, 150, 0, 220));
+			sprintf_s(audioBuf, "%s##audiooutput", outputName.c_str());
+			if (ImGui::Button(audioBuf)) {
+				mVDSession->selectAudioOutputDevice(outputName);
+			}
+			if (isSelected) ImGui::PopStyleColor(1);
+			ImGui::SameLine();
+			bool isDefault = (outputName == defaultOutput);
+			if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, defaultColor);
+			sprintf_s(audioBuf, "%s##defaultaudiooutput%s", isDefault ? "D" : "S", outputName.c_str());
+			if (ImGui::SmallButton(audioBuf)) {
+				mVDSession->setDefaultAudioOutputDevice(isDefault ? "" : outputName);
+			}
+			if (isDefault) ImGui::PopStyleColor(1);
+		}
+		ImGui::Separator();
+
+		// mic - disabled while no input device is selected, unless line in is already on
+		// (so it can still be switched back off with no device selected)
+		bool canToggleLineIn = !preferredInput.empty() || mVDSession->getUseLineIn();
+		ImGui::BeginDisabled(!canToggleLineIn);
+		(mVDSession->getUseLineIn()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(4.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(4.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(4.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Mic In")) {
+			mVDSession->toggleUseLineIn();
+		}
+		ImGui::PopStyleColor(3);
+		ImGui::EndDisabled();
+		hue++;
+		ImGui::SameLine();
+		// monitor
+		(mVDSession->getUseWaveMonitor()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Wave")) {
+			mVDSession->toggleUseWaveMonitor();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+		// wave
+		(mVDSession->isAudioBuffered()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.2f, 0.2f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Buf")) {
+			mVDSession->toggleAudioBuffered();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		// random
+		(mVDSession->getUseRandom()) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(3.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.3f, 0.3f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(3.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(3.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Rnd")) {
+			mVDSession->toggleUseRandom();
+		}
+		ImGui::PopStyleColor(3);
+		hue++;
+		ImGui::SameLine();
+
+		// TODO 20200221 ImGui::Text("Position %d", mVDSession->getPosition(0));
+		ImGui::TextColored(ImColor(0, 255, 0), "Max %.1f", mVDSession->getUniformValue(mVDUniforms->IMAXVOLUME));
+
+		static int iFreq0 = mVDSession->getFreqIndex(0);
+		sprintf_s(buf, "f0 %4.2f##f0", mVDSession->getFreq(0));
+		if (ImGui::SliderInt(buf, &iFreq0, 0, mVDSession->getFFTWindowSize()))
+		{
+			mVDSession->setFreqIndex(0, iFreq0);
+		}
+		static int iFreq1 = mVDSession->getFreqIndex(1);
+		sprintf_s(buf, "f1 %4.2f##f1", mVDSession->getFreq(1));
+		if (ImGui::SliderInt(buf, &iFreq1, 0, mVDSession->getFFTWindowSize()))
+		{
+			mVDSession->setFreqIndex(1, iFreq1);
+		}
+
+		static int iFreq2 = mVDSession->getFreqIndex(2);
+		sprintf_s(buf, "f2 %4.2f##f2", mVDSession->getFreq(2));
+		if (ImGui::SliderInt(buf, &iFreq2, 0, mVDSession->getFFTWindowSize()))
+		{
+			mVDSession->setFreqIndex(2, iFreq2);
+		}
+
+		static int iFreq3 = mVDSession->getFreqIndex(3);
+		sprintf_s(buf, "f3 %4.2f##f3", mVDSession->getFreq(3));
+		if (ImGui::SliderInt(buf, &iFreq3, 0, mVDSession->getFFTWindowSize()))
+		{
+			mVDSession->setFreqIndex(3, iFreq3);
+		}
+		ImGui::PopItemWidth();
+	} // Audio
+}
+
+void VDUIAnimation::RunMidi() {
+	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
+	{
+		sprintf_s(buf, "Enable");
+		if (ImGui::Button(buf)) mVDSession->setupMidi();
+		if (mVDSession->isMidiSetup()) {
+			ImGui::TextColored(ImColor(0, 255, 0), "%s", "Midi enabled");
+			ImGui::Text(">%s", mVDSession->getMidiMsg().c_str());
+			if (ImGui::CollapsingHeader("MidiIn", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::Columns(2, "datain", true);
+				ImGui::Text("Name"); ImGui::NextColumn();
+				ImGui::Text("Connect"); ImGui::NextColumn();
+				ImGui::Separator();
+				for (int i = 0; i < mVDSession->getMidiInPortsCount(); i++)
+				{
+					if (isHiddenMidiPort(mVDSession->getMidiInPortName(i))) continue;
+					ImGui::Text("%s", mVDSession->getMidiInPortName(i).c_str()); ImGui::NextColumn();
+
+					if (mVDSession->isMidiInConnected(i))
+					{
+						sprintf_s(buf, "Disconnect %d", i);
+					}
+					else
+					{
+						sprintf_s(buf, "Connect %d", i);
+					}
+
+					if (ImGui::Button(buf))
+					{
 						if (mVDSession->isMidiInConnected(i))
 						{
-							sprintf_s(buf, "Disconnect %d", i);
+							mVDSession->closeMidiInPort(i);
 						}
 						else
 						{
-							sprintf_s(buf, "Connect %d", i);
+							mVDSession->openMidiInPort(i);
 						}
-
-						if (ImGui::Button(buf))
-						{
-							if (mVDSession->isMidiInConnected(i))
-							{
-								mVDSession->closeMidiInPort(i);
-							}
-							else
-							{
-								mVDSession->openMidiInPort(i);
-							}
-						}
-						ImGui::NextColumn();
-						ImGui::Separator();
 					}
-					ImGui::Columns(1);
-				}
-				// Midi out
-				if (ImGui::CollapsingHeader("MidiOut", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					ImGui::Columns(2, "dataout", true);
-					ImGui::Text("Name"); ImGui::NextColumn();
-					ImGui::Text("Connect"); ImGui::NextColumn();
+					ImGui::NextColumn();
 					ImGui::Separator();
-					for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
-					{
-						if (isHiddenMidiPort(mVDSession->getMidiOutPortName(i))) continue;
-						ImGui::Text("%s", mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
+				}
+				ImGui::Columns(1);
+			}
+			// Midi out
+			if (ImGui::CollapsingHeader("MidiOut", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				ImGui::Columns(2, "dataout", true);
+				ImGui::Text("Name"); ImGui::NextColumn();
+				ImGui::Text("Connect"); ImGui::NextColumn();
+				ImGui::Separator();
+				for (int i = 0; i < mVDSession->getMidiOutPortsCount(); i++)
+				{
+					if (isHiddenMidiPort(mVDSession->getMidiOutPortName(i))) continue;
+					ImGui::Text("%s", mVDSession->getMidiOutPortName(i).c_str()); ImGui::NextColumn();
 
+					if (mVDSession->isMidiOutConnected(i))
+					{
+						sprintf_s(buf, "Disconnect  %d", i);
+					}
+					else
+					{
+						sprintf_s(buf, "Connect  %d", i);
+					}
+
+					if (ImGui::Button(buf))
+					{
 						if (mVDSession->isMidiOutConnected(i))
 						{
-							sprintf_s(buf, "Disconnect  %d", i);
+							mVDSession->closeMidiOutPort(i);
 						}
 						else
 						{
-							sprintf_s(buf, "Connect  %d", i);
+							mVDSession->openMidiOutPort(i);
 						}
-
-						if (ImGui::Button(buf))
-						{
-							if (mVDSession->isMidiOutConnected(i))
-							{
-								mVDSession->closeMidiOutPort(i);
-							}
-							else
-							{
-								mVDSession->openMidiOutPort(i);
-							}
-						}
-						ImGui::NextColumn();
-						ImGui::Separator();
 					}
-					ImGui::Columns(1);
+					ImGui::NextColumn();
+					ImGui::Separator();
 				}
+				ImGui::Columns(1);
+			}
 
-				// midi learn - moved here from VDUI.cpp (used to sit next to the "Enable Midi"
-				// button there) since it belongs with the rest of the Midi panel, not the
-				// top-level toggle bar. Binds an arbitrary MIDI CC to any uniform index (1-90)
-				// instead of relying on the fixed "CC number == uniform index" convention
-				// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
-				if (ImGui::CollapsingHeader("Midi Learn", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					// bindings shared with TSWebsocketServer (assets/actions/*.json, its ids/actions)
-					bool learnMode = mVDSession->isMidiLearnMode();
-					if (ImGui::Checkbox("Learn mode##midilearnenabled", &learnMode)) {
-						mVDSession->setMidiLearnMode(learnMode);
-						if (!learnMode) mVDSession->armMidiLearn(-1);
-					}
-					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Outlines every uniform slider: click one, then move a control\n(note: on=1/off=0, CC/aftertouch: value)");
+			// midi learn - moved here from VDUI.cpp (used to sit next to the "Enable Midi"
+			// button there) since it belongs with the rest of the Midi panel, not the
+			// top-level toggle bar. Binds an arbitrary MIDI CC to any uniform index (1-90)
+			// instead of relying on the fixed "CC number == uniform index" convention
+			// VDMidi::midiListener() otherwise assumes - see VDMidi.h's setMidiLearnMode() etc.
+			if (ImGui::CollapsingHeader("Midi Learn", ImGuiTreeNodeFlags_DefaultOpen))
+			{
+				// bindings shared with TSWebsocketServer (assets/actions/*.json, its ids/actions)
+				bool learnMode = mVDSession->isMidiLearnMode();
+				if (ImGui::Checkbox("Learn mode##midilearnenabled", &learnMode)) {
+					mVDSession->setMidiLearnMode(learnMode);
+					if (!learnMode) mVDSession->armMidiLearn(-1);
+				}
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Outlines every uniform slider: click one, then move a control\n(note: on=1/off=0, CC/aftertouch: value)");
+				ImGui::SameLine();
+				if (ImGui::Button("Reload##midibindingsreload")) mVDSession->reloadMidiBindings();
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("Re-read assets/actions and assets/hardware");
+				if (mVDSession->isWSClientConnected()) {
+					ImGui::TextColored(ImColor(0, 200, 255), "Connected to TSWebsocketServer: it handles MIDI and saves bindings");
+				}
+				else {
+					ImGui::TextColored(ImColor(150, 150, 150), "Standalone: this app's MIDI ports, bindings saved to assets/actions");
+				}
+				if (learnMode) {
+					// a uniform without a slider: by index
+					ImGui::PushItemWidth(50 * uiScale);
+					ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
+					ImGui::PopItemWidth();
+					if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
+					if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
 					ImGui::SameLine();
-					if (ImGui::Button("Reload##midibindingsreload")) mVDSession->reloadMidiBindings();
-					if (ImGui::IsItemHovered()) ImGui::SetTooltip("Re-read assets/actions and assets/hardware");
-					if (mVDSession->isWSClientConnected()) {
-						ImGui::TextColored(ImColor(0, 200, 255), "Connected to TSWebsocketServer: it handles MIDI and saves bindings");
+					if (ImGui::Button("Arm##midilearnarm")) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
+					ImGui::SameLine();
+					int target = mVDSession->getMidiLearnTarget();
+					if (target >= 0) {
+						ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind %d %s", target, mVDUniforms->getUniformName(target).c_str());
 					}
 					else {
-						ImGui::TextColored(ImColor(150, 150, 150), "Standalone: this app's MIDI ports, bindings saved to assets/actions");
+						ImGui::TextColored(ImColor(150, 150, 150), "Click a slider, or Arm %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
 					}
-					if (learnMode) {
-						// a uniform without a slider: by index
-						ImGui::PushItemWidth(50 * uiScale);
-						ImGui::InputInt("##midilearntarget", &mMidiLearnTargetUniform);
-						ImGui::PopItemWidth();
-						if (mMidiLearnTargetUniform < 1) mMidiLearnTargetUniform = 1;
-						if (mMidiLearnTargetUniform > 90) mMidiLearnTargetUniform = 90;
+					std::string status = mVDSession->getMidiLearnStatus();
+					if (!status.empty()) ImGui::Text("Last: %s", status.c_str());
+				}
+				// uniform bindings (from every device), each removable
+				auto bindings = mVDSession->getMidiUniformBindings();
+				if (!bindings.empty() && ImGui::TreeNode("##midibindings", "Uniform bindings (%d)", (int)bindings.size())) {
+					for (size_t b = 0; b < bindings.size(); b++) {
+						sprintf_s(buf, "x##midibindrm%d", (int)b);
+						if (ImGui::SmallButton(buf)) mVDSession->removeMidiBinding(bindings[b].id);
 						ImGui::SameLine();
-						if (ImGui::Button("Arm##midilearnarm")) mVDSession->armMidiLearn(mMidiLearnTargetUniform);
-						ImGui::SameLine();
-						int target = mVDSession->getMidiLearnTarget();
-						if (target >= 0) {
-							ImGui::TextColored(ImColor(255, 200, 0), "Move a control to bind %d %s", target, mVDUniforms->getUniformName(target).c_str());
-						}
-						else {
-							ImGui::TextColored(ImColor(150, 150, 150), "Click a slider, or Arm %d %s", mMidiLearnTargetUniform, mVDUniforms->getUniformName(mMidiLearnTargetUniform).c_str());
-						}
-						std::string status = mVDSession->getMidiLearnStatus();
-						if (!status.empty()) ImGui::Text("Last: %s", status.c_str());
+						ImGui::Text("%s -> %s", bindings[b].id.c_str(), bindings[b].action.c_str());
 					}
-					// uniform bindings (from every device), each removable
-					auto bindings = mVDSession->getMidiUniformBindings();
-					if (!bindings.empty() && ImGui::TreeNode("##midibindings", "Uniform bindings (%d)", (int)bindings.size())) {
-						for (size_t b = 0; b < bindings.size(); b++) {
-							sprintf_s(buf, "x##midibindrm%d", (int)b);
-							if (ImGui::SmallButton(buf)) mVDSession->removeMidiBinding(bindings[b].id);
+					ImGui::TreePop();
+				}
+				// legacy midilearn.json (CC number -> uniform, any device): still applied, not written any more
+				int mappingsCount = mVDSession->getMidiLearnMappingsCount();
+				if (mappingsCount > 0 && ImGui::TreeNode("##midilegacy", "Legacy CC bindings (%d)", mappingsCount)) {
+					int cc = 0, uniformIndex = 0;
+					for (int m = 0; m < mappingsCount; m++) {
+						if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
+							sprintf_s(buf, "x##midilearnrm%d", cc);
+							if (ImGui::SmallButton(buf)) mVDSession->removeMidiLearnMapping(cc);
 							ImGui::SameLine();
-							ImGui::Text("%s -> %s", bindings[b].id.c_str(), bindings[b].action.c_str());
+							ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
 						}
-						ImGui::TreePop();
 					}
-					// legacy midilearn.json (CC number -> uniform, any device): still applied, not written any more
-					int mappingsCount = mVDSession->getMidiLearnMappingsCount();
-					if (mappingsCount > 0 && ImGui::TreeNode("##midilegacy", "Legacy CC bindings (%d)", mappingsCount)) {
-						int cc = 0, uniformIndex = 0;
-						for (int m = 0; m < mappingsCount; m++) {
-							if (mVDSession->getMidiLearnMappingAt(m, cc, uniformIndex)) {
-								sprintf_s(buf, "x##midilearnrm%d", cc);
-								if (ImGui::SmallButton(buf)) mVDSession->removeMidiLearnMapping(cc);
-								ImGui::SameLine();
-								ImGui::Text("CC %d -> %d %s", cc, uniformIndex, mVDUniforms->getUniformName(uniformIndex).c_str());
-							}
-						}
-						if (ImGui::Button("Clear all##midilearnclear")) mVDSession->clearMidiLearnMap();
-						ImGui::TreePop();
-					}
+					if (ImGui::Button("Clear all##midilearnclear")) mVDSession->clearMidiLearnMap();
+					ImGui::TreePop();
 				}
 			}
 		}
-		ImGui::End();
 	}
+}
 
-	if (mShowTempo) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-		ImGui::Begin("Tempo", &mShowTempo, ImGuiWindowFlags_NoSavedSettings);
-		{
-			// this block's own PopItemWidth() at the end used to balance the main "Animation"
-			// window's top-level PushItemWidth() (this section was inside that same window) -
-			// now that Tempo is its own separate window, that Pop has nothing to match here,
-			// which crashed with "Calling PopItemWidth() too many times!" the moment this window
-			// was ever shown. Push here instead, so the pair is self-contained again.
-			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
-			//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
-			//ImGui::SameLine();
-			//ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
-
-			if (ImGui::Button("0##istartx")) {
-				setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
-				setFloatValue(mVDUniforms->ISTART, mVDSession->getUniformValue(mVDUniforms->ITIME));
-				setFloatValue(mVDUniforms->IBARSTART, mVDSession->getUniformValue(mVDUniforms->IBAR));
-			}
-			ImGui::SameLine();
-			ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
-			// Time factor
-			localValues[mVDUniforms->ITIMEFACTOR] = mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR);
-			sprintf_s(buf, "x##%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
-			if (ImGui::Button(buf)) {
-				mVDSession->setUniformValue(mVDUniforms->ITIMEFACTOR, mVDSession->getDefaultUniformValue(mVDUniforms->ITIMEFACTOR));
-			}
-			ImGui::SameLine();
-			sprintf_s(buf, "%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
-			if (ImGui::SliderFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 10.0f))
-			{
-				setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
-			}
-			ImGui::SameLine();
-
-			sprintf_s(buf, "%d", mVDUniforms->ITIMEFACTOR);
-			if (ImGui::InputFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 3.0f))
-			{
-				setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
-			}
-			// ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-			/* 20211018 replaced by iSpeed
-			if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
-			ImGui::SameLine();
-			ImGui::SliderFloat("speed x", &mVDSettings->iSpeedMultiplier, 0.01f, 1.0f, "%.4f");//, 2.01f
-
-			static int tf = 5;
-			if (ImGui::Button("x##tfx")) { tf = 5; mVDSession->setTimeFactor(5); }
-			ImGui::SameLine();
-			if (ImGui::SliderInt("time x", &tf, 0, 9)) mVDSession->setTimeFactor(tf);
-
-			ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
-
-			// iTimeFactor KO 0.0 on 1st touch
-			ctrl = mVDUniforms->ITIMEFACTOR;
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
-
-			//ImGui::Text("Elapsed %.2f", mVDSession->getUniformValue(mVDUniforms->IELAPSED));
-			// duration			
-			//ImGui::SameLine();
-			//ImGui::Text("duration", &mVDSettings->iBarDuration);
-			//ImGui::SameLine();
-			//ImGui::Text("phase %.2f ", mVDSession->getUniformValue(mVDUniforms->IPHASE));
-
-
-			static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
-			
-			if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
-				setFloatValue(mVDUniforms->IBPM, tempo);
-			}
-			
-			if (ImGui::Button("Tap tempo")) { mVDSession->tapTempo(); }
-
-
-			if (mVDSession->getUseTimeWithTempo()) {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 1.0f, 0.5f));
-			}
-			else {
-				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.1f, 0.1f));
-			}
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.8f, 0.8f));
-			if (ImGui::Button("Time tempo")) { mVDSession->toggleUseTimeWithTempo(); }
-			ImGui::PopStyleColor(3);
-
-
-			//ImGui::SameLine();
-			ImGui::PopItemWidth();
-
-		}
-		ImGui::End();
-	}
-
-	if (mShowOSC) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-		ImGui::Begin("OSC", &mShowOSC, ImGuiWindowFlags_NoSavedSettings);
-		{
-			static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
-			// validate in loading, not here 
-			std::copy(mVDSettings->mOSCDestinationHost.begin(), (mVDSettings->mOSCDestinationHost.size() >= 128 ? mVDSettings->mOSCDestinationHost.begin() + 128 : mVDSettings->mOSCDestinationHost.end()), host);
-			static int senderPort = mVDSettings->mOSCDestinationPort;
-			ImGui::InputText("destination host", host, IM_ARRAYSIZE(host));
-			if (ImGui::InputInt("destination port", &senderPort)) mVDSettings->mOSCDestinationPort = senderPort;
-			if (mVDSession->isOscSenderConnected()) {
-				ImGui::Text("Osc sender connected %d", mVDSettings->mOSCDestinationPort);
-			}
-			else {
-				if (ImGui::Button("Sender connect"))
-				{
-					mVDSession->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort);
-				}
-			}
-
-			static int receiverPort = mVDSession->getOSCReceiverPort();
-			if (ImGui::InputInt("receiver port", &receiverPort)) mVDSession->setOSCReceiverPort(receiverPort);
-			if (mVDSession->isOscReceiverConnected()) {
-				ImGui::Text("Osc receiver connected %d", mVDSession->getOSCReceiverPort());
-				ImGui::Text(">%s", mVDSession->getOSCMsg().c_str());
-			}
-			else {
-				if (ImGui::Button("Receiver connect"))
-				{
-					mVDSession->setupOSCReceiver();
-				}
-			}
-
-			/* TODO if useful ImGui::Text("Sending to 2nd host %s", mVDSettings->mOSCDestinationHost2.c_str());
-			ImGui::SameLine();
-			ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
-		}
-		ImGui::End();
-	}
-
-	// Websocket TODO CHECK , "8088"
-	if (mShowWebsocket) {
-		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-		ImGui::Begin("Websocket", &mShowWebsocket, ImGuiWindowFlags_NoSavedSettings);
-		{
-			//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
-
-			static int clientPort = mVDSession->getWSClientPort();
-			if (ImGui::InputInt("client port", &clientPort)) mVDSession->setWSClientPort(clientPort);
-
-			if (ImGui::Button("Connect"))
-			{
-				mVDSession->wsConnect();//  setupWSClient();
-			}
-			ImGui::SameLine();
-			if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
-			ImGui::Text(">%s", mVDSession->getWSMsg().c_str());
-		}
-		ImGui::End();
-	}
-
-	// Render stays part of the main, always-visible "Animation" window (not one of the panels
-	// extracted above) - reopening it here by the same title continues that same window rather
-	// than creating a second one, exactly as if this were still the same Begin() from the top
-	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+void VDUIAnimation::RunTempo() {
+	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	{
-		// Render
-		if (ImGui::CollapsingHeader("Render", false))
+		// this block's own PopItemWidth() at the end used to balance the main "Animation"
+		// window's top-level PushItemWidth() (this section was inside that same window) -
+		// now that Tempo is its own separate window, that Pop has nothing to match here,
+		// which crashed with "Calling PopItemWidth() too many times!" the moment this window
+		// was ever shown. Push here instead, so the pair is self-contained again.
+		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
+		//if (ImGui::Button("x##startx")) { mVDSettings->iStart = 0.0f; }
+		//ImGui::SameLine();
+		//ImGui::SliderFloat("start", &mVDSettings->iStart, 0.01f, 1.0f, "%.4f");
+
+		if (ImGui::Button("0##istartx")) {
+			setFloatValue(mVDUniforms->ITIME, (float)getElapsedSeconds());
+			setFloatValue(mVDUniforms->ISTART, mVDSession->getUniformValue(mVDUniforms->ITIME));
+			setFloatValue(mVDUniforms->IBARSTART, mVDSession->getUniformValue(mVDUniforms->IBAR));
+		}
+		ImGui::SameLine();
+		ImGui::TextColored(ImColor(0, 255, 0), "Start %.1f", mVDSession->getUniformValue(mVDUniforms->ISTART));
+		// Time factor
+		localValues[mVDUniforms->ITIMEFACTOR] = mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR);
+		sprintf_s(buf, "x##%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
+		if (ImGui::Button(buf)) {
+			mVDSession->setUniformValue(mVDUniforms->ITIMEFACTOR, mVDSession->getDefaultUniformValue(mVDUniforms->ITIMEFACTOR));
+		}
+		ImGui::SameLine();
+		sprintf_s(buf, "%s", mVDSession->getUniformName(mVDUniforms->ITIMEFACTOR).c_str());
+		if (ImGui::SliderFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 10.0f))
+		{
+			setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
+		}
+		ImGui::SameLine();
+
+		sprintf_s(buf, "%d", mVDUniforms->ITIMEFACTOR);
+		if (ImGui::InputFloat(buf, &localValues[mVDUniforms->ITIMEFACTOR], 0.00f, 3.0f))
+		{
+			setFloatValue(mVDUniforms->ITIMEFACTOR, localValues[mVDUniforms->ITIMEFACTOR]);
+		}
+		// ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
+		/* 20211018 replaced by iSpeed
+		if (ImGui::Button("x##spdx")) { mVDSettings->iSpeedMultiplier = 1.0f; }
+		ImGui::SameLine();
+		ImGui::SliderFloat("speed x", &mVDSettings->iSpeedMultiplier, 0.01f, 1.0f, "%.4f");//, 2.01f
+
+		static int tf = 5;
+		if (ImGui::Button("x##tfx")) { tf = 5; mVDSession->setTimeFactor(5); }
+		ImGui::SameLine();
+		if (ImGui::SliderInt("time x", &tf, 0, 9)) mVDSession->setTimeFactor(tf);
+
+		ImGui::SliderFloat("iTimeFactor", &mVDSettings->iTimeFactor, 0.01f, 1.0f, "%.4f");
+
+		// iTimeFactor KO 0.0 on 1st touch
+		ctrl = mVDUniforms->ITIMEFACTOR;
+		localValues[ctrl] = mVDSession->getUniformValue(ctrl);
+		if (learnable(mVDSession, ImGui::SliderFloat("timeFactor", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
+		{
+			setFloatValue(ctrl, localValues[ctrl]);
+		}*/
+
+		//ImGui::Text("Elapsed %.2f", mVDSession->getUniformValue(mVDUniforms->IELAPSED));
+		// duration			
+		//ImGui::SameLine();
+		//ImGui::Text("duration", &mVDSettings->iBarDuration);
+		//ImGui::SameLine();
+		//ImGui::Text("phase %.2f ", mVDSession->getUniformValue(mVDUniforms->IPHASE));
+
+
+		static float tempo = mVDSession->getUniformValue(mVDUniforms->IBPM);
+		
+		if (ImGui::SliderFloat("TempoS", &tempo, 0.01f, 200.0f, "%.01f")) {
+			setFloatValue(mVDUniforms->IBPM, tempo);
+		}
+		
+		if (ImGui::Button("Tap tempo")) { mVDSession->tapTempo(); }
+
+
+		if (mVDSession->getUseTimeWithTempo()) {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 1.0f, 0.5f));
+		}
+		else {
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0.0f, 0.1f, 0.1f));
+		}
+		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.0f, 0.7f, 0.7f));
+		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0.0f, 0.8f, 0.8f));
+		if (ImGui::Button("Time tempo")) { mVDSession->toggleUseTimeWithTempo(); }
+		ImGui::PopStyleColor(3);
+
+
+		//ImGui::SameLine();
+		ImGui::PopItemWidth();
+
+	}
+}
+
+void VDUIAnimation::RunOSC() {
+	{
+		static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
+		// validate in loading, not here 
+		std::copy(mVDSettings->mOSCDestinationHost.begin(), (mVDSettings->mOSCDestinationHost.size() >= 128 ? mVDSettings->mOSCDestinationHost.begin() + 128 : mVDSettings->mOSCDestinationHost.end()), host);
+		static int senderPort = mVDSettings->mOSCDestinationPort;
+		ImGui::InputText("destination host", host, IM_ARRAYSIZE(host));
+		if (ImGui::InputInt("destination port", &senderPort)) mVDSettings->mOSCDestinationPort = senderPort;
+		if (mVDSession->isOscSenderConnected()) {
+			ImGui::Text("Osc sender connected %d", mVDSettings->mOSCDestinationPort);
+		}
+		else {
+			if (ImGui::Button("Sender connect"))
+			{
+				mVDSession->addOSCObserver(mVDSettings->mOSCDestinationHost, mVDSettings->mOSCDestinationPort);
+			}
+		}
+
+		static int receiverPort = mVDSession->getOSCReceiverPort();
+		if (ImGui::InputInt("receiver port", &receiverPort)) mVDSession->setOSCReceiverPort(receiverPort);
+		if (mVDSession->isOscReceiverConnected()) {
+			ImGui::Text("Osc receiver connected %d", mVDSession->getOSCReceiverPort());
+			ImGui::Text(">%s", mVDSession->getOSCMsg().c_str());
+		}
+		else {
+			if (ImGui::Button("Receiver connect"))
+			{
+				mVDSession->setupOSCReceiver();
+			}
+		}
+
+		/* TODO if useful ImGui::Text("Sending to 2nd host %s", mVDSettings->mOSCDestinationHost2.c_str());
+		ImGui::SameLine();
+		ImGui::Text(" on port %d", mVDSettings->mOSCDestinationPort2);*/
+	}
+}
+
+void VDUIAnimation::RunWebsocket() {
+	{
+		//static char host[128] = "127.0.0.1"; // #define IP_LOCALHOST 127.0.0.1
+
+		static int clientPort = mVDSession->getWSClientPort();
+		if (ImGui::InputInt("client port", &clientPort)) mVDSession->setWSClientPort(clientPort);
+
+		if (ImGui::Button("Connect"))
+		{
+			mVDSession->wsConnect();//  setupWSClient();
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
+		ImGui::Text(">%s", mVDSession->getWSMsg().c_str());
+	}
+}
+
+void VDUIAnimation::RunRender() {
+	int hue = 0;
+	{
 		{
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
@@ -1053,5 +1033,4 @@ void VDUIAnimation::Run(const char* title) {
 		}
 
 	}
-	ImGui::End();
 }

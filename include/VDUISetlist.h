@@ -44,11 +44,9 @@ namespace videodromm
 		{
 			return std::shared_ptr<VDUISetlist>(new VDUISetlist(aVDUniforms, aVDSession));
 		}
-		void Run(const char* title) {
+		// a section of VDUI's tabbed "Panel" (2026-10-27), drawn inside its window
+		void RunContent() {
 			const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-			ImGui::SetNextWindowSize(ImVec2(320.0f * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-			ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol2() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
-			ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 			{
 				if (!mScanned) scan();
 				const std::string loaded = mVDSession->getLoadedFolder();
@@ -102,7 +100,6 @@ namespace videodromm
 					ImGui::TextColored(ImColor(150, 150, 150), "No setlist: add assets/<name>.json with a \"tracks\" array");
 				}
 			}
-			ImGui::End();
 		}
 	private:
 		struct Track {

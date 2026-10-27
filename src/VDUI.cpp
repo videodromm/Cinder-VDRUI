@@ -49,8 +49,6 @@ VDUI::VDUI(VDSettingsRef aVDSettings, VDSessionFacadeRef aVDSession, VDUniformsR
 	mShowFbos = true;
 	mShowTextures = true;
 	mShowBlend = false;
-	mShowFolders = true;
-	mShowSetlist = true;
 }
 
 void VDUI::registerPoolSources() {
@@ -168,65 +166,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	}
 	*/
 #pragma endregion menu
-	// right panel
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(300.0f * uiScale, mVDParams->getUILargeH() * 2.2f * uiScale), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
-
-	ImGui::Begin(" Messages", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
-	{
-		if (ImGui::Button("Clear")) {
-			mVDSettings->setMsg("");
-			mVDSettings->setErrorMsg("");
-			// TODO mVDSettings->mMidiMsg = ""; mVDSession->setmi("");
-
-			mVDSettings->mSocketIOMsg = "";
-			mVDSession->setOSCMsg("");
-			//mVDSettings->mShaderMsg = "";
-		}
-
-		ImGui::TextColored(ImColor(200, 200, 0), "Msg %s", mVDSettings->getMsg().c_str());
-		int ec = mVDSession->getErrorCode();
-		if (ec > 0) {
-			switch (ec)
-			{
-			case 1:
-				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform max=0");
-				break;
-			case 2:
-				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform value out of bounds");
-				break;
-			case 3:
-				ImGui::TextColored(ImColor(255, 0, 0), "Uniform value not set");
-				break;
-			default:
-				ImGui::TextColored(ImColor(0, 255, 0), "Code %d", ec);
-				break;
-			}
-		}
-		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
-		ImGui::TextWrapped("Midi %s", mVDSession->getMidiMsg().c_str());
-
-		// websockets
-		// ImGui::TextWrapped("WS");
-		if (ImGui::Button("WS"))
-		{
-			mVDSession->wsConnect();
-		}
-		ImGui::SameLine();
-		if (mVDSession->isWSClientConnected()) 
-		{
-			if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
-		}
-		
-		ImGui::SameLine();		
-		ImGui::Text("%s", mVDSession->getWSMsg().c_str());
-
-		// OSC
-		ImGui::TextWrapped("OSC %s", mVDSession->getOSCMsg().c_str());
-		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
-	}
-	ImGui::End();
 	// Center panel
 	ImGui::SetNextWindowSize(ImVec2(748.0f * uiScale, mVDParams->getUILargePreviewH() * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
@@ -367,15 +307,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		hue++;
 		ImGui::SameLine();
 
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Code")) {
-			mToggleShowCodeView();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
 		
 #if defined( CINDER_MSW )
 		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
@@ -401,115 +332,9 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #endif
 
 
-		// projector output window: green while it's open
-		if (mOutputWindow->isOpen()) {
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(0, 140, 0, 255));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor(0, 180, 0, 255));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor(0, 210, 0, 255));
-		}
-		else {
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		}
-		if (ImGui::Button("Output")) {
-			mShowOutput = !mShowOutput;
-		}
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Projector output window (2nd display or several projectors)");
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Folders")) {
-			mToggleShowFolders();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Setlist")) {
-			mToggleShowSetlist();
-		}
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("The show's setlist (assets/<name>.json): click a track to load its folder");
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		// red while recording, orange while armed
-		{
-			const VDVideoExport::State exportState = mVideoExport->getState();
-			const float exportHue = exportState == VDVideoExport::RECORDING ? 0.0f : exportState == VDVideoExport::ARMED ? 0.08f : hue / 16.0f;
-			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(exportHue, 1.0f, exportState == VDVideoExport::RECORDING ? 0.8f : 0.5f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(exportHue, 0.7f, 0.7f));
-			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(exportHue, 0.8f, 0.8f));
-			if (ImGui::Button(exportState == VDVideoExport::RECORDING ? "REC" : "Export##export")) {
-				mShowExport = !mShowExport;
-				mFocusExport = mShowExport;
-			}
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Export the output window as an mp4 (repos/export), from Play to the song's end");
-			ImGui::PopStyleColor(3);
-		}
-		hue++;
-		ImGui::SameLine();
-
-		// Audio/Midi/Tempo/OSC/Websocket used to be always-visible CollapsingHeaders inside the
-		// "Animation" window, making it very tall - each is now its own toggleable window (see
-		// VDUIAnimation.cpp), shown/hidden from here the same way Warps/Fbos/Tex/Blend/Folders
-		// already are
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Audio")) {
-			mUIAnimation->toggleShowAudio();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Midi##toggle")) {
-			mUIAnimation->toggleShowMidi();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Tempo")) {
-			mUIAnimation->toggleShowTempo();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("OSC##toggle")) {
-			mUIAnimation->toggleShowOSC();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
-		ImGui::SameLine();
-
-		ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-		ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-		if (ImGui::Button("Websocket##toggle")) {
-			mUIAnimation->toggleShowWebsocket();
-		}
-		ImGui::PopStyleColor(3);
-		hue++;
+		// Audio, Midi, Tempo, OSC, Websocket, Output, Folders, Setlist, Code and Export are sections
+		// of the "Panel" window now (runPanel), not buttons here
+		ImGui::NewLine();
 		
 		/*
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.9f, 0.7f, 0.7f));
@@ -826,44 +651,17 @@ void VDUI::Run(const char* title, unsigned int fps) {
 	if (mShowTextures) {
 		mUITextures->Run("Textures");
 	}
-	// Folders
-	if (mShowFolders) {
-		mUIFolders->Run("Folders");
-	}
-	// Setlist
-	if (mShowSetlist) {
-		mUISetlist->Run("Setlist");
-	}
-	// video export: recording runs whether its panel is shown or not
-	{
-		ci::gl::TextureRef exportTexture = mOutputWindow->getExportTexture();
-		mVideoExport->update(exportTexture);
-		if (mShowExport) {
-			// it used to open at ImGui's default spot (top left), behind or over the big panels, so a
-			// click on Export sometimes seemed to do nothing: placed under the toolbar, and brought to
-			// the front whenever the button opens it
-			ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol2() * uiScale, mVDParams->getUIYPosRow2() * uiScale), ImGuiCond_Appearing);
-			if (mFocusExport) {
-				ImGui::SetNextWindowFocus();
-				mFocusExport = false;
-			}
-			mVideoExport->Run("Export###exportpanel", &mShowExport, exportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view");
-		}
-	}
+	// video export: recording runs whether its section is shown or not
+	ci::gl::TextureRef exportTexture = mOutputWindow->getExportTexture();
+	mVideoExport->update(exportTexture);
+	// the sections, one at a time, where Messages was
+	runPanel(exportTexture);
 #if defined( CINDER_MSW )
 	// HtmlPage (WebView2)
 	if (mShowHtmlPage) {
 		mUIHtmlPage->Run("WebApp");
 	}
 #endif
-	// live code view
-	if (mShowCodeView) {
-		runCodeView();
-	}
-	// projector output window
-	if (mShowOutput) {
-		runOutput();
-	}
 	// an image/video drop no fbo pane claimed (Fbos panel hidden, or dropped elsewhere):
 	// image -> shared texture pool, video -> new fbo, paused
 	mVDSession->flushPendingTextureDrop();
@@ -880,8 +678,11 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 void VDUI::runCodeView() {
 	VDCodeViewRef codeView = mVDSession->getCodeView();
-	if (!codeView) return;
-	if (ImGui::Begin("Code view", &mShowCodeView)) {
+	if (!codeView) {
+		ImGui::TextUnformatted("No code view");
+		return;
+	}
+	{
 		ImGui::TextWrapped("WebApp GLSL and Strudel editor text, sent as the transparent Spout sender \"VDCode\".");
 		ImGui::Text("GLSL: %s, %d lines", codeView->isActive(VDCodeView::LANG_GLSL) ? "editor open" : "waiting", codeView->getLineCount(VDCodeView::LANG_GLSL));
 		ImGui::Text("Strudel: %s, %d lines", codeView->isActive(VDCodeView::LANG_STRUDEL) ? "editor open" : "waiting", codeView->getLineCount(VDCodeView::LANG_STRUDEL));
@@ -940,11 +741,10 @@ void VDUI::runCodeView() {
 			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
 		}
 	}
-	ImGui::End();
 }
 
 void VDUI::runOutput() {
-	if (ImGui::Begin("Output", &mShowOutput)) {
+	{
 		bool open = mOutputWindow->isOpen();
 		if (ImGui::Button(open ? "Close output window" : "Open output window")) {
 			if (open) mOutputWindow->requestClose();
@@ -993,6 +793,119 @@ void VDUI::runOutput() {
 		bool onTop = mOutputWindow->getAlwaysOnTop();
 		if (ImGui::Checkbox("Always on top", &onTop)) mOutputWindow->setAlwaysOnTop(onTop);
 		ImGui::TextWrapped("Spout to Resolume keeps running either way. Esc on the output window closes it.");
+	}
+}
+
+void VDUI::runMessages() {
+	{
+		if (ImGui::Button("Clear")) {
+			mVDSettings->setMsg("");
+			mVDSettings->setErrorMsg("");
+			// TODO mVDSettings->mMidiMsg = ""; mVDSession->setmi("");
+
+			mVDSettings->mSocketIOMsg = "";
+			mVDSession->setOSCMsg("");
+			//mVDSettings->mShaderMsg = "";
+		}
+
+		ImGui::TextColored(ImColor(200, 200, 0), "Msg %s", mVDSettings->getMsg().c_str());
+		int ec = mVDSession->getErrorCode();
+		if (ec > 0) {
+			switch (ec)
+			{
+			case 1:
+				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform max=0");
+				break;
+			case 2:
+				ImGui::TextColored(ImColor(255, 0, 0), "Set Uniform value out of bounds");
+				break;
+			case 3:
+				ImGui::TextColored(ImColor(255, 0, 0), "Uniform value not set");
+				break;
+			default:
+				ImGui::TextColored(ImColor(0, 255, 0), "Code %d", ec);
+				break;
+			}
+		}
+		//ImGui::TextWrapped("Shader: %s", mVDSettings->mShaderMsg.c_str());
+		ImGui::TextWrapped("Midi %s", mVDSession->getMidiMsg().c_str());
+
+		// websockets
+		// ImGui::TextWrapped("WS");
+		if (ImGui::Button("WS"))
+		{
+			mVDSession->wsConnect();
+		}
+		ImGui::SameLine();
+		if (mVDSession->isWSClientConnected()) 
+		{
+			if (ImGui::Button("Ping")) { mVDSession->wsPing(); }
+		}
+		
+		ImGui::SameLine();		
+		ImGui::Text("%s", mVDSession->getWSMsg().c_str());
+
+		// OSC
+		ImGui::TextWrapped("OSC %s", mVDSession->getOSCMsg().c_str());
+	}
+}
+
+// Audio, Midi, Tempo, OSC, Websocket, Output, Color, Render, Messages, Folders, Setlist, Code and
+// Export in one window, one at a time (2026-10-27): before, each was its own window or toolbar
+// toggle, and Audio/Midi/Tempo/OSC/Websocket opened on top of "Animation". Where Messages was.
+void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
+	const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
+	ImGui::SetNextWindowSize(ImVec2(420.0f * uiScale, mVDParams->getUILargeH() * 5.0f * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
+	ImGui::Begin(" Panel", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+	{
+		static const char* labels[PANEL_COUNT] = { "Audio", "Midi", "Tempo", "OSC", "WS", "Output", "Color", "Render", "Messages", "Folders", "Setlist", "Code", "Export" };
+		const VDVideoExport::State exportState = mVideoExport->getState();
+		const ImGuiStyle& style = ImGui::GetStyle();
+		// section buttons, wrapping to the window's width
+		const float right = ImGui::GetCursorScreenPos().x + ImGui::GetContentRegionAvail().x;
+		for (int i = 0; i < PANEL_COUNT; i++) {
+			const char* label = labels[i];
+			if (i == PANEL_EXPORT && exportState == VDVideoExport::RECORDING) label = "REC";
+			if (i > 0) {
+				const float w = ImGui::CalcTextSize(label).x + style.FramePadding.x * 2.0f;
+				if (ImGui::GetItemRectMax().x + style.ItemSpacing.x + w <= right) ImGui::SameLine();
+			}
+			// the shown section bright; Output green while its window is open, Export red while
+			// recording and orange while armed, whatever section is shown
+			float h = i / 16.0f, sat = i == mPanelTab ? 1.0f : 0.35f, val = i == mPanelTab ? 0.55f : 0.25f;
+			if (i == PANEL_OUTPUT && mOutputWindow->isOpen()) { h = 0.33f; sat = 1.0f; }
+			if (i == PANEL_EXPORT && exportState == VDVideoExport::RECORDING) { h = 0.0f; sat = 1.0f; val = 0.8f; }
+			if (i == PANEL_EXPORT && exportState == VDVideoExport::ARMED) { h = 0.08f; sat = 1.0f; }
+			ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(h, sat, val));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(h, 0.7f, 0.7f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(h, 0.8f, 0.8f));
+			snprintf(buf, sizeof(buf), "%s##panel%d", label, i);
+			if (ImGui::Button(buf)) mPanelTab = i;
+			ImGui::PopStyleColor(3);
+		}
+		ImGui::Separator();
+
+		// the section, scrolling above the error line
+		ImGui::BeginChild("##panelsection", ImVec2(0.0f, -(ImGui::GetTextLineHeightWithSpacing() + style.ItemSpacing.y)));
+		switch (mPanelTab) {
+		case PANEL_AUDIO: mUIAnimation->RunAudio(); break;
+		case PANEL_MIDI: mUIAnimation->RunMidi(); break;
+		case PANEL_TEMPO: mUIAnimation->RunTempo(); break;
+		case PANEL_OSC: mUIAnimation->RunOSC(); break;
+		case PANEL_WS: mUIAnimation->RunWebsocket(); break;
+		case PANEL_OUTPUT: runOutput(); break;
+		case PANEL_COLOR: mUIAnimation->RunColor(); break;
+		case PANEL_RENDER: mUIAnimation->RunRender(); break;
+		case PANEL_MESSAGES: runMessages(); break;
+		case PANEL_FOLDERS: mUIFolders->RunContent(); break;
+		case PANEL_SETLIST: mUISetlist->RunContent(); break;
+		case PANEL_CODE: runCodeView(); break;
+		case PANEL_EXPORT: mVideoExport->RunContent(aExportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view"); break;
+		}
+		ImGui::EndChild();
+		// the last error stays in sight whatever section is shown
+		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
 	}
 	ImGui::End();
 }

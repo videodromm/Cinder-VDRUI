@@ -40,7 +40,7 @@ namespace videodromm
 		{
 			return shared_ptr<VDUIFolders>(new VDUIFolders(aVDUniforms, aVDSession));
 		}
-		void    Run(const char* title);
+		void    RunContent();
 	private:
 		// Params
 		VDParamsRef					mVDParams;

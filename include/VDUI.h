@@ -107,13 +107,15 @@ namespace videodromm
 
 		// UIFolders
 		VDUIFoldersRef				mUIFolders;
-		bool						mShowFolders;
 		// UISetlist
 		VDUISetlistRef				mUISetlist;
-		bool						mShowSetlist;
 		VDVideoExportRef			mVideoExport;
-		bool						mShowExport = false;
-		bool						mFocusExport = false;
+
+		// the "Panel" window: these sections, one shown at a time (2026-10-27), where Messages was
+		enum PanelTab { PANEL_AUDIO, PANEL_MIDI, PANEL_TEMPO, PANEL_OSC, PANEL_WS, PANEL_OUTPUT, PANEL_COLOR, PANEL_RENDER, PANEL_MESSAGES, PANEL_FOLDERS, PANEL_SETLIST, PANEL_CODE, PANEL_EXPORT, PANEL_COUNT };
+		int							mPanelTab = PANEL_MESSAGES;
+		void						runPanel(const ci::gl::TextureRef& aExportTexture);
+		void						runMessages();
 
 #if defined( CINDER_MSW )
 		// UIHtmlPage (WebView2, Windows-only)
@@ -122,7 +124,6 @@ namespace videodromm
 #endif
 
 		// live code view (Spout "VDCode") settings + preview
-		bool						mShowCodeView = false;
 		void						runCodeView();
 
 		// files dragged from Explorer (Windows): registered on the first Run(), see VDFileDropTarget.h
@@ -136,7 +137,6 @@ namespace videodromm
 
 		// projector output window settings
 		VDOutputWindowRef			mOutputWindow;
-		bool						mShowOutput = false;
 		bool						mSpoutOutEnabled = false;
 		bool						mNdiOutEnabled = false;
 		void						runOutput();
@@ -166,15 +166,6 @@ namespace videodromm
 		}
 		void mToggleShowBlend() {
 			mShowBlend = !mShowBlend;
-		}
-		void mToggleShowSetlist() {
-			mShowSetlist = !mShowSetlist;
-		}
-		void mToggleShowFolders() {
-			mShowFolders = !mShowFolders;
-		}
-		void mToggleShowCodeView() {
-			mShowCodeView = !mShowCodeView;
 		}
 #if defined( CINDER_MSW )
 		void mToggleShowHtmlPage() {

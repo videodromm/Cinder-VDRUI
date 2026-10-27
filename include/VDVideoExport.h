@@ -74,11 +74,10 @@ namespace videodromm
 			mWasPlaying = playing;
 		}
 
-		// aOpen: the panel's close box clears it (the caller may set the next window's pos/focus first)
-		void Run(const char* title, bool* aOpen, const ci::gl::TextureRef& aTexture, const std::string& aSourceLabel) {
+		// a section of VDUI's tabbed "Panel" (2026-10-27), drawn inside its window; recording
+		// runs from update() whether it's shown or not
+		void RunContent(const ci::gl::TextureRef& aTexture, const std::string& aSourceLabel) {
 			const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-			ImGui::SetNextWindowSize(ImVec2(420.0f * uiScale, 230.0f * uiScale), ImGuiCond_Once);
-			ImGui::Begin(title, aOpen, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 			{
 				const State state = mState.load();
 				if (mFfmpeg.empty()) {
@@ -140,7 +139,6 @@ namespace videodromm
 				if (!mOutFile.empty() && (state == DONE || state == FAILED))
 					ImGui::TextDisabled("ffmpeg log: %s", mLogFile.c_str());
 			}
-			ImGui::End();
 		}
 
 	private:

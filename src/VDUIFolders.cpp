@@ -16,14 +16,10 @@ VDUIFolders::VDUIFolders(VDUniformsRef aVDUniforms, VDSessionFacadeRef aVDSessio
 	mVDParams = VDParams::create();
 }
 
-void VDUIFolders::Run(const char* title) {
-
+// folders on the left, the selected folder's files on the right; a section of VDUI's tabbed
+// "Panel" (2026-10-27), drawn inside its window
+void VDUIFolders::RunContent() {
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	// folders on the left, the selected folder's files on the right
-	ImGui::SetNextWindowSize(ImVec2(600.0f * uiScale, mVDParams->getUILargeH() * 2.0f * uiScale), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
-
-	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
 		if (!mFoldersRequested) {
 			mFoldersRequested = true;
@@ -112,5 +108,4 @@ void VDUIFolders::Run(const char* title) {
 		}
 		ImGui::EndChild();
 	}
-	ImGui::End();
 }

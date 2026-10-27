@@ -43,26 +43,17 @@ namespace videodromm
 		}
 		~VDUIAnimation();
 		void    Run(const char* title);
-		// Audio/Midi/Tempo/OSC/Websocket used to always be visible as CollapsingHeaders inside
-		// this one "Animation" window, making it very tall - each is now its own separate window,
-		// hidden by default and toggled independently via a button in VDUI.cpp, so only the
-		// panels actually in use take up screen space.
-		void	toggleShowAudio() { mShowAudio = !mShowAudio; }
-		void	toggleShowMidi() { mShowMidi = !mShowMidi; }
-		void	toggleShowTempo() { mShowTempo = !mShowTempo; }
-		void	toggleShowOSC() { mShowOSC = !mShowOSC; }
-		void	toggleShowWebsocket() { mShowWebsocket = !mShowWebsocket; }
-		bool	isShowingAudio() { return mShowAudio; }
-		bool	isShowingMidi() { return mShowMidi; }
-		bool	isShowingTempo() { return mShowTempo; }
-		bool	isShowingOSC() { return mShowOSC; }
-		bool	isShowingWebsocket() { return mShowWebsocket; }
+		// sections of VDUI's tabbed "Panel" (one shown at a time, 2026-10-27): drawn inside
+		// its window, no Begin()/End() of their own. They used to be separate windows that
+		// opened on top of the "Animation" window.
+		void	RunColor();
+		void	RunRender();
+		void	RunAudio();
+		void	RunMidi();
+		void	RunTempo();
+		void	RunOSC();
+		void	RunWebsocket();
 	private:
-		bool							mShowAudio = false;
-		bool							mShowMidi = false;
-		bool							mShowTempo = false;
-		bool							mShowOSC = false;
-		bool							mShowWebsocket = false;
 		// midi learn - the uniform index currently typed into the Midi panel's target box
 		// (VDMidi itself only tracks the actually-armed target, set via armMidiLearn(); this is
 		// just this input widget's own displayed value, distinct so the box can be edited
