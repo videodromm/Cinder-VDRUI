@@ -867,6 +867,14 @@ void VDUIAnimation::RunRender() {
 	int hue = 0;
 	{
 		{
+			// manual UI scale override (IUISCALE, seeded from the display's content scale): panel,
+			// font and spacing scale, fine-tuned here (it was the "UIX" slider of the Fps window)
+			float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
+			ImGui::PushItemWidth(120.0f * uiScale);
+			if (ImGui::SliderFloat("UI scale", &uiScale, 0.5f, 4.0f)) {
+				mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, uiScale);
+			}
+			ImGui::PopItemWidth();
 
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
 			// multiple extra screens resolution

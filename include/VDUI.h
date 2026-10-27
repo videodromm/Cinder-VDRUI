@@ -116,8 +116,11 @@ namespace videodromm
 		int							mPanelTab = PANEL_MESSAGES;
 		// its height, measured from its content each frame (pixels)
 		float						mPanelHeight = 300.0f;
-		// the Fps window's width (unscaled): 748 before its buttons moved to the Panel
-		static constexpr float		FPS_WINDOW_W = 540.0f;
+		// its section is taller than the screen allows: show its scrollbar
+		bool						mPanelSectionScrolls = false;
+		// the Fps window's width (unscaled): 748 before its buttons moved to the Panel, then 540;
+		// 400 fits its first line (3 previews + 2 plots) and the button rows
+		static constexpr float		FPS_WINDOW_W = 400.0f;
 		void						runPanel(const ci::gl::TextureRef& aExportTexture);
 		void						runMessages();
 

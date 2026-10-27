@@ -230,15 +230,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		//}
 		//ImGui::PopStyleColor(1);
 
-		// manual UI scale override (see IUISCALE) - lets the panel/font/spacing scale be
-		// fine-tuned independently of the display's auto-detected content scale
-		ImGui::SameLine();
-		ImGui::PushItemWidth(80.0f * uiScale);
-		float uiScaleCtrl = uiScale;
-		if (ImGui::SliderFloat("UIX", &uiScaleCtrl, 0.5f, 4.0f)) {
-			mVDUniforms->setUniformValue(mVDUniforms->IUISCALE, uiScaleCtrl);
-		}
-		ImGui::PopItemWidth();
+		// the UI scale slider (IUISCALE) is in the Panel's Render section (VDUIAnimation::RunRender)
 		#if defined( _DEBUG )
 			// file logging is opt-in at runtime (see VDLog::setFileLoggingEnabled()) rather than
 			// always-on for the whole debug session - only ever meaningful in a debug build at all,
@@ -333,8 +325,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 
 
 		// Audio, Midi, Tempo, OSC, Websocket, Output, Folders, Setlist, Code and Export are sections
-		// of the "Panel" window now (runPanel), not buttons here
-		ImGui::NewLine();
+		// of the "Panel" window now (runPanel), not buttons here; the display modes follow on this line
 		
 		/*
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0.9f, 0.7f, 0.7f));
@@ -388,7 +379,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		
 		// line 3
 		for (unsigned int m = 0; m < mVDSession->getModesCount(); m++) {
-			if (m > 0) ImGui::SameLine();
+			ImGui::SameLine();
 			sprintf_s(buf, "%s##mode", mVDSession->getModeName(m).c_str());
 			if (mVDSession->getUniformValue(mVDUniforms->IDISPLAYMODE) == m) {
 				ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(m / 16.0f, 1.0f, 0.5f));
@@ -403,7 +394,6 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", buf);
 			ImGui::PopStyleColor(3);
 		}
-		ImGui::SameLine();
 		ctrl = mVDUniforms->IGLITCH;
 		(getFloatValue(ctrl)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
 		ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
@@ -516,47 +506,14 @@ void VDUI::Run(const char* title, unsigned int fps) {
 			if (ImGui::Button(buf)) mVDSession->setupMidi();
 			ImGui::PopStyleColor(1);
 		} */
-		ImGui::Text(" Main %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight);
-		ImGui::SameLine();
-		// windows
-		ImGui::Text(" Render window %dx%d", mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
-		ImGui::SameLine();
-		// mouse
-		ImGui::Text(" Clic %d", ImGui::GetIO().MouseDown[0]);
-		ImGui::SameLine();
-		ImGui::Text(" Pos: %.1f,%.1f", ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
-
-		// time
-		/*smooth = mVDSession->getUniformValue(mVDUniforms->ISMOOTH);
-		if (ImGui::SliderFloat("Smooth", &smooth, 0.001f, 0.02f)) {
-			mVDSession->setUniformValue(mVDUniforms->ISMOOTH, smooth);
-		}
-		ImGui::SameLine();*/
-		ImGui::Text(" Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME));
-		ImGui::SameLine();
-		ImGui::Text(" TStart %.2f", mVDSession->getUniformValue(mVDUniforms->ISTART));
-		ImGui::SameLine();
-		ImGui::Text(" Factor %.2f", mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR));
-		//ImGui::SameLine();
-		//ImGui::Text(" Tempo Time %.2f", mVDSession->getUniformValue(mVDUniforms->ITEMPOTIME));
-		ImGui::SameLine();
-		ImGui::Text(" Delta %.2f", mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
-		// LiveOSC Obsolete ImGui::Text("Trk %s %.2f", mVDSettings->mTrackName.c_str(), mVDSettings->liveMeter);
-		//ImGui::SameLine();
-		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);
-		//ImGui::Text(" Tempo %.2f", mVDSession->getUniformValue(mVDUniforms->IBPM));
-		// Beat... on its own line: the window is narrower (FPS_WINDOW_W) since the Panel took its buttons
-		ImGui::Text(" Beat %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT));
-		ImGui::SameLine();
-		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
-		ImGui::SameLine();
-		ImGui::Text(" BStart %.0f", mVDSession->getUniformValue(mVDUniforms->IBARSTART));
-		ImGui::SameLine();
-		ImGui::Text(" Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
-		ImGui::SameLine();
-		ImGui::Text(" %s (%.0f)", mVDSession->getTrackName().c_str(), mVDSession->getUniformValue(mVDUniforms->ITRACK));
-		ImGui::SameLine();
-		ImGui::Text(" BPM %.0f", mVDSession->getUniformValue(mVDUniforms->IBPM));
+		// five short lines, for the narrow window (FPS_WINDOW_W)
+		ImGui::Text(" Main %dx%d  Render window %dx%d", mVDSettings->mMainWindowWidth, mVDSettings->mMainWindowHeight, mVDSettings->mRenderWidth, mVDSettings->mRenderHeight);
+		ImGui::Text(" Clic %d  Pos: %.1f,%.1f", ImGui::GetIO().MouseDown[0], ImGui::GetIO().MousePos.x, ImGui::GetIO().MousePos.y);
+		ImGui::Text(" Time %.2f  TStart %.2f  Factor %.2f  Delta %.2f", mVDSession->getUniformValue(mVDUniforms->ITIME), mVDSession->getUniformValue(mVDUniforms->ISTART),
+			mVDSession->getUniformValue(mVDUniforms->ITIMEFACTOR), mVDSession->getUniformValue(mVDUniforms->IDELTATIME));
+		ImGui::Text(" Beat %.0f  Bar %.0f  BStart %.0f  Bb %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT), mVDSession->getUniformValue(mVDUniforms->IBAR),
+			mVDSession->getUniformValue(mVDUniforms->IBARSTART), mVDSession->getUniformValue(mVDUniforms->IBARBEAT));
+		ImGui::Text(" %s (%.0f)  BPM %.0f", mVDSession->getTrackName().c_str(), mVDSession->getUniformValue(mVDUniforms->ITRACK), mVDSession->getUniformValue(mVDUniforms->IBPM));
 
 		//ImGui::SameLine();
 		//sprintf_s(buf, "%s", mVDSession->getTrackName().c_str());
@@ -853,14 +810,14 @@ void VDUI::runMessages() {
 // Audio, Midi, Tempo, OSC, Websocket, Output, Color, Render, Messages, Folders, Setlist, Code and
 // Export in one window, one at a time (2026-10-27): before, each was its own window or toolbar
 // toggle, and Audio/Midi/Tempo/OSC/Websocket opened on top of "Animation".
-// Right of the Fps window, in the width it gave up (it was 748 wide) plus Messages' old 420; its
-// height follows the shown section, up to the screen's bottom (then the section scrolls). The
-// width stays resizable.
+// Right of the Fps window, as wide as the width it gave up (748 -> 540) plus Messages' old 420,
+// kept when the Fps window narrowed again (FPS_WINDOW_W); its height follows the shown section, up
+// to the screen's bottom (then the section scrolls). The width stays resizable.
 void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 	const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	const float margin = (float)mVDParams->getUIMargin();
 	const float x = mVDParams->getUIXPosCol1() + FPS_WINDOW_W + margin;
-	const float w = mVDParams->getUIXPosCol3() + 420.0f - x;
+	const float w = mVDParams->getUIXPosCol3() + 420.0f - (mVDParams->getUIXPosCol1() + 540.0f + margin);
 	ImGui::SetNextWindowSize(ImVec2(w * uiScale, mPanelHeight), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(x * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 	// the height measured last frame, the width free
@@ -898,8 +855,12 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 
 		// the section, as tall as its content, scrolling only when the error line would leave the screen
 		const float footer = ImGui::GetTextLineHeightWithSpacing() + style.WindowPadding.y;
-		ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, std::max(60.0f * uiScale, room - ImGui::GetCursorPosY() - footer)));
-		ImGui::BeginChild("##panelsection", ImVec2(0.0f, 0.0f), ImGuiChildFlags_AutoResizeY);
+		const float sectionMax = std::max(60.0f * uiScale, room - ImGui::GetCursorPosY() - footer);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, sectionMax));
+		// no scrollbar unless the section was taller than the room last frame: the auto height lags a
+		// frame, and a scrollbar coming and going changed the width, so wrapped text (Output) and the
+		// width-sized preview (Code) changed height, and the scrollbar flickered
+		ImGui::BeginChild("##panelsection", ImVec2(0.0f, 0.0f), ImGuiChildFlags_AutoResizeY, mPanelSectionScrolls ? 0 : ImGuiWindowFlags_NoScrollbar);
 		switch (mPanelTab) {
 		case PANEL_AUDIO: mUIAnimation->RunAudio(); break;
 		case PANEL_MIDI: mUIAnimation->RunMidi(); break;
@@ -915,6 +876,7 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 		case PANEL_CODE: runCodeView(); break;
 		case PANEL_EXPORT: mVideoExport->RunContent(aExportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view"); break;
 		}
+		mPanelSectionScrolls = ImGui::GetCursorPosY() - style.ItemSpacing.y + style.WindowPadding.y > sectionMax + 1.0f;
 		ImGui::EndChild();
 		// the last error stays in sight whatever section is shown
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
