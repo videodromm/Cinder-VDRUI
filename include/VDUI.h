@@ -114,6 +114,10 @@ namespace videodromm
 		// the "Panel" window: these sections, one shown at a time (2026-10-27), where Messages was
 		enum PanelTab { PANEL_AUDIO, PANEL_MIDI, PANEL_TEMPO, PANEL_OSC, PANEL_WS, PANEL_OUTPUT, PANEL_COLOR, PANEL_RENDER, PANEL_MESSAGES, PANEL_FOLDERS, PANEL_SETLIST, PANEL_CODE, PANEL_EXPORT, PANEL_COUNT };
 		int							mPanelTab = PANEL_MESSAGES;
+		// its height, measured from its content each frame (pixels)
+		float						mPanelHeight = 300.0f;
+		// the Fps window's width (unscaled): 748 before its buttons moved to the Panel
+		static constexpr float		FPS_WINDOW_W = 540.0f;
 		void						runPanel(const ci::gl::TextureRef& aExportTexture);
 		void						runMessages();
 

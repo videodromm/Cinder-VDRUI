@@ -79,7 +79,9 @@ namespace videodromm
 					ImGui::TextColored(ImColor(150, 150, 150), "%d/%d", active + 1, (int)tracks.size());
 
 					ImGui::Separator();
-					ImGui::BeginChild("##setlisttracks", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders);
+					// as tall as the setlist (the Panel fits its height to it), up to 30 lines
+					ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, ImGui::GetTextLineHeightWithSpacing() * 30));
+					ImGui::BeginChild("##setlisttracks", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
 					for (int i = 0; i < (int)tracks.size(); i++) {
 						const auto& t = tracks[i];
 						const bool isActive = (i == active);

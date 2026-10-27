@@ -168,7 +168,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 #pragma endregion menu
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	// Center panel
-	ImGui::SetNextWindowSize(ImVec2(748.0f * uiScale, mVDParams->getUILargePreviewH() * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(FPS_WINDOW_W * uiScale, mVDParams->getUILargePreviewH() * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol1() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 
 	sprintf_s(buf, " Fps %c %d ###fps", "|/-\\"[(int)(ImGui::GetTime() / 0.25f) & 3], fps);
@@ -545,7 +545,7 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		//ImGui::SameLine();
 		//			ImGui::Checkbox("Playing", &mVDSettings->mIsPlaying);
 		//ImGui::Text(" Tempo %.2f", mVDSession->getUniformValue(mVDUniforms->IBPM));
-		ImGui::SameLine();
+		// Beat... on its own line: the window is narrower (FPS_WINDOW_W) since the Panel took its buttons
 		ImGui::Text(" Beat %.0f", mVDSession->getUniformValue(mVDUniforms->IBEAT));
 		ImGui::SameLine();
 		ImGui::Text(" Bar %.0f", mVDSession->getUniformValue(mVDUniforms->IBAR));
@@ -852,13 +852,23 @@ void VDUI::runMessages() {
 
 // Audio, Midi, Tempo, OSC, Websocket, Output, Color, Render, Messages, Folders, Setlist, Code and
 // Export in one window, one at a time (2026-10-27): before, each was its own window or toolbar
-// toggle, and Audio/Midi/Tempo/OSC/Websocket opened on top of "Animation". Where Messages was.
+// toggle, and Audio/Midi/Tempo/OSC/Websocket opened on top of "Animation".
+// Right of the Fps window, in the width it gave up (it was 748 wide) plus Messages' old 420; its
+// height follows the shown section, up to the screen's bottom (then the section scrolls). The
+// width stays resizable.
 void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 	const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
-	ImGui::SetNextWindowSize(ImVec2(420.0f * uiScale, mVDParams->getUILargeH() * 5.0f * uiScale), ImGuiCond_Once);
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIXPosCol3() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
+	const float margin = (float)mVDParams->getUIMargin();
+	const float x = mVDParams->getUIXPosCol1() + FPS_WINDOW_W + margin;
+	const float w = mVDParams->getUIXPosCol3() + 420.0f - x;
+	ImGui::SetNextWindowSize(ImVec2(w * uiScale, mPanelHeight), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(x * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
+	// the height measured last frame, the width free
+	ImGui::SetNextWindowSizeConstraints(ImVec2(200.0f * uiScale, mPanelHeight), ImVec2(FLT_MAX, mPanelHeight));
 	ImGui::Begin(" Panel", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
 	{
+		// room down to the screen's bottom, wherever the window was moved
+		const float room = ImGui::GetIO().DisplaySize.y - ImGui::GetWindowPos().y - margin * uiScale;
 		static const char* labels[PANEL_COUNT] = { "Audio", "Midi", "Tempo", "OSC", "WS", "Output", "Color", "Render", "Messages", "Folders", "Setlist", "Code", "Export" };
 		const VDVideoExport::State exportState = mVideoExport->getState();
 		const ImGuiStyle& style = ImGui::GetStyle();
@@ -886,8 +896,10 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 		}
 		ImGui::Separator();
 
-		// the section, scrolling above the error line
-		ImGui::BeginChild("##panelsection", ImVec2(0.0f, -(ImGui::GetTextLineHeightWithSpacing() + style.ItemSpacing.y)));
+		// the section, as tall as its content, scrolling only when the error line would leave the screen
+		const float footer = ImGui::GetTextLineHeightWithSpacing() + style.WindowPadding.y;
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, std::max(60.0f * uiScale, room - ImGui::GetCursorPosY() - footer)));
+		ImGui::BeginChild("##panelsection", ImVec2(0.0f, 0.0f), ImGuiChildFlags_AutoResizeY);
 		switch (mPanelTab) {
 		case PANEL_AUDIO: mUIAnimation->RunAudio(); break;
 		case PANEL_MIDI: mUIAnimation->RunMidi(); break;
@@ -906,6 +918,8 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 		ImGui::EndChild();
 		// the last error stays in sight whatever section is shown
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
+		// next frame's height: down to here (title bar included), within the screen
+		mPanelHeight = std::min(ImGui::GetCursorPosY() - style.ItemSpacing.y + style.WindowPadding.y, std::max(room, 100.0f * uiScale));
 	}
 	ImGui::End();
 }

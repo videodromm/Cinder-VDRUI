@@ -46,7 +46,9 @@ void VDUIFolders::RunContent() {
 
 		ImGui::Separator();
 		// two columns, each scrolling on its own
-		ImGui::BeginChild("##folderlist", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.0f), ImGuiChildFlags_Borders);
+		// as tall as their content (the Panel fits its height to it), up to 20 lines, then they scroll
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, ImGui::GetTextLineHeightWithSpacing() * 20));
+		ImGui::BeginChild("##folderlist", ImVec2(ImGui::GetContentRegionAvail().x * 0.5f, 0.0f), ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
 		ImGui::TextColored(ImColor(155, 255, 0), "Folders");
 		auto folders = mVDSession->getFolderList();
 		const std::string defaultFolder = mVDSession->getDefaultFolder();
@@ -90,7 +92,8 @@ void VDUIFolders::RunContent() {
 		}
 		ImGui::EndChild();
 		ImGui::SameLine();
-		ImGui::BeginChild("##folderfiles", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders);
+		ImGui::SetNextWindowSizeConstraints(ImVec2(0.0f, 0.0f), ImVec2(FLT_MAX, ImGui::GetTextLineHeightWithSpacing() * 20));
+		ImGui::BeginChild("##folderfiles", ImVec2(0.0f, 0.0f), ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
 		if (mSelectedFolder.empty()) {
 			ImGui::TextColored(ImColor(150, 150, 150), "Select a folder to list its files");
 		}
