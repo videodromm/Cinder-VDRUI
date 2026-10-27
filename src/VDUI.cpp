@@ -694,8 +694,12 @@ void VDUI::runCodeView() {
 		if (ImGui::IsItemDeactivatedAfterEdit()) mOutputWindow->saveSettings();
 
 		if (auto tex = codeView->getTexture()) {
-			float w = ImGui::GetContentRegionAvail().x;
-			ImGui::Image(tex, ImVec2(w, w * tex->getHeight() / (float)tex->getWidth()));
+			// at most 200 high: sized from the width alone, the preview's height followed any
+			// scrollbar of the Panel, which then came and went (flicker)
+			const float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
+			const float aspect = tex->getHeight() / (float)tex->getWidth();
+			const float h = std::min(ImGui::GetContentRegionAvail().x * aspect, 200.0f * uiScale);
+			ImGui::Image(tex, ImVec2(h / aspect, h));
 		}
 	}
 }
@@ -822,7 +826,9 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 	ImGui::SetNextWindowPos(ImVec2(x * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
 	// the height measured last frame, the width free
 	ImGui::SetNextWindowSizeConstraints(ImVec2(200.0f * uiScale, mPanelHeight), ImVec2(FLT_MAX, mPanelHeight));
-	ImGui::Begin(" Panel", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse);
+	// never a scrollbar of its own: its height follows the content a frame late, so a growing section
+	// overflowed it for a frame, and that scrollbar narrowed everything (the Code pane flickered)
+	ImGui::Begin(" Panel", NULL, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 	{
 		// room down to the screen's bottom, wherever the window was moved
 		const float room = ImGui::GetIO().DisplaySize.y - ImGui::GetWindowPos().y - margin * uiScale;
@@ -876,7 +882,10 @@ void VDUI::runPanel(const ci::gl::TextureRef& aExportTexture) {
 		case PANEL_CODE: runCodeView(); break;
 		case PANEL_EXPORT: mVideoExport->RunContent(aExportTexture, mOutputWindow->isShowingWarps() ? "output window (warps)" : "main view"); break;
 		}
-		mPanelSectionScrolls = ImGui::GetCursorPosY() - style.ItemSpacing.y + style.WindowPadding.y > sectionMax + 1.0f;
+		// on when it overflows, off only once it fits with two lines to spare (no back and forth)
+		const float sectionContent = ImGui::GetCursorPosY() - style.ItemSpacing.y + style.WindowPadding.y;
+		if (sectionContent > sectionMax + 1.0f) mPanelSectionScrolls = true;
+		else if (sectionContent < sectionMax - 2.0f * ImGui::GetTextLineHeightWithSpacing()) mPanelSectionScrolls = false;
 		ImGui::EndChild();
 		// the last error stays in sight whatever section is shown
 		ImGui::TextColored(ImColor(255, 0, 0), "Last error %s", mVDSettings->getErrorMsg().c_str());
