@@ -51,6 +51,16 @@ void VDUIHtmlPage::Run(const char* title) {
 
 	ImGui::SetNextWindowSize(ImVec2(900, 650), ImGuiCond_Once);
 	bool isOpen = ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings);
+	// keep the title bar on screen: the native WebView2 below it takes every click, so once the
+	// title bar was dragged above the top (or past a side) the pane couldn't be moved anymore
+	{
+		const ImVec2 pos = ImGui::GetWindowPos();
+		const ImVec2 display = ImGui::GetIO().DisplaySize;
+		const float grab = 80.0f; // title bar width kept inside, enough to grab
+		ImVec2 clamped(std::clamp(pos.x, grab - ImGui::GetWindowWidth(), std::max(0.0f, display.x - grab)),
+			std::clamp(pos.y, 0.0f, std::max(0.0f, display.y - ImGui::GetFrameHeight())));
+		if (clamped.x != pos.x || clamped.y != pos.y) ImGui::SetWindowPos(clamped);
+	}
 	if (isOpen) {
 		if (mWebViewPanel->hasError()) {
 			// ASCII-only diagnostic text (see CinderWebView2Panel) - a naive wide-to-narrow
