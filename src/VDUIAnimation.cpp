@@ -217,8 +217,8 @@ void VDUIAnimation::Run(const char* title) {
 			/*sprintf_s(buf, "XorY");
 			mVDSettings->iXorY ^= ImGui::Button(buf);*/
 
-			// steps
-			/*ctrl = mVDUniforms->ISTEPS;
+			// steps (also post.glsl's vignette trail speed, 2026-11-03)
+			ctrl = mVDUniforms->ISTEPS;
 			if (ImGui::Button("x##steps")) { localValues[ctrl] = 16.0f; setFloatValue(ctrl, localValues[ctrl]); }
 			ImGui::SameLine();
 			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
@@ -226,7 +226,9 @@ void VDUIAnimation::Run(const char* title) {
 			{
 				setFloatValue(ctrl, localValues[ctrl]);
 			}
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Vignette + Edge: trail speed (16: 4 px per frame at 1920 wide)");
 			// pixelate
+			/*
 			ctrl = mVDUniforms->IPIXELATE;
 			if (ImGui::Button("x##pixelate")) { localValues[ctrl] = 1.0f; setFloatValue(ctrl, localValues[ctrl]); }
 			ImGui::SameLine();
