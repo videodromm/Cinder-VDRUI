@@ -183,7 +183,8 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Warp");
 		ImGui::SameLine();
 		ImGui::Image(mVDSession->buildFxFboTexture(), ivec2(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale));
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip("Fx");
+		// the Fx ray march only runs when shown: hovering this thumbnail refreshes it (it no longer renders every 100 frames)
+		if (ImGui::IsItemHovered()) { mVDSession->requestFxPreview(); ImGui::SetTooltip("Fx (refreshed while hovered, in Fx mode or when a warp shows it)"); }
 
 		ImGui::SameLine();
 
@@ -218,6 +219,14 @@ void VDUI::Run(const char* title, unsigned int fps) {
 		sprintf_s(buf, "%d", fps);
 		ImGui::PlotLines("F", &fpsValues.front(), (int)fpsValues.size(), fpsValues_offset, buf, 0.0f, 100.0f, ImVec2(0, 30));
 		if (fps < 24.0) ImGui::PopStyleColor();
+		// GPU time per render stage (studies/mixette-fx.md step 0): the baseline before changing the chain
+		ImGui::TextDisabled("%s", mVDSession->getGpuTimesText().c_str());
+		// program chain (studies/mixette-fx.md): the post effects reach every output; off = the old routing, to fall back
+		{
+			bool chain = mVDSession->getProgramChain();
+			if (ImGui::Checkbox("Effects on every output##programchain", &chain)) mVDSession->setProgramChain(chain);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("On: fbos -> mixette -> post effects = the program, shown by Mix mode, the warps (Mix input) and Fx.\nOff: the old routing, effects only in Post mode, warps on the raw mix.");
+		}
 		// audio spectrum, max volume and gain (AX): in the "audio" texture pane (VDUITextures)
 
 		int hue = 0;

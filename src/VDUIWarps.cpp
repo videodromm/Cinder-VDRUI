@@ -33,7 +33,12 @@ void VDUIWarps::Run(const char* title) {
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	// moved here from VDUI.cpp's top-level toggle bar - creating a warp belongs with the rest of
 	// the warp controls, not the panel-visibility buttons
-	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() * uiScale, mVDParams->getUIYPosRow3() * uiScale), ImGuiCond_Once);
+	// 2026-11-12: below the texture list (VDUITextures: column 1, row 3, windows LargePreviewH * 0.6 high), same left
+	// edge; each warp's own window follows it to the right, on the same row
+	const float warpsRowY = mVDParams->getUIYPosRow3() + mVDParams->getUILargePreviewH() * 0.6f + mVDParams->getUIMargin() * 2;
+	const float warpsLeftX = static_cast<float>(mVDParams->getUIMargin() + mVDParams->getUIXPosCol1());
+	ImGui::SetNextWindowPos(ImVec2(warpsLeftX * uiScale, warpsRowY * uiScale), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, 150.0f * uiScale), ImGuiCond_Once);
 	ImGui::Begin(title, NULL, ImGuiWindowFlags_NoSavedSettings);
 	{
 		if (ImGui::Button("Warp++")) {
@@ -63,13 +68,14 @@ void VDUIWarps::Run(const char* title) {
 	}
 	ImGui::End();
 
-	yPos = mVDParams->getUIYPosRow3();
+	yPos = (int)warpsRowY;
 	// a window's own close [x] (via ImGui::Begin's p_open) actually removes the warp - deferred
 	// until after the loop below so erasing mid-iteration can't shift indices out from under it
 	int warpToRemove = -1;
 	for (int w = 0; w < mVDSession->getWarpCount(); w++) {
 
-		xPos = mVDParams->getUIMargin() + mVDParams->getUIXPosCol3() + ((mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w));//+1
+		// right of the Warps pane, one after the other
+		xPos = (int)(warpsLeftX + (mVDParams->getUILargePreviewW() + mVDParams->getUIMargin()) * (w + 1));
 
 		ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargePreviewW() * uiScale, 150.0f * uiScale), ImGuiCond_Once);
 		ImGui::SetNextWindowPos(ImVec2(xPos * uiScale, yPos * uiScale), ImGuiCond_Once);
@@ -108,6 +114,15 @@ void VDUIWarps::Run(const char* title) {
 			}
 
 
+			// back to a new warp's layout; undoable like point moves
+			sprintf_s(buf, "Reset##wreset%d", w);
+			if (ImGui::Button(buf)) mVDSession->resetWarp(w);
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Back to the default layout: 2x2 grid, corners at the edges, no perspective.\nCtrl+Z in warp edit mode (W) undoes it, like point moves.");
+			ImGui::SameLine();
+			sprintf_s(buf, "Undo (%d)##wundo%d", (int)mVDSession->getWarpUndoCount(), w);
+			if (ImGui::Button(buf)) mVDSession->undoWarpEdit();
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Undo the last point move, grid change or reset (any warp). Same as Ctrl+Z in warp edit mode.");
+
 			ImGui::PushItemWidth(mVDParams->getPreviewFboWidth() * uiScale);
 			ImGui::PushID(w);
 			unsigned int fboa = mVDSession->getWarpAFboIndex(w);
@@ -126,7 +141,7 @@ void VDUIWarps::Run(const char* title) {
 			{
 				const unsigned int inputs[3] = { VDSession::WARP_INPUT_MIX, VDSession::WARP_INPUT_POST, VDSession::WARP_INPUT_FX };
 				const char* names[3] = { "Mix", "Post", "Fx" };
-				const char* tips[3] = { "The weighted mix of the active fbos", "The Post render", "The Fx render" };
+				const char* tips[3] = { mVDSession->getProgramChain() ? "The program: the mix of the active fbos with the post effects (same as Post)" : "The weighted mix of the active fbos, no effects", "The Post render", "The Fx render" };
 				for (int k = 0; k < 3; k++) {
 					// an fbo index that no longer exists shows the mix too
 					bool active = (k == 0) ? (fboa >= mVDSession->getFboShaderListSize() && fboa != VDSession::WARP_INPUT_POST && fboa != VDSession::WARP_INPUT_FX) : (fboa == inputs[k]);
