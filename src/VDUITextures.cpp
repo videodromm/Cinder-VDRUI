@@ -146,10 +146,14 @@ void VDUITextures::Run(const char* title) {
 			// video/audio file), loop, volume level
 			if (VDVideoSourceRef video = mVDSession->getVideoSource(texName)) {
 				// green while playing, black while paused
+				// amber and disabled while it cues its first frame (2026-11-14)
+				const bool loading = video->isLoading();
 				const bool playing = video->isPlaying();
-				ImGui::PushStyleColor(ImGuiCol_Button, playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
-				sprintf_s(buf, "%s##vplay%d", playing ? "Pause" : "Play", i);
+				ImGui::PushStyleColor(ImGuiCol_Button, loading ? (ImVec4)ImColor(200, 120, 0, 255) : playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
+				sprintf_s(buf, "%s##vplay%d", loading ? "Loading..." : playing ? "Pause" : "Play", i);
+				ImGui::BeginDisabled(loading);
 				if (ImGui::Button(buf)) mVDSession->togglePlayPauseSource(texName);
+				ImGui::EndDisabled();
 				ImGui::PopStyleColor(1);
 				ImGui::SameLine();
 				bool looping = video->isLooping();

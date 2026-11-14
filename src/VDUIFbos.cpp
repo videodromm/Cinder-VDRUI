@@ -252,14 +252,19 @@ void VDUIFbos::Run(const char* title) {
 				if (!mVDSession->isSequence(f)) ImGui::SameLine();
 				// the label shows the action the button performs
 				// green while playing, black while paused
+				// amber and disabled while its video cues its first frame or its song decodes (2026-11-14)
+				const bool loading = mVDSession->isLoading(f);
 				const bool playing = mVDSession->isPlaying(f);
-				ImGui::PushStyleColor(ImGuiCol_Button, playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
-				sprintf_s(buf, "%s##s%d", playing ? "Pause" : "Play", f);
+				ImGui::PushStyleColor(ImGuiCol_Button, loading ? (ImVec4)ImColor(200, 120, 0, 255) : playing ? (ImVec4)ImColor(0, 170, 60, 255) : (ImVec4)ImColor(0, 0, 0, 255));
+				sprintf_s(buf, "%s##s%d", loading ? "Loading..." : playing ? "Pause" : "Play", f);
+				ImGui::BeginDisabled(loading);
 				if (ImGui::Button(buf))
 				{
 					mVDSession->togglePlayPause(f);
 				}
+				ImGui::EndDisabled();
 				ImGui::PopStyleColor(1);
+				if (loading && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled)) ImGui::SetTooltip("Not ready yet: the video is cueing its first frame, or the song is being decoded into memory");
 			}
 			
 			if (mVDSession->isSequence(f)) {
