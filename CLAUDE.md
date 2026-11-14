@@ -8,4 +8,4 @@ The C++ history, decisions and open items for the Videodromm Cinder apps live in
 
 ### Added (2026-10-14, video export)
 
-`include/VDVideoExport.h` (header-only): the Export panel/button, recording the output window to `<repos>/export/*.mp4` through ffmpeg. Details in `../Cinder-VDR/CLAUDE.md` ("video export of the output window") and `security-review-2026-10-14.md`.
+`include/VDVideoExport.h` (header-only): the Export panel/button, recording the output window to `<repos>/export/*.mp4` through ffmpeg. Details in `../Cinder-VDR/CLAUDE.md` ("video export of the output window") and `security.md` (2026-10-14).
