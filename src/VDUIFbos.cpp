@@ -5,6 +5,7 @@
 #include "VDUIFbos.h"
 // MIDI learn on uniform widgets
 #include "VDUILearn.h"
+#include "VDUIWidgets.h"
 
 // snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
 // the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
@@ -408,14 +409,13 @@ void VDUIFbos::Run(const char* title) {
 					// float 5126 GL_FLOAT 0x1406
 					localValues[ctrl] = mVDSession->getUniformValue(ctrl);
 					if (ctrl > 0) {
-						sprintf_s(buf, "%s##floatuniform%d", uName.c_str(), f);
-
 						float spd = (ctrl == mVDUniforms->IPIXELX || ctrl == mVDUniforms->IPIXELY) ? 1.0f : 0.001f;
-
-						if (learnable(mVDSession, ImGui::DragFloat(buf, &localValues[ctrl], spd, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
-						{
-							setValue(ctrl, f, localValues[ctrl]);
-						}
+						// shared widget (2026-11-14, VDUIWidgets.h): name + value inside the bar, yellow
+						// when off its default, right-click resets, MIDI learn; sends the value itself
+						ImGui::PushID((int)f);
+						ui::uniformSlider(mVDSession, ctrl, getMinUniformValue(ctrl), getMaxUniformValue(ctrl), uName,
+							mVDSession->getAnim(ctrl) == mVDSettings->ANIM_NONE, spd);
+						ImGui::PopID();
 					}
 					else {
 						// 0 = time or unknown uniform

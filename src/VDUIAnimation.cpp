@@ -1,6 +1,8 @@
 #include "VDUIAnimation.h"
 // MIDI learn on uniform widgets
 #include "VDUILearn.h"
+// shared uniform slider, mode button, colored button (2026-11-14)
+#include "VDUIWidgets.h"
 
 // snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
 // the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
@@ -42,336 +44,84 @@ void VDUIAnimation::Run(const char* title) {
 	float uiScale = mVDUniforms->getUniformValue(mVDUniforms->IUISCALE);
 	ImGui::SetNextWindowSize(ImVec2(mVDParams->getUILargeW() * uiScale, mVDParams->getUILargeH() * 7.3f * uiScale), ImGuiCond_Once);
 	ImGui::SetNextWindowPos(ImVec2(mVDParams->getUIMargin() * uiScale, mVDParams->getUIYPosRow1() * uiScale), ImGuiCond_Once);
-	int hue = 0;
 	ImGui::Begin(" Animation", NULL, ImGuiWindowFlags_NoSavedSettings);// | ImGuiWindowFlags_NoCollapse
 	{
-		ImGui::PushItemWidth(mVDParams->getPreviewFboWidth());
+		// 2026-11-14 (studies/ui-rework.md): one mode button per row (was six: a f b m s x), the name
+		// and value inside a full-width slider (was clipped on the right), uniforms in groups, ranges
+		// from VDUniforms (overridden below where the stored range doesn't match what the shaders
+		// get), the label yellow when off its default, right-click resets (ui::uniformSlider).
+		const unsigned int ALL_MODES = 0x3F;						// none, time, auto, bass, mid, smooth
+		const unsigned int FX_MODES = (1u << 0) | (1u << 1) | (1u << 2);	// none, time, auto
+		auto range = [this](unsigned int i, float& lo, float& hi) {
+			lo = getMinUniformValue(i); hi = getMaxUniformValue(i);
+			switch (i) {
+			case 8: lo = 0.0f; hi = 1.49f; break;						// iZoom (stored 0.95..1.05, mapnfold)
+			case 9: lo = 0.0f; hi = 1.0f; break;						// iFactor (stored 0.4..0.6, default 1)
+			case 19: case 20: lo = 0.0f; hi = 1.0f; break;				// iMouseX/Y are normalized
+			case 23: case 24: lo = -1.0f; hi = 1.0f; break;				// iRenderXYX/Y (stored up to 1920/1080)
+			case 14: lo = 0.0f; hi = 40.0f; break;						// iRatio
+			default: break;
+			}
+		};
+		auto row = [&](unsigned int i, unsigned int modes, const std::string& label = "") {
+			float lo, hi;
+			range(i, lo, hi);
+			ui::animModeButton(mVDSession, i, modes);
+			ImGui::SameLine(0.0f, ImGui::GetStyle().ItemInnerSpacing.x);
+			ui::uniformSlider(mVDSession, i, lo, hi, label, mVDSession->getAnim(i) == mVDSettings->ANIM_NONE);
+		};
+		auto group = [](const char* name, bool open) {
+			return ImGui::TreeNodeEx(name, ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_NoTreePushOnOpen | (open ? ImGuiTreeNodeFlags_DefaultOpen : 0));
+		};
+
 		if( ImGui::CollapsingHeader( "Animation", ImGuiTreeNodeFlags_DefaultOpen ) )
 		{
 			if (ImGui::Button("Reset")) {
 				mVDSession->resetAnim();
 			}
-			for (size_t iUniform = 5; iUniform < 28; iUniform++)
-			{
-				int hue = 0;
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("All animations off, values back to their defaults");
+			ImGui::SameLine();
+			ImGui::TextDisabled("(?)");
+			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Left button: animation mode (a time, f auto, b bass, m mid, s smooth, x none)\nSlider: Ctrl+click to type, right-click to reset\nYellow name: not at its default; red: selected for MIDI");
 
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_TIME) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.3f));
-				}
-				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) {
-					mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME);
-				}
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_AUTO) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_BASS) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "b##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_BASS); }
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_MID) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "m##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_MID); }
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_SMOOTH) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "s##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_SMOOTH); }
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_NONE) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) {
-					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
-					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
-				}
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
-				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
-				if (isSelected) {
-					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
-				} 
-				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-				
-				if (iUniform > 22 || iUniform == 14 || iUniform == 8 ) {
-					if (iUniform == 8) {
-						// iZoom
-						if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f), iUniform))
-						{
-							setFloatValue(iUniform, localValues[iUniform]);
-						}
-					}
-					else {
-						if (iUniform == 23 || iUniform == 24) {
-							// iRenderXY
-							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f), iUniform))
-							{
-								setFloatValue(iUniform, localValues[iUniform]);
-							}
-						}
-						else {
-
-							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-							{
-								setFloatValue(iUniform, localValues[iUniform]);
-							}
-						}
-					}
-				}
-				else {
-					if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-					{
-						setFloatValue(iUniform, localValues[iUniform]);
-					}
-				}
-				if (isSelected) {
-					ImGui::PopStyleColor(1);
-				}
+			if (group("Color", true)) {
+				for (unsigned int i : { 5u, 6u, 7u, 27u, 17u }) row(i, ALL_MODES);
 			}
+			if (group("Geometry", true)) {
+				for (unsigned int i : { 8u, 11u, 23u, 24u, 15u, 16u }) row(i, ALL_MODES);
+			}
+			if (group("Effects", true)) {
+				for (unsigned int i : { 9u, 10u, 12u, 13u, 14u, 18u }) row(i, ALL_MODES);
+				// steps (also post.glsl's vignette trail speed, 2026-11-03)
+				row(mVDUniforms->ISTEPS, ALL_MODES, "iSteps trail");
+				// iBarBeat (int)
+				ctrl = mVDUniforms->IBARBEAT;
+				iBarBeat = (int)getFloatValue(ctrl);
+				ImGui::SetNextItemWidth(-1.0f);
+				const bool barBeatOff = iBarBeat != 1;
+				if (barBeatOff) ImGui::PushStyleColor(ImGuiCol_Text, ui::changedTextColor());
+				if (ImGui::SliderInt("##iBarBeat", &iBarBeat, 1, 50, "iBarBeat %d")) setFloatValue(ctrl, (float)iBarBeat);
+				if (barBeatOff) ImGui::PopStyleColor(1);
+				if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) setFloatValue(ctrl, 1.0f);
+			}
+			if (group("Mouse, selection", false)) {
+				for (unsigned int i : { 19u, 20u, 21u, 22u, 25u }) row(i, ALL_MODES);
+			}
+		}
 
-			// badTv
-			/*ctrl = mVDUniforms->IBADTV;
-			if (ImGui::Button("a##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME); }
-			ImGui::SameLine();
-			if (ImGui::Button("f##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
-			ImGui::SameLine();
-			if (ImGui::Button("x##badtv")) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (ImGui::DragFloat("badTv", &localValues[ctrl], 0.01f, getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// iPixelX
-			ctrl = mVDUniforms->IPIXELX;
-			if (ImGui::Button("x##iPixelX")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("iPixelX/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// iPixelY
-			ctrl = mVDUniforms->IPIXELY;
-			if (ImGui::Button("x##iPixelY")) { mVDSession->setAnim(ctrl, mVDSettings->ANIM_NONE); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("iPixelY/min/max", &localValues[ctrl], getMinUniformValue(ctrl), getMaxUniformValue(ctrl)), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
-			// iBarBeat
-			ctrl = mVDUniforms->IBARBEAT;
-			if (ImGui::Button("x##iBarBeat")) { iBarBeat = 1; setFloatValue(ctrl, 1); }
-			ImGui::SameLine();
-			if (ImGui::SliderInt("iBarBeat", &iBarBeat, 1, 50))
-			{
-				setFloatValue(ctrl, iBarBeat);
-			}
-			/*sprintf_s(buf, "XorY");
-			mVDSettings->iXorY ^= ImGui::Button(buf);*/
-
-			// steps (also post.glsl's vignette trail speed, 2026-11-03)
-			ctrl = mVDUniforms->ISTEPS;
-			if (ImGui::Button("x##steps")) { localValues[ctrl] = 16.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("steps", &localValues[ctrl], 1.0f, 128.0f), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Vignette + Edge: trail speed (16: 4 px per frame at 1920 wide)");
-			// pixelate
-			/*
-			ctrl = mVDUniforms->IPIXELATE;
-			if (ImGui::Button("x##pixelate")) { localValues[ctrl] = 1.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("pixelate", &localValues[ctrl], 0.01f, 1.0f), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}
-			// trixels
-			ctrl = mVDUniforms->ITRIXELS;
-			if (ImGui::Button("x##trixels")) { localValues[ctrl] = 0.0f; setFloatValue(ctrl, localValues[ctrl]); }
-			ImGui::SameLine();
-			localValues[ctrl] = mVDSession->getUniformValue(ctrl);
-			if (learnable(mVDSession, ImGui::SliderFloat("trixels", &localValues[ctrl], 0.00f, 1.0f), ctrl))
-			{
-				setFloatValue(ctrl, localValues[ctrl]);
-			}*/
-		} 
-		
 		// FX boolean
 		if( ImGui::CollapsingHeader( "Fx" ) )
 		{
-			for (size_t iUniform = 86; iUniform < 90; iUniform++)
-			{
-				int hue = 0;
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_TIME) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.3f));
-				}
-				sprintf_s(buf, "a##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) {
-					mVDSession->setAnim(iUniform, mVDSettings->ANIM_TIME);
-				}
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_AUTO) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "f##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) { mVDSession->setAnim(iUniform, mVDSettings->ANIM_AUTO); }
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				if (mVDSession->getAnim(iUniform) == mVDSettings->ANIM_NONE) {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(13.0f / 16.0f, 1.0f, 0.5f));
-				}
-				else {
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.25f));
-				}
-				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) {
-					mVDSession->setAnim(iUniform, mVDSettings->ANIM_NONE);
-					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
-				}
-				ImGui::PopStyleColor(1);
-				hue++;
-				ImGui::SameLine();
-
-				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
-				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
-				if (isSelected) {
-					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
-				}
-				sprintf_s(buf, "%d %s", (int)iUniform, mVDSession->getUniformName(iUniform).c_str());
-				if (iUniform > 22 || iUniform == 14 || iUniform == 8) {
-					if (iUniform == 25) {
-						// iZoom
-						if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 1.49f), iUniform))
-						{
-							setFloatValue(iUniform, localValues[iUniform]);
-						}
-					}
-					else {
-						if (iUniform == 23 || iUniform == 24) {
-							// iRenderXY
-							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], -1.0f, 1.0f), iUniform))
-							{
-								setFloatValue(iUniform, localValues[iUniform]);
-							}
-						}
-						else {
-
-							if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.0f, 40.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-							{
-								setFloatValue(iUniform, localValues[iUniform]);
-							}
-						}
-					}
-				}
-				else {
-					if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 1.0f), iUniform)) // 20211108 TODO PB with getMinUniformValue(ctrl), getMaxUniformValue(ctrl)))
-					{
-						setFloatValue(iUniform, localValues[iUniform]);
-					}
-				}
-				if (isSelected) {
-					ImGui::PopStyleColor(1);
-				}
-			}
+			for (unsigned int i = 86; i < 90; i++) row(i, FX_MODES);
 		}
-		// Uniforms
+		// Params
 		if( ImGui::CollapsingHeader( "Params" ) )
 		{
-
-			for (size_t iUniform = 54; iUniform < 60; iUniform++)
-			{
-				localValues[iUniform] = mVDSession->getUniformValue(iUniform);
-				bool isSelected = iUniform == int(getFloatValue(mVDUniforms->ISELECTED));
-				if (isSelected) {
-					ImGui::PushStyleColor(ImGuiCol_Text, (ImVec4)ImColor::HSV(0.0f, 1.0f, 1.0f));
-				}
-				sprintf_s(buf, "x##%s", mVDSession->getUniformName(iUniform).c_str());
-				if (ImGui::Button(buf)) {
-					mVDSession->setUniformValue(iUniform, mVDSession->getDefaultUniformValue(iUniform));
-				}
-				ImGui::SameLine();
-				sprintf_s(buf, "%s", mVDSession->getUniformName(iUniform).c_str());
-				if (learnable(mVDSession, ImGui::SliderFloat(buf, &localValues[iUniform], 0.00f, 10.0f), iUniform))
-				{
-					setFloatValue(iUniform, localValues[iUniform]);
-				}
-				ImGui::SameLine();
-				
-				sprintf_s(buf, "%d", (int)iUniform);
-				if (ImGui::InputFloat(buf, &localValues[iUniform], 0.00f, 3.0f))
-				{
-					setFloatValue(iUniform, localValues[iUniform]);
-				}
-				if (isSelected) {
-					ImGui::PopStyleColor(1);
-				}
+			for (unsigned int i = 54; i < 60; i++) {
+				float lo, hi;
+				range(i, lo, hi);
+				ui::uniformSlider(mVDSession, i, lo, hi);
 			}
-
-
 		} // Params
 	}
 	ImGui::End();
