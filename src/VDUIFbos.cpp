@@ -381,19 +381,37 @@ void VDUIFbos::Run(const char* title) {
 					hue++;
 					break;
 				case GL_INT:
-					// int 5124 GL_INT 0x1404
-					(getValue(ctrl, f)) ? ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(hue / 16.0f, 1.0f, 0.5f)) : ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(1.0f, 0.1f, 0.1f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(hue / 16.0f, 0.7f, 0.7f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(hue / 16.0f, 0.8f, 0.8f));
-					sprintf_s(buf, "%s##intuniform%d", uName.c_str(), f);
-					if (ImGui::Button(buf)) {
-						//toggleValue(ctrl, f);
+					// int 5124 GL_INT 0x1404 (iSteps, iInvert): a whole-step slider, or a button for a 0..1 range
+					// (2026-11-14: was a button that did nothing)
+					if (ctrl > 0) {
+						ImGui::PushID((int)f);
+						ui::uniformIntSlider(mVDSession, ctrl, getMinUniformValue(ctrl), getMaxUniformValue(ctrl), uName, hue / 16.0f);
+						ImGui::PopID();
+						hue++;
 					}
-					ImGui::PopStyleColor(3);
-					hue++;
+					else {
+						ImGui::TextDisabled("int %s", uName.c_str());
+					}
 					break;
 				case GL_SAMPLER_2D:
 					// sampler2d 35678 GL_SAMPLER_2D 0x8B5E
+					// iChannelN: what the fbo binds there (2026-11-14). Convention: iChannel0 = the fbo's input
+					// (audio, video, image...), iChannel1 = its second texture ("texture1", an image)
+					if (uName.rfind("iChannel", 0) == 0) {
+						const int unit = atoi(uName.c_str() + 8);
+						std::string what;
+						if (unit == 0) {
+							what = mVDSession->getInputTextureMode(f) == VDTextureMode::AUDIO ? "audio" : "input";
+							const std::string tn = mVDSession->getInputTextureName(f);
+							if (!tn.empty()) what += ": " + tn;
+						}
+						else if (unit == 1) {
+							const std::string tn = mVDSession->getFboTexture1Name(f);
+							what = tn.empty() ? "image: none" : "image: " + tn;
+						}
+						ImGui::TextDisabled("%s  %s", uName.c_str(), what.c_str());
+						break;
+					}
 
 					texNameEndIndex = uName.find("tex");
 					if (texNameEndIndex != std::string::npos && texNameEndIndex != -1) {
@@ -436,7 +454,24 @@ void VDUIFbos::Run(const char* title) {
 					}
 					break;
 				case GL_FLOAT_VEC2:
-					// vec2 35664		
+					// vec2 35664: an XY pad over the uniform's X/Y floats (2026-11-14, was nothing). iRenderXY moves
+					// the render in uv units: -1..1 like the Animation pane (its stored range goes to 1920/1080).
+					if (uName == "RENDERSIZE" || uName == "resolution") break; // set by the engine
+					{
+						const int ix = mVDSession->getUniformIndexForName(uName + "X");
+						const int iy = mVDSession->getUniformIndexForName(uName + "Y");
+						if (ix > 0 && iy > 0) {
+							const bool render = ix == (int)mVDUniforms->IRENDERXYX;
+							ImGui::PushID((int)f);
+							ui::uniformXYPad(mVDSession, ix, iy,
+								render ? -1.0f : getMinUniformValue(ix), render ? 1.0f : getMaxUniformValue(ix),
+								render ? -1.0f : getMinUniformValue(iy), render ? 1.0f : getMaxUniformValue(iy), uName);
+							ImGui::PopID();
+						}
+						else {
+							ImGui::TextDisabled("vec2 %s", uName.c_str());
+						}
+					}
 					/*if (uName == "RENDERSIZE" || uName == "resolution") {
 						float fw = mVDSession->buildFboRenderedTexture(f)->getWidth();
 						sprintf_s(buf, "rw %.0f", fw);						
@@ -454,28 +489,38 @@ void VDUIFbos::Run(const char* title) {
 				case GL_FLOAT_VEC3:
 					// vec3 35665
 					// iColor: the shader reads iColorX/Y/Z (VDUniforms::getVec3UniformValueByName)
-					if (ctrl == mVDUniforms->ICOLOR) {
-						float color[3] = { getValue(mVDUniforms->ICOLORX, f), getValue(mVDUniforms->ICOLORY, f), getValue(mVDUniforms->ICOLORZ, f) };
-						sprintf_s(buf, "%s##coloruniform%d", uName.c_str(), f);
-						if (ImGui::ColorEdit3(buf, color, ImGuiColorEditFlags_NoInputs)) {
-							for (int c = 0; c < 3; c++) setValue(mVDUniforms->ICOLORX + c, f, color[c]);
+					// iBackgroundColor (2026-11-14) and any other *Color vec3 the same way, from its X/Y/Z floats
+					if (uName == "iResolution") break; // set by the engine
+					{
+						const int ix = mVDSession->getUniformIndexForName(uName + "X");
+						const int iy = mVDSession->getUniformIndexForName(uName + "Y");
+						const int iz = mVDSession->getUniformIndexForName(uName + "Z");
+						if (ix > 0 && iy > 0 && iz > 0) {
+							float color[3] = { getValue(ix, f), getValue(iy, f), getValue(iz, f) };
+							sprintf_s(buf, "%s##coloruniform%d", uName.c_str(), f);
+							if (ImGui::ColorEdit3(buf, color, ImGuiColorEditFlags_NoInputs)) {
+								setValue(ix, f, color[0]);
+								setValue(iy, f, color[1]);
+								setValue(iz, f, color[2]);
+							}
+						}
+						else {
+							ImGui::TextDisabled("vec3 %s", uName.c_str());
 						}
 					}
 					break;
 				case GL_FLOAT_VEC4:
 					// vec4 35666 GL_FLOAT_VEC4
 					// iMouse: the shader reads iMouseX/Y/Z/W (VDFboShader); X and Y in pixels of the fbo
+					// as an XY pad since 2026-11-14 (was two drags)
 					if (ctrl == mVDUniforms->IMOUSE) {
-						mouseX = getValue(mVDUniforms->IMOUSEX, f);
-						sprintf_s(buf, "iMouseX##mousexuniform%d", f);
-						if (learnable(mVDSession, ImGui::DragFloat(buf, &mouseX, 1.0f, 0.0f, (float)mVDParams->getFboWidth()), mVDUniforms->IMOUSEX)) {
-							setValue(mVDUniforms->IMOUSEX, f, mouseX);
-						}
-						mouseY = getValue(mVDUniforms->IMOUSEY, f);
-						sprintf_s(buf, "iMouseY##mouseyuniform%d", f);
-						if (learnable(mVDSession, ImGui::DragFloat(buf, &mouseY, 1.0f, 0.0f, (float)mVDParams->getFboHeight()), mVDUniforms->IMOUSEY)) {
-							setValue(mVDUniforms->IMOUSEY, f, mouseY);
-						}
+						ImGui::PushID((int)f);
+						ui::uniformXYPad(mVDSession, mVDUniforms->IMOUSEX, mVDUniforms->IMOUSEY,
+							0.0f, (float)mVDParams->getFboWidth(), 0.0f, (float)mVDParams->getFboHeight(), uName);
+						ImGui::PopID();
+					}
+					else if (uName != "iDate") {
+						ImGui::TextDisabled("vec4 %s", uName.c_str());
 					}
 					break;
 				default:

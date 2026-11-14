@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 
 namespace videodromm
@@ -85,6 +86,117 @@ namespace ui
 					aIndex, aSession->getUniformName(aIndex).c_str(), def, lo, hi);
 			}
 		}
+		return result;
+	}
+
+	// Integer uniform (stored as a float): a slider in whole steps, or an on/off button when the range is 0..1.
+	inline bool uniformIntSlider(VDSessionFacadeRef aSession, unsigned int aIndex, float aLo, float aHi,
+		const std::string& aLabel = "", float aHue = 0.3f) {
+		const std::string name = aLabel.empty() ? aSession->getUniformName(aIndex) : aLabel;
+		const float def = aSession->getDefaultUniformValue(aIndex);
+		const int value = (int)std::lround(aSession->getUniformValue(aIndex));
+		const int lo = (int)std::floor(std::min({ aLo, def, (float)value }));
+		const int hi = (int)std::ceil(std::max({ aHi, def, (float)value }));
+		char id[48];
+		if (hi - lo <= 1) {
+			snprintf(id, sizeof(id), "%s##i%u", name.c_str(), aIndex);
+			const bool clicked = coloredButton(id, aHue, value > lo);
+			if (learnable(aSession, clicked, (int)aIndex)) {
+				aSession->setUniformValue(aIndex, value > lo ? (float)lo : (float)hi);
+				return true;
+			}
+			return false;
+		}
+		std::string fmt;
+		for (char c : name) { fmt += c; if (c == '%') fmt += '%'; }
+		fmt += " %d";
+		snprintf(id, sizeof(id), "##i%u", aIndex);
+		int v = value;
+		const bool changed = std::abs(value - (int)std::lround(def)) > 0;
+		if (changed) ImGui::PushStyleColor(ImGuiCol_Text, changedTextColor());
+		ImGui::SetNextItemWidth(-1.0f);
+		const bool moved = ImGui::SliderInt(id, &v, lo, hi, fmt.c_str());
+		if (changed) ImGui::PopStyleColor(1);
+		bool result = false;
+		if (learnable(aSession, moved, (int)aIndex)) {
+			aSession->setUniformValue(aIndex, (float)v);
+			result = true;
+		}
+		if (!aSession->isMidiLearnMode() && ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+			aSession->setUniformValue(aIndex, def);
+			result = true;
+		}
+		return result;
+	}
+
+	// XY pad: a square box with a crosshair at (aX, aY); click or drag inside to move it. Y grows upwards.
+	// Returns true while the user moves it. aColor: crosshair color.
+	inline bool xyPad(const char* aId, float& aX, float& aY, float aXLo, float aXHi, float aYLo, float aYHi, float aSize, ImU32 aColor) {
+		ImDrawList* dl = ImGui::GetWindowDrawList();
+		const ImVec2 p0 = ImGui::GetCursorScreenPos();
+		const ImVec2 p1(p0.x + aSize, p0.y + aSize);
+		ImGui::InvisibleButton(aId, ImVec2(aSize, aSize));
+		bool changed = false;
+		if (ImGui::IsItemActive() && aXHi > aXLo && aYHi > aYLo) {
+			const ImVec2 m = ImGui::GetIO().MousePos;
+			const float nx = std::clamp((m.x - p0.x) / aSize, 0.0f, 1.0f);
+			const float ny = std::clamp((p1.y - m.y) / aSize, 0.0f, 1.0f);
+			const float x = aXLo + nx * (aXHi - aXLo);
+			const float y = aYLo + ny * (aYHi - aYLo);
+			if (x != aX || y != aY) { aX = x; aY = y; changed = true; }
+		}
+		dl->AddRectFilled(p0, p1, ImGui::GetColorU32(ImGuiCol_FrameBg));
+		const ImU32 faint = ImGui::GetColorU32(ImGuiCol_Border);
+		// zero axes, when inside the range
+		if (aXLo < 0.0f && aXHi > 0.0f) { const float zx = p0.x + (-aXLo) / (aXHi - aXLo) * aSize; dl->AddLine(ImVec2(zx, p0.y), ImVec2(zx, p1.y), faint); }
+		if (aYLo < 0.0f && aYHi > 0.0f) { const float zy = p1.y - (-aYLo) / (aYHi - aYLo) * aSize; dl->AddLine(ImVec2(p0.x, zy), ImVec2(p1.x, zy), faint); }
+		const float cx = p0.x + std::clamp((aX - aXLo) / std::max(1e-6f, aXHi - aXLo), 0.0f, 1.0f) * aSize;
+		const float cy = p1.y - std::clamp((aY - aYLo) / std::max(1e-6f, aYHi - aYLo), 0.0f, 1.0f) * aSize;
+		dl->AddLine(ImVec2(cx, p0.y), ImVec2(cx, p1.y), aColor);
+		dl->AddLine(ImVec2(p0.x, cy), ImVec2(p1.x, cy), aColor);
+		dl->AddCircleFilled(ImVec2(cx, cy), 3.0f, aColor);
+		dl->AddRect(p0, p1, faint);
+		return changed;
+	}
+
+	// Two float uniforms as an XY pad (iRenderXYX/Y, iMouseX/Y) with their two sliders on its right,
+	// which keep MIDI learn, right-click reset and Ctrl+click. Right-click on the pad resets both.
+	inline bool uniformXYPad(VDSessionFacadeRef aSession, unsigned int aIndexX, unsigned int aIndexY,
+		float aXLo, float aXHi, float aYLo, float aYHi, const std::string& aLabel) {
+		float x = aSession->getUniformValue(aIndexX);
+		float y = aSession->getUniformValue(aIndexY);
+		const float defX = aSession->getDefaultUniformValue(aIndexX);
+		const float defY = aSession->getDefaultUniformValue(aIndexY);
+		const bool changed = isOffDefault(aSession, aIndexX, aXLo, aXHi) || isOffDefault(aSession, aIndexY, aYLo, aYHi);
+		const float size = ImGui::GetFrameHeight() * 2.0f + ImGui::GetStyle().ItemSpacing.y;
+		ImGui::PushID((int)aIndexX);
+		bool result = xyPad("##xypad", x, y, aXLo, aXHi, aYLo, aYHi, size,
+			changed ? ImGui::GetColorU32(changedTextColor()) : IM_COL32(255, 255, 255, 200));
+		if (result) {
+			aSession->setUniformValue(aIndexX, x);
+			aSession->setUniformValue(aIndexY, y);
+		}
+		if (!aSession->isMidiLearnMode()) {
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+				aSession->setUniformValue(aIndexX, defX);
+				aSession->setUniformValue(aIndexY, defY);
+				result = true;
+			}
+			if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal)) {
+				ImGui::SetTooltip("%s: %.3f, %.3f\ndrag to move, right-click: reset", aLabel.c_str(), x, y);
+			}
+		}
+		ImGui::PopID();
+		ImGui::SameLine();
+		// narrow windows (the fbo panes): "x 0.027" instead of a clipped "iRenderXY.x 0.02"; the pad's tooltip names it
+		const float avail = ImGui::GetContentRegionAvail().x;
+		const bool fits = ImGui::CalcTextSize((aLabel + ".x -0.000").c_str()).x + ImGui::GetStyle().FramePadding.x * 2.0f <= avail;
+		const std::string lx = fits ? aLabel + ".x" : std::string("x");
+		const std::string ly = fits ? aLabel + ".y" : std::string("y");
+		ImGui::BeginGroup();
+		result |= uniformSlider(aSession, aIndexX, aXLo, aXHi, lx);
+		result |= uniformSlider(aSession, aIndexY, aYLo, aYHi, ly);
+		ImGui::EndGroup();
 		return result;
 	}
 
