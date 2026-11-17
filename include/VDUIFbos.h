@@ -88,6 +88,12 @@ namespace videodromm
 		bool							mShowRenderedTexture = true;
 		// per fbo pane: "tex" shows its input texture (and type/name) instead of its render
 		static const unsigned int		MAX_FBO_PANES = 64;
+		// solo (2026-11-17): one fbo at weight 1, the others at 0; clicking it again restores the weights from before.
+		// Only fbos 0..8 have a weight (iWeight0..8, what the mixette blends)
+		static const unsigned int		SOLO_FBOS = 9;
+		int								mSoloFbo = -1;
+		float							mSoloSaved[SOLO_FBOS] = {};
+		void							toggleSolo(unsigned int aFbo);
 		bool							mShowInputTexture[MAX_FBO_PANES] = {};
 	};
 }

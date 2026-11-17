@@ -172,6 +172,18 @@ void VDUIFbos::Run(const char* title) {
 			//mVDSession->buildFboRenderedTexture(f) && 
 			if (ImGui::IsItemHovered()) ImGui::SetTooltip("Save thumbnail");
 
+			// solo: only this fbo in the mix (orange while soloed; again = back to the weights from before)
+			if (f < SOLO_FBOS) {
+				hue++;
+				ImGui::SameLine();
+				const bool soloed = mSoloFbo == (int)f;
+				ImGui::PushStyleColor(ImGuiCol_Button, soloed ? (ImVec4)ImColor(230, 160, 0, 255) : (ImVec4)ImColor::HSV(hue / 16.0f, 0.6f, 0.45f));
+				sprintf_s(buf, "S##solo%d", f);
+				if (ImGui::Button(buf)) toggleSolo(f);
+				ImGui::PopStyleColor(1);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip(soloed ? "Solo on: click to restore the other fbos' weights" : "Solo: this fbo at weight 1, all the others at 0");
+			}
+
 			const ivec2 previewSize(mVDParams->getPreviewFboWidth() * uiScale, mVDParams->getPreviewFboHeight() * uiScale);
 			if (showInputTexture) {
 				// in place of the render: stacked below it, it fell outside the pane's initial height
@@ -590,4 +602,21 @@ void VDUIFbos::Run(const char* title) {
 
 #pragma endregion fbos
 
+}
+
+void VDUIFbos::toggleSolo(unsigned int aFbo) {
+	const unsigned int n = std::min<unsigned int>(mVDSession->getFboShaderListSize(), SOLO_FBOS);
+	if (aFbo >= n) return;
+	if (mSoloFbo == (int)aFbo) {
+		// solo off: the weights from before the first solo
+		for (unsigned int i = 0; i < n; i++) mVDSession->setUniformValue(mVDUniforms->IWEIGHT0 + i, mSoloSaved[i]);
+		mSoloFbo = -1;
+		return;
+	}
+	// first solo: keep the mix; switching solo from one fbo to another keeps the first saved mix
+	if (mSoloFbo < 0) {
+		for (unsigned int i = 0; i < n; i++) mSoloSaved[i] = mVDSession->getUniformValue(mVDUniforms->IWEIGHT0 + i);
+	}
+	for (unsigned int i = 0; i < n; i++) mVDSession->setUniformValue(mVDUniforms->IWEIGHT0 + i, i == aFbo ? 1.0f : 0.0f);
+	mSoloFbo = (int)aFbo;
 }
