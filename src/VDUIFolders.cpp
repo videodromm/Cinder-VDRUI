@@ -1,4 +1,5 @@
 #include "VDUIFolders.h"
+#include <algorithm>
 
 // snprintf on every platform: MSVC's sprintf_s ends the app (invalid-parameter handler) when
 // the text doesn't fit the 64-char buffers, e.g. a long shader name; snprintf truncates
@@ -52,7 +53,21 @@ void VDUIFolders::RunContent() {
 		ImGui::TextColored(ImColor(155, 255, 0), "Folders");
 		auto folders = mVDSession->getFolderList();
 		const std::string defaultFolder = mVDSession->getDefaultFolder();
+		// grouped by project (track.json "project": BA, BL, RM, ZE...), sorted, then "Other" (2026-11-18)
+		std::vector<std::string> groups;
 		for (auto& folder : folders) {
+			const std::string p = mVDSession->getFolderProject(folder);
+			if (!p.empty() && std::find(groups.begin(), groups.end(), p) == groups.end()) groups.push_back(p);
+		}
+		std::sort(groups.begin(), groups.end());
+		groups.push_back("");
+		for (const auto& group : groups) {
+		bool any = false;
+		for (auto& folder : folders) if (mVDSession->getFolderProject(folder) == group) { any = true; break; }
+		if (!any) continue;
+		ImGui::SeparatorText(group.empty() ? "Other" : group.c_str());
+		for (auto& folder : folders) {
+			if (mVDSession->getFolderProject(folder) != group) continue;
 			// D: this folder is loaded at startup (assets/mix.json), green when it is
 			const bool isDefault = (folder == defaultFolder);
 			if (isDefault) ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor(0, 160, 0, 255));
@@ -89,6 +104,7 @@ void VDUIFolders::RunContent() {
 				mVDSession->listShaders(mSelectedFolder, mExtension);
 			}
 			if (isSelected) ImGui::PopStyleColor(1);
+		}
 		}
 		ImGui::EndChild();
 		ImGui::SameLine();
